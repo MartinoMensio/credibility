@@ -1,12 +1,20 @@
-from .external_origins import newsguard, mywot
-from .batch_origins import ntt
+from .realtime_origins import newsguard, mywot
+from .batch_origins import ntt, ifcn, opensources, adfontesmedia
 from . import utils
 
-origins = {
+batch_origins = {
+    'ntt': ntt,
+    'ifcn': ifcn,
+    'opensources': opensources,
+    'adfontesmedia': adfontesmedia
+}
+
+realtime_origins = {
     'newsguard': newsguard,
     'mywot': mywot,
-    'ntt': ntt,
 }
+
+origins = {**batch_origins, **realtime_origins}
 
 def get_source_credibility(source):
     """retrieve the credibility score for the source, by using the origins available"""
@@ -17,12 +25,12 @@ def get_source_credibility(source):
     # accumulator for the trust*confidence
     confidence_and_weights_sum = 0
 
-    for k, v in origins.items():
-        assessment = v.get_source_credibility(source)
+    for origin_id, origin in origins.items():
+        assessment = origin.get_source_credibility(source)
         if not assessment:
             continue
         # TODO source evaluation, now is a fixed value
-        origin_weight = v.WEIGHT
+        origin_weight = origin.WEIGHT
         credibility_value = assessment['credibility']['value']
         credibility_confidence = assessment['credibility']['confidence']
 
@@ -31,7 +39,7 @@ def get_source_credibility(source):
         credibility_sum += credibility_value * origin_weight * credibility_confidence
         weights_sum += origin_weight
 
-        assessments[k] = assessment
+        assessments[origin_id] = assessment
     # weighted average
     if confidence_and_weights_sum:
         # there is something useful
@@ -49,4 +57,40 @@ def get_source_credibility(source):
 
 
 def get_url_credibility(url):
-    pass
+    # TODO
+    raise NotImplementedError()
+
+def update_batch_origin(origin_id):
+    if origin_id not in batch_origins:
+        return None
+    origin = batch_origins[origin_id]
+    print('updating', origin_id, '...')
+    result = origin.update()
+    print('updated', origin_id)
+    return result
+
+
+def update_batch_origins():
+    counts = {}
+    for origin_id, origin in batch_origins.items():
+        counts[origin_id] = update_batch_origin(origin_id)
+
+    return counts
+
+def get_origin(origin_id):
+    if origin_id not in origins:
+        return None
+    origin = origins[origin_id]
+    return {
+        'id': origin_id,
+        'weight': origin.WEIGHT,
+        'homepage': origin.HOMEPAGE
+    }
+
+def get_origins():
+    result = []
+
+    for origin_id, origin in origins.items():
+        result.append(get_origin(origin_id))
+
+    return result

@@ -15,10 +15,18 @@ db_credibility = client['credibility']
 
 def save_origin(origin_name, assessments):
     """Saves all the assessments for the specified origin"""
+    if not assessments:
+        # an empty array of values could mean failure, prevent it
+        raise ValueError('there are no assessments!!!')
     collection = db_credibility[origin_name]
 
     if len(set(ass['itemReviewed'] for ass in assessments)) < len(assessments):
-        raise ValueError('check the assessments, they are evaluating the same item!!!')
+        done = set()
+        for ass in assessments:
+            el = ass['itemReviewed']
+            if el in done:
+                raise ValueError('check the assessments, they are evaluating the same item!!!', el)
+            done.add(el)
     for ass in assessments:
         ass['_id'] = ass['itemReviewed']
 
@@ -36,5 +44,4 @@ def get_domain_assessment(origin_name, domain):
     collection = db_credibility[origin_name]
     # TODO deal with multiple matches
     match = collection.find_one({'domain': domain})
-    print(domain, match)
     return match

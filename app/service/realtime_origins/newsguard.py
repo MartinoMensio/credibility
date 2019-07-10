@@ -3,11 +3,11 @@ import requests
 WEIGHT = 10
 
 MY_NAME = 'newsguard'
+HOMEPAGE = 'https://www.newsguardtech.com/'
 API_ENDPOINT = 'https://api.newsguardtech.com/check'
 
 def get_source_credibility(source):
     original_assessment = get_assessment(source)
-    print(original_assessment)
     itemReviewed = original_assessment['identifier']
     review_url = None
     credibility = {'value': 0., 'confidence': 0.}
@@ -39,8 +39,6 @@ def get_credibility_measures(original_assessment):
         credibility = 0.0
         confidence = 1.0
 
-    print(original_assessment['score'], credibility)
-
     return {
         'value': credibility,
         'confidence': confidence
@@ -50,6 +48,6 @@ def get_assessment(url):
     response = requests.get(API_ENDPOINT, params={'url': url})
     if response.status_code != 200:
         print('error for', url)
-        return url, None
+        return None
         #raise ValueError(response.status_code)
     return response.json()

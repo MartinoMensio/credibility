@@ -24,6 +24,7 @@ def update():
     result = interpret_table(table)
     print(MY_NAME, 'retrieved', len(result), 'assessments')
     persistence.save_origin(MY_NAME, result)
+    return len(result)
 
 
 def interpret_table(table):
@@ -176,9 +177,11 @@ def download_from_source():
     }
 
     response = requests.request("POST", API_ENDPOINT, data=payload, params=querystring)
+    if response.status_code != 200:
+        print('error retrieving list')
+        raise ValueError(response.status_code)
 
     result = response.json()
-    print('retrieved')
     return result
 
 def get_credibility_measures(row):

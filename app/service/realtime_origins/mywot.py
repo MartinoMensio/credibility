@@ -5,6 +5,7 @@ import requests
 WEIGHT = 5
 
 MY_NAME = 'mywot'
+HOMEPAGE = 'https://mywot.com/'
 API_ENDPOINT = 'http://api.mywot.com/0.4/public_link_json2'
 MYWOT_KEY = os.environ['MYWOT_KEY']
 
