@@ -1,4 +1,5 @@
 import requests
+import tqdm
 from bs4 import BeautifulSoup
 
 from .. import utils, persistence
@@ -106,13 +107,14 @@ def get_signatories_info():
 
     result = []
 
-    for signatory_el in soup.select('.card div.card-body div.media'):
+    for signatory_el in tqdm.tqdm(soup.select('.card div.card-body div.media')):
         #url = signatory_el.select('a[title]')[0]['href']
         #name = signatory_el.select('div.media-body h5')[0].text.strip()
         #country = signatory_el.select('div.media-body h6')[0].text.strip().replace('from ', '')
         detail_url = signatory_el.select(
             'div.media-body div div div a')[0]['href']
         media_logo = signatory_el.select_one('img.signatory-avatar')['src']
+        # here get the details
         result.append(extract_signatory_info(detail_url, media_logo))
 
     return result
