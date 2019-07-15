@@ -11,13 +11,11 @@ API_ENDPOINT = 'https://api.newsguardtech.com/check'
 def get_source_credibility(source):
     original_assessment = get_assessment(source)
     itemReviewed = original_assessment['identifier']
-    review_url = None
-    credibility = {'value': 0., 'confidence': 0.}
-    found = False
-    if itemReviewed:
-        review_url = f'https://api.newsguardtech.com/{original_assessment["labelToken"]}'
-        credibility = get_credibility_measures(original_assessment)
-        found = True
+    # condition for 'not evaluated'
+    if not itemReviewed:
+        return None
+    review_url = f'https://api.newsguardtech.com/{original_assessment["labelToken"]}'
+    credibility = get_credibility_measures(original_assessment)
 
     result = {
         'url': review_url,
@@ -28,8 +26,7 @@ def get_source_credibility(source):
         'origin': MY_NAME,
         'granularity': 'source'
     }
-    if found:
-        persistence.add_origin_assessment(MY_NAME, result)
+    persistence.add_origin_assessment(MY_NAME, result)
     return result
 
 def get_credibility_measures(original_assessment):

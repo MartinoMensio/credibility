@@ -15,11 +15,10 @@ def get_source_credibility(source):
     api_response = query_api([source])[source]
     interpreted = interpret_api_value(api_response)
     credibility = get_credibility_measures(interpreted)
-    review_url = None
-    found = False
-    if interpreted['reputation_components']:
-        review_url = interpreted['detail_page']
-        found = True
+    # condition for 'not evaluated'
+    if not interpreted['reputation_components']:
+        return None
+    review_url = interpreted['detail_page']
     result = {
         'url': review_url,
         'credibility': credibility,
@@ -29,8 +28,7 @@ def get_source_credibility(source):
         'origin': MY_NAME,
         'granularity': 'source'
     }
-    if found:
-        persistence.add_origin_assessment(MY_NAME, result)
+    persistence.add_origin_assessment(MY_NAME, result)
 
     return result
 
