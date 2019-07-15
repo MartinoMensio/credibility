@@ -1,4 +1,5 @@
 import requests
+from bs4 import BeautifulSoup
 
 from .. import utils, persistence
 
@@ -23,7 +24,7 @@ def update():
     table = download_from_source()
     result = interpret_table(table)
     print(MY_NAME, 'retrieved', len(result), 'assessments')
-    persistence.save_origin(MY_NAME, result)
+    persistence.save_origin_assessments(MY_NAME, result)
     return len(result)
 
 
@@ -44,7 +45,8 @@ def interpret_table(table):
             'itemReviewed': source,
             'original': row_parsed,
             'origin': MY_NAME,
-            'domain': domain
+            'domain': domain,
+            'granularity': 'source'
         }
 
         results.append(interpreted)
@@ -54,6 +56,14 @@ def interpret_table(table):
 
 def download_from_source():
     # from https://www.newsroomtransparencytracker.com/
+    response = requests.get(HOMEPAGE)
+    if response.status_code != 200:
+        raise ValueError(response.status_code)
+
+    soup = BeautifulSoup(response.text, 'lxml')
+    wdtNonce = soup.find('input', {'id': 'wdtNonceFrontendEdit'})['value']
+    print(wdtNonce)
+
     # if this script breaks, inspect the source page and look for the column origHeader and displayHeader and the nonce
     querystring = {"action":"get_wdtable","table_id":"7"}
 
@@ -173,7 +183,7 @@ def download_from_source():
         'length': '-1',
         'search%5Bvalue%5D': '',
         'search%5Bregex%5D': 'false',
-        'wdtNonce': '4b4dfdb88d'
+        'wdtNonce': wdtNonce
     }
 
     response = requests.request("POST", API_ENDPOINT, data=payload, params=querystring)

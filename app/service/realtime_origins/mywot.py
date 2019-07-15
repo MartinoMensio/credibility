@@ -2,6 +2,8 @@ import os
 import json
 import requests
 
+from .. import utils, persistence
+
 WEIGHT = 5
 
 MY_NAME = 'mywot'
@@ -14,15 +16,23 @@ def get_source_credibility(source):
     interpreted = interpret_api_value(api_response)
     credibility = get_credibility_measures(interpreted)
     review_url = None
+    found = False
     if interpreted['reputation_components']:
         review_url = interpreted['detail_page']
-    return {
+        found = True
+    result = {
         'url': review_url,
         'credibility': credibility,
         'itemReviewed': interpreted['target'],
+        'domain': utils.get_url_domain(interpreted['target']),
         'original': interpreted,
-        'origin': MY_NAME
+        'origin': MY_NAME,
+        'granularity': 'source'
     }
+    if found:
+        persistence.add_origin_assessment(MY_NAME, result)
+
+    return result
 
 
 

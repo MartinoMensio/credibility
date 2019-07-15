@@ -19,7 +19,7 @@ def update():
     assessments = get_signatories_info()
     result = interpret_assessments(assessments)
     print(MY_NAME, 'retrieved', len(result), 'assessments')
-    persistence.save_origin(MY_NAME, result)
+    persistence.save_origin_assessments(MY_NAME, result)
     return len(result)
 
 def colors_to_value(style_str):
@@ -131,7 +131,8 @@ def interpret_assessments(assessments):
             'itemReviewed': fact_checker_url,
             'original': ass,
             'origin': MY_NAME,
-            'domain': fact_checker_domain
+            'domain': fact_checker_domain,
+            'granularity': 'source'
         }
         results.append(result)
     return results

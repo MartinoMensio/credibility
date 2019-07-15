@@ -1,5 +1,7 @@
 import requests
 
+from .. import utils, persistence
+
 WEIGHT = 10
 
 MY_NAME = 'newsguard'
@@ -11,17 +13,24 @@ def get_source_credibility(source):
     itemReviewed = original_assessment['identifier']
     review_url = None
     credibility = {'value': 0., 'confidence': 0.}
+    found = False
     if itemReviewed:
         review_url = f'https://api.newsguardtech.com/{original_assessment["labelToken"]}'
         credibility = get_credibility_measures(original_assessment)
+        found = True
 
-    return {
+    result = {
         'url': review_url,
         'credibility': credibility,
         'itemReviewed': itemReviewed,
+        'domain': utils.get_url_domain(itemReviewed),
         'original': original_assessment,
-        'origin': MY_NAME
+        'origin': MY_NAME,
+        'granularity': 'source'
     }
+    if found:
+        persistence.add_origin_assessment(MY_NAME, result)
+    return result
 
 def get_credibility_measures(original_assessment):
     rank = original_assessment['rank']

@@ -1,12 +1,13 @@
 from .realtime_origins import newsguard, mywot
-from .batch_origins import ntt, ifcn, opensources, adfontesmedia
-from . import utils
+from .batch_origins import ntt, ifcn, opensources, adfontesmedia, mbfc
+from . import utils, persistence
 
 batch_origins = {
     'ntt': ntt,
     'ifcn': ifcn,
     'opensources': opensources,
-    'adfontesmedia': adfontesmedia
+    'adfontesmedia': adfontesmedia,
+    'mbfc': mbfc
 }
 
 realtime_origins = {
@@ -19,6 +20,7 @@ origins = {**batch_origins, **realtime_origins}
 def get_source_credibility(source):
     """retrieve the credibility score for the source, by using the origins available"""
     # TODO be sure to be at the source level, e.g. use utils.get_domain but be careful to facebook/twitter/... platforms
+    source = utils.get_url_domain(source)
     assessments = {}
     credibility_sum = 0
     weights_sum = 0
@@ -79,18 +81,25 @@ def update_batch_origins():
 
 def get_origin(origin_id):
     if origin_id not in origins:
+        print(f'origin {origin_id} not found')
         return None
     origin = origins[origin_id]
+    if origin_id in batch_origins:
+        origin_type = 'batch'
+    else:
+        origin_type = 'realtime'
     return {
         'id': origin_id,
         'weight': origin.WEIGHT,
-        'homepage': origin.HOMEPAGE
+        'homepage': origin.HOMEPAGE,
+        'origin_type': origin_type,
+        'assessments_count': persistence.get_origin_assessments_count(origin_id)
     }
 
 def get_origins():
     result = []
 
-    for origin_id, origin in origins.items():
+    for origin_id in origins.keys():
         result.append(get_origin(origin_id))
 
     return result

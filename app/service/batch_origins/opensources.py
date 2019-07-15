@@ -35,7 +35,7 @@ def update():
     assessments = download_source_list()
     result = interpret_assessments(assessments)
     print(MY_NAME, 'retrieved', len(result), 'assessments')
-    persistence.save_origin(MY_NAME, result)
+    persistence.save_origin_assessments(MY_NAME, result)
     return len(result)
 
 
@@ -69,7 +69,8 @@ def interpret_assessments(assessments):
             'itemReviewed': source,
             'original': ass,
             'origin': MY_NAME,
-            'domain': source_domain
+            'domain': source_domain,
+            'granularity': 'source'
         }
         results.append(result)
 
