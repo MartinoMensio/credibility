@@ -9,7 +9,7 @@ class TypeEnum(str, Enum):
 class Origin(BaseModel):
     id: str
     origin_type: TypeEnum
-    weight: int
+    weight: float
     homepage: UrlStr
     assessments_count: int
 

@@ -15,6 +15,9 @@ HOMEPAGE = 'https://ifcncodeofprinciples.poynter.org/signatories'
 def get_source_credibility(source):
     return persistence.get_domain_assessment(MY_NAME, source)
 
+def get_all_sources_credibility():
+    return persistence.get_origin_assessments(MY_NAME)
+
 def update():
     """Updates all the informations from the signatories"""
     assessments = get_signatories_info()

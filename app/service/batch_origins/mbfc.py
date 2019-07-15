@@ -44,7 +44,7 @@ def get_source_credibility(source):
 
 def update():
     assessments = scrape()
-    with open('temp.json', 'w') as f:
+    with open('temp_mbfc_responses.json', 'w') as f:
         json.dump(assessments, f, indent=2)
     result = interpret_assessments(assessments)
     print(MY_NAME, 'retrieved', len(result), 'assessments')
