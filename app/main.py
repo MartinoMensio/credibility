@@ -12,6 +12,6 @@ app.include_router(origins.router, prefix='/origins', tags=['origins'])
 @app.get('/')
 async def root():
     return {
-        'name': 'twitter_connector',
+        'name': 'credibility',
         'docs': '/docs'
     }

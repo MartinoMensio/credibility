@@ -5,9 +5,9 @@ MONGO_HOST = os.environ.get('MONGO_HOST', 'localhost:27017')
 MONGO_USER = os.environ.get('MONGO_USER', None)
 MONGO_PASS = os.environ.get('MONGO_PASS', None)
 if MONGO_USER and MONGO_PASS:
-    MONGO_URI = 'mongodb://{}:{}@{}'.format(MONGO_USER, MONGO_PASS, MONGO_HOST)
+    MONGO_URI = f'mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOST}'
 else:
-    MONGO_URI = 'mongodb://{}'.format(MONGO_HOST)
+    MONGO_URI = f'mongodb://{MONGO_HOST}'
 print('MONGO_URI', MONGO_URI)
 client = pymongo.MongoClient(MONGO_URI)
 

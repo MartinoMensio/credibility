@@ -42,7 +42,7 @@ def colors_to_value(style_str):
 def extract_signatory_info(detail_url, media_logo):
     response = requests.get(detail_url)
     if response.status_code != 200:
-        print('error retrieving {}'.format(detail_url))
+        print(f'error retrieving {detail_url}')
         raise ValueError(response.status_code)
 
     soup = BeautifulSoup(response.text, 'lxml')

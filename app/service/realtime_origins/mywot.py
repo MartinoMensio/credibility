@@ -12,7 +12,7 @@ API_ENDPOINT = 'http://api.mywot.com/0.4/public_link_json2'
 MYWOT_KEY = os.environ['MYWOT_KEY']
 
 def get_source_credibility(source):
-    api_response = query_api([source])[source]
+    api_response = query_api([source]).get(source, {})
     interpreted = interpret_api_value(api_response)
     credibility = get_credibility_measures(interpreted)
     # condition for 'not evaluated'
@@ -133,8 +133,9 @@ def interpret_api_value(api_value):
         'description': blacklists_map[k],
         'time': v
     } for k,v in api_value.get('blacklists', {}).items()}
+    target = api_value.get('target', None)
     result = {
-        'target': api_value['target'],
+        'target': target,
         'reputation_components': reputation_components,
         'categories': {k: {
             'category_group': categories_groups_map[k],
@@ -142,7 +143,7 @@ def interpret_api_value(api_value):
             'confidence': v
         } for k,v in api_value.get('categories', {}).items()},
         'blacklists': blacklists,
-        'detail_page': 'https://www.mywot.com/en/scorecard/{}'.format(api_value['target'])
+        'detail_page': f'https://www.mywot.com/en/scorecard/{target}'
     }
 
     return result

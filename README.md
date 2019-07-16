@@ -51,3 +51,19 @@ granularity: source-level and article-level
 #### Fact-Checker crawling
 
 TODO
+
+
+## Docker
+
+build the container: `docker build -t mm34834/credibility .`
+
+Run the container:
+
+locally:
+```
+docker run -dit --restart always --name mm34834_credibility --network=twitter_app_default -p 20300:8000 -e MONGO_HOST=mongo:27017 -v `pwd`:/app --link=twitter_app_mongo_1:mongo mm34834/credibility
+```
+
+```
+docker run -dit --restart always --name mm34834_credibility -p 127.0.0.1:20300:8000 -e MONGO_HOST=mongo:27017 -v `pwd`:/app --link=mm34834_mongo:mongo mm34834/credibility
+```
