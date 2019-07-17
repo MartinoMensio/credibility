@@ -75,3 +75,9 @@ docker run -dit --restart always --name mm34834_credibility --network=twitter_ap
 ```
 docker run -dit --restart always --name mm34834_credibility -p 127.0.0.1:20300:8000 -e MONGO_HOST=mongo:27017 -v `pwd`:/app --link=mm34834_mongo:mongo mm34834/credibility
 ```
+
+Trigger the update of the origins:
+
+```
+curl -v -X POST http://localhost:20300/origins/
+```
