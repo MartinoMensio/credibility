@@ -7,6 +7,8 @@ from . import ifcn
 from .. import persistence
 
 MY_NAME = 'fact_checkers'
+# TODO this is the homepage of ifcn!!!
+HOMEPAGE = 'https://ifcncodeofprinciples.poynter.org/signatories'
 WEIGHT = 2
 
 claimreviews_by_fc_domain = {}
