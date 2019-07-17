@@ -53,6 +53,14 @@ granularity: source-level and article-level
 TODO
 
 
+## Requirements
+
+You need a [MyWOT key](https://www.mywot.com/api). Once you have it, pass it as environment variable `MYWOT_KEY`. You can create a `.env` file in this folder with the following content:
+
+```bash
+MYWOT_KEY=PASTE_HERE_YOUR_KEY
+```
+
 ## Docker
 
 build the container: `docker build -t mm34834/credibility .`
