@@ -1,6 +1,11 @@
+from multiprocessing.pool import ThreadPool
+import tqdm
+
 from .realtime_origins import newsguard, mywot
 from .batch_origins import ntt, ifcn, opensources, adfontesmedia, mbfc, fact_checkers
 from . import utils, persistence
+
+POOL_SIZE = 30
 
 batch_origins = {
     'ntt': ntt,
@@ -22,7 +27,7 @@ origins = {**batch_origins, **realtime_origins}
 def get_source_credibility(source):
     """retrieve the credibility score for the source, by using the origins available"""
     # TODO be sure to be at the source level, e.g. use utils.get_domain but be careful to facebook/twitter/... platforms
-    source = utils.get_url_domain(source)
+    #source = utils.get_url_domain(source)
     assessments = {}
     credibility_sum = 0
     weights_sum = 0
@@ -59,8 +64,24 @@ def get_source_credibility(source):
             'value': credibility_weighted,
             'confidence': confidence_weighted
         },
-        'assessments': assessments
+        'assessments': assessments,
+        'itemReviewed': source
     }
+
+def get_source_credibility_tuple_wrap(argument):
+    """This method wraps another method giving back a tuple of (argument, result)"""
+    result = get_source_credibility(argument)
+    return (argument, result)
+
+def get_source_credibility_parallel(sources):
+    sources = set(sources)
+    results = {}
+    with ThreadPool(POOL_SIZE) as pool:
+        for result_tuple in tqdm.tqdm(pool.imap_unordered(get_source_credibility_tuple_wrap, sources), total=len(sources)):
+            source, result = result_tuple
+            if result:
+                results[source] = result
+    return results
 
 
 def get_url_credibility(url):

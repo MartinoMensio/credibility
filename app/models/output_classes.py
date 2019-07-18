@@ -40,3 +40,4 @@ class AggregatedAssessment(BaseModel):
     # the aggregated credibility
     credibility: Credibility
     assessments: Dict[str, Assessment]
+    itemReviewed: str

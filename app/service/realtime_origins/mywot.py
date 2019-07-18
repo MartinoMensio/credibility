@@ -12,6 +12,7 @@ API_ENDPOINT = 'http://api.mywot.com/0.4/public_link_json2'
 MYWOT_KEY = os.environ['MYWOT_KEY']
 
 def get_source_credibility(source):
+    # TODO optimisation: find a way to use this in parallel, maybe using queues
     api_response = query_api([source]).get(source, {})
     interpreted = interpret_api_value(api_response)
     credibility = get_credibility_measures(interpreted)
