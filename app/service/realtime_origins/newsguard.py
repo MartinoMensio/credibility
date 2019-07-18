@@ -10,6 +10,9 @@ API_ENDPOINT = 'https://api.newsguardtech.com/check'
 
 def get_source_credibility(source):
     original_assessment = get_assessment(source)
+    # condition for failure
+    if not original_assessment:
+        return None
     itemReviewed = original_assessment['identifier']
     # condition for 'not evaluated'
     if not itemReviewed:
@@ -54,6 +57,6 @@ def get_assessment(url):
     response = requests.get(API_ENDPOINT, params={'url': url})
     if response.status_code != 200:
         print('error for', url)
+        # for some sources (e.g., tinyurl.com) the response is HTTP 500
         return None
-        #raise ValueError(response.status_code)
     return response.json()
