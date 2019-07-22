@@ -48,6 +48,7 @@ def get_source_credibility(source):
         credibility_sum += credibility_value * origin_weight * credibility_confidence
         weights_sum += origin_weight
 
+        assessment['origin_id'] = origin_id
         assessments[origin_id] = assessment
     # weighted average
     if confidence_and_weights_sum:
@@ -64,7 +65,7 @@ def get_source_credibility(source):
             'value': credibility_weighted,
             'confidence': confidence_weighted
         },
-        'assessments': assessments,
+        'assessments': list(assessments.values()),
         'itemReviewed': source
     }
 

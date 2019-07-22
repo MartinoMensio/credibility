@@ -23,6 +23,8 @@ class GranularityEnum(str, Enum):
     claim = 'claim'
 
 class Assessment(BaseModel):
+    # who assessed it
+    origin_id: str
     # the URL where the assessment is published
     url: UrlStr
     # our conversion
@@ -39,5 +41,5 @@ class Assessment(BaseModel):
 class AggregatedAssessment(BaseModel):
     # the aggregated credibility
     credibility: Credibility
-    assessments: Dict[str, Assessment]
+    assessments: List[Assessment]
     itemReviewed: str
