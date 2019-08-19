@@ -36,7 +36,8 @@ save_me_dict = {
     'elko-daily-free-press': 'https://elkodaily.com/',
     'journal-gazette-times-courier': 'https://jg-tc.com/',
     'polipace': 'http://polipace.com/',
-    'borowitz-report': 'https://www.newyorker.com/humor/borowitz-report'
+    'borowitz-report': 'https://www.newyorker.com/humor/borowitz-report',
+    'american-psychological-association-apa': 'https://www.apa.org/'
 }
 
 def get_source_credibility(source):
@@ -59,7 +60,7 @@ def scrape():
             # these sources are already in other lists
             continue
         assessments_urls = get_assessments_urls(c)
-        print(len(assessments_urls))
+        print(c['url'], len(assessments_urls))
         for ass_url in assessments_urls:#[:3]:
             assessment = {
                 'bias': c['label'],
@@ -76,16 +77,23 @@ def scrape():
             if assessment_scraped:
                 assessments_scraped.append(assessment_scraped)
 
-    # for two sources, there are two different urls:
+    # for these sources, there are two different urls:
     # https://www.americandailynews.org/ :
     #   http://mediabiasfactcheck.com/american-news/ (extreme-right)
     #   https://mediabiasfactcheck.com/american-news-24-7/ (right, factual=MIXED)
     # https://www.macleans.ca :
     #   http://mediabiasfactcheck.com/macleans-magazine/ (listed in the leftcenter: correct, but redirects to the https)
     #   https://mediabiasfactcheck.com/macleans-magazine/ (listed in the right-center: wrong class but correct URL)
+    # http://washingtonmonthly.com/ :
+    #   http://mediabiasfactcheck.com/washington-monthly/
+    #   https://mediabiasfactcheck.com/washington-monthly/
     result = []
     for el in assessments_scraped:
-        if el['url'] == 'http://mediabiasfactcheck.com/american-news/' or el['url'] == 'https://mediabiasfactcheck.com/macleans-magazine/':
+        # discard these
+        if el['url'] == 'http://mediabiasfactcheck.com/american-news/' \
+            or el['url'] == 'https://mediabiasfactcheck.com/american-news/' \
+            or el['url'] == 'https://mediabiasfactcheck.com/macleans-magazine/'\
+            or el['url'] == 'http://mediabiasfactcheck.com/washington-monthly/':
             pass
         else:
             result.append(el)
@@ -122,14 +130,14 @@ def get_assessments_urls(category):
     description = ''.join([el.text.strip() for el in soup.select('div.entry p')[:2]])
     description = re.sub('see also:', '', description, flags=re.IGNORECASE).strip()
     #print(description)
-    # for some kind of bias, they are in a table-container
-    source_urls_list = soup.select('div.entry p[style="text-align: center;"] a')
-    source_urls_tables = soup.select('div#table-container table tr td a')
+    # they are in a table-container (not anymore in a list)
+    #source_urls_list = soup.select('div.entry p[style="text-align: center;"] a')
+    source_urls_tables = soup.select('table[id="mbfc-table"] tr td a')
 
     category['name'] = name
     category['description'] = description
 
-    source_urls = source_urls_list + source_urls_tables
+    source_urls =  source_urls_tables # + source_urls_list
     source_urls = [el['href'] for el in source_urls]
     # there are some spurious elements, e.g. https://www.hermancain.com/
     source_urls = [el for el in source_urls if 'mediabiasfactcheck.com' in el]
@@ -209,7 +217,7 @@ def scrape_assessment(assessment):
             factual = factual.strip()
             break
     if not factual:
-        print(assessment['url'])
+        print('no factuality rating in', assessment['url'])
 
     # the ones in questionable (fake-news) have an attribute called "reasoning"
     reasoning = None
@@ -247,6 +255,8 @@ def get_credibility_measures(mbfc_assessment):
         credibility = 1.0
     elif factual_level == 'HIGH':
         credibility = 0.6
+    elif factual_level == 'MOSTLY FACTUAL':
+        credibility = 0.3
     elif factual_level == 'MIXED':
         credibility = 0.0
     elif factual_level == 'LOW':
