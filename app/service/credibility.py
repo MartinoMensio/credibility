@@ -2,7 +2,7 @@ from multiprocessing.pool import ThreadPool
 import tqdm
 
 from .realtime_origins import newsguard, mywot
-from .batch_origins import ntt, ifcn, opensources, adfontesmedia, mbfc, fact_checkers
+from .batch_origins import ntt, ifcn, opensources, adfontesmedia, mbfc, fact_checkers, lemonde_decodex
 from . import utils, persistence
 
 POOL_SIZE = 30
@@ -13,7 +13,8 @@ batch_origins = {
     'opensources': opensources,
     'adfontesmedia': adfontesmedia,
     'mbfc': mbfc,
-    'fact_checkers': fact_checkers
+    'fact_checkers': fact_checkers,
+    'lemonde_decodex': lemonde_decodex
 }
 #batch_origins = {**batch_origins, **fact_checkers.get_factcheckers()}
 
