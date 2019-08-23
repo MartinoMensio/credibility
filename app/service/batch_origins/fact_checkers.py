@@ -69,6 +69,12 @@ def retrieve_and_group_claimreviews():
         fc_domain = utils.get_url_domain(fc_url)
         claimreviews_by_fc_domain[fc_domain].append(cr)
 
+    # THIS IS TO TEST THE SUBSET
+    # by_fullfact = claimreviews_by_fc_domain['fullfact.org']
+    # assessments_fullfact = get_domain_assessments_from_claimreviews(by_fullfact)
+    # persistence.save_origin_assessments(MY_NAME, assessments_fullfact.values())
+    # return assessments_fullfact
+
     print('all_claimreviews', len(all_claimreviews))
     domain_assessments = get_domain_assessments_from_claimreviews(all_claimreviews)
     print('domain_assessments', len(domain_assessments))
@@ -167,7 +173,7 @@ def get_domain_assessments_from_claimreviews(claimreviews):
                 'factcheck_positive_cnt': factcheck_positive_cnt,
                 'factcheck_negative_cnt': factcheck_negative_cnt,
                 'factcheck_neutral_cnt': factcheck_neutral_cnt,
-                'assessments': assessments[domain]
+                #'assessments': assessments[domain]
             },
             'url': 'http://todo.todo',
             'itemReviewed': domain,
@@ -194,7 +200,7 @@ def claimreview_get_claim_appearances(claimreview):
         appearances = [itemReviewed.get('firstAppearance', None)] + itemReviewed.get('appearance', [])
         if appearances:
             # new field appearance in https://pending.schema.org/Claim
-            print(appearances)
+            #print(appearances)
             result = [el['url'] for el in appearances if el]
         else:
             sameAs = itemReviewed.get('sameAs', None)
@@ -212,7 +218,15 @@ def claimreview_get_claim_appearances(claimreview):
                     #if sameAs:
                     #    print(sameAs)
                 if sameAs:
-                    result = [sameAs]
+                    if isinstance(sameAs, list):
+                        result = sameAs
+                    else:
+                        result = [sameAs]
+        # itemReviewed.url
+        itemReviewed_url = itemReviewed.get('url', None)
+        if itemReviewed_url:
+            #raise ValueError(claimreview['url'])
+            result.append(itemReviewed_url)
     # TODO also return sameAs if present on the claim directly, other links there!!
     return result
     if type(result) == list:
@@ -335,6 +349,56 @@ label_maps = {
     '\u0646\u06cc\u0645\u0647 \u062f\u0631\u0633\u062a': 'mixed', # half true
     '\u06af\u0645\u0631\u0627\u0647\u200c\u06a9\u0646\u0646\u062f\u0647': 'mixed', # misleading
 
+    # fullfact
+    'correct': 'true',
+    'that\u2019s correct': 'true',
+    'incorrect' : 'fake',
+    'this is false': 'fake',
+    'roughly correct': 'mixed',
+    'broadly correct': 'mixed',
+    'this isn\'t correct': 'fake',
+    'this is correct': 'true',
+    'not far off': 'mixed',
+    'that\u2019s wrong': 'mixed',
+    'it\u2019s correct': 'true',
+    'this is true': 'true',
+    'this is wrong': 'fake',
+    'that\'s correct': 'true',
+    'that is correct': 'true',
+    'these aren\u2019t all correct': 'mixed',
+
+    # teyit.org
+    'yanliş': 'fake',
+    'doğru': 'true',
+    'karma': 'mixed',
+    'belirsiz': None, #'uncertain'
+
+    # lemonde
+    'faux': 'fake',
+
+    # istinomer
+    'neistina': 'fake',
+    'skoro neistina': None, # almost untrue
+
+    # https://evrimagaci.org ???
+    'sahte': 'fake',
+
+    # https://verafiles.org
+    'mali': 'fake',
+
+    # poligrafo
+    'verdadeiro': 'true',
+    'engañoso': 'fake', # misleading
+    'contraditorio': None, # contradictory
+
+    # pagella politica
+    'vero': 'true',
+    'c’eri quasi': 'mixed', # almost true
+    'pinocchio andante': 'fake',
+    'panzana pazzesca': 'fake',
+
+
+
     # random stuff (just set to fake to debug and go on)
     # 'ce sondage n\'existe pas.': 'fake',
     # "New England MP and former Deputy Prime Minister Barnaby Joyce": 'fake',
@@ -389,13 +453,13 @@ def claimreview_get_rating(claimreview):
         print('rating numbers not found', reviewRating)
     if score == None:
         try:
-            scoreTxt = reviewRating.get('alternateName', None) or reviewRating.get('properties', {}).get('alternateName', None)
+            scoreTxt = reviewRating.get('alternateName', '') or reviewRating.get('properties', {}).get('alternateName', '')
         except Exception as e:
             print(reviewRating)
             raise e
         try:
             simplified_label = simplify_label(scoreTxt)
-            print(simplified_label)
+            #print(simplified_label)
         except Exception as e:
             print(claimreview['url'])
             print(reviewRating)
@@ -411,7 +475,7 @@ def claimreview_interpret_rating(claimreview):
         credibility = 0.0
         confidence = 0.0
     else:
-        print(rating, claimreview['reviewRating'])
+        #print(rating, claimreview['reviewRating'])
         credibility = (rating - 0.5) * 2
         confidence = 1.0
     return {'value': credibility, 'confidence': confidence}
