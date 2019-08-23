@@ -97,7 +97,7 @@ def update():
 
     domain_assessments = get_domain_assessments_from_claimreviews(all_claimreviews)
     persistence.save_origin_assessments(MY_NAME, domain_assessments.values())
-    return domain_assessments
+    return len(domain_assessments)
 
     claimreviews_by_fc_domain = defaultdict(list)
     for cr in all_claimreviews:
@@ -185,6 +185,8 @@ def get_domain_assessments_from_claimreviews(claimreviews):
             counts[label_to_use].append(assessment['url'])
             # origin_id.replace('.', '_')
             cnts_by_factchecker[origin.id][label_to_use].append(assessment['url'])
+            # add this also inside the object
+            cnts_by_factchecker[origin.id]['origin_id'] = origin.id
             credibility_confidence = assessment['credibility']['confidence']
             # TODO negative fact-check counts more?
             confidence_and_weights_sum += credibility_confidence * origin_weight
