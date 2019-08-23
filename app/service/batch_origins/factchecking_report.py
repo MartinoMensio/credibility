@@ -6,12 +6,12 @@ from .. import utils
 from . import ifcn
 from .. import persistence
 
-MY_NAME = 'fact_checkers'
+MY_NAME = 'factchecking_report'
 # TODO this is the homepage of ifcn!!!
 HOMEPAGE = 'https://ifcncodeofprinciples.poynter.org/signatories'
 WEIGHT = 2
 
-claimreviews_by_fc_domain = {}
+#claimreviews_by_fc_domain = {}
 
 def get_factcheckers():
     """returns the list of factcheckers, intended as objects with the following attributes:
@@ -28,11 +28,13 @@ def get_factcheckers():
     signatories_assessments = ifcn.get_all_sources_credibility()
     for sa in signatories_assessments:
         homepage = sa['original']['website']
+        id = sa['original']['id']
+        domain = utils.get_url_domain(homepage)
         # TODO this is kinda of the formula for propagation (warning negative weights? mapping function?)
         weight = sa['credibility']['value'] * sa['credibility']['confidence'] * ifcn.WEIGHT
-        fact_checker = FactChecker(homepage, weight)
+        fact_checker = FactChecker(homepage, id, weight)
         print(fact_checker.id, fact_checker.WEIGHT)
-        result[fact_checker.id] = fact_checker
+        result[domain] = fact_checker
 
     return result
 
@@ -43,13 +45,13 @@ class FactChecker(object):
     id: str
     origin_type: str
 
-    def __init__(self, homepage, weight):
+    def __init__(self, homepage, id, weight):
         self.HOMEPAGE = homepage
         self.WEIGHT = weight
-        self.id = utils.get_url_domain(homepage)
+        self.id = id#utils.get_url_domain(homepage)
 
-    def get_source_credibility(self, source):
-        return get_source_credibility_from(source, self.id)
+    # def get_source_credibility(self, source):
+    #     return get_source_credibility_from(source, self.id)
 
     def update(self):
         domain_assessments = retrieve_and_group_claimreviews()
@@ -90,15 +92,40 @@ def get_source_credibility(source):
     return persistence.get_domain_assessment(MY_NAME, source)
 
 def update():
-    result =retrieve_and_group_claimreviews()
-    return len(result)
+    #result = retrieve_and_group_claimreviews()
+    all_claimreviews = [el for el in persistence.get_claimreviews()]
+
+    domain_assessments = get_domain_assessments_from_claimreviews(all_claimreviews)
+    persistence.save_origin_assessments(MY_NAME, domain_assessments.values())
+    return domain_assessments
+
+    claimreviews_by_fc_domain = defaultdict(list)
+    for cr in all_claimreviews:
+        fc_url = cr['url']
+        fc_domain = utils.get_url_domain(fc_url)
+        claimreviews_by_fc_domain[fc_domain].append(cr)
+    processing_stats = []
+    for fc_domain, claimreviews_for_domain in claimreviews_by_fc_domain.items():
+        claimreview_cnt = len(claimreviews_for_domain)
+        domain_assessments = get_domain_assessments_from_claimreviews(claimreviews_for_domain)
+        domain_assessed_cnt = len(domain_assessments)
+        processing_stats.append({
+            'fc_domain': fc_domain,
+            'claimreview_cnt': claimreview_cnt,
+            'domain_assessed_cnt': domain_assessed_cnt
+        })
+
+
+    return sorted(processing_stats, key=lambda el: el['domain_assessed_cnt'], reverse=True)
+    #return len(result)
 
 
 def get_domain_assessments_from_claimreviews(claimreviews):
-    """assessments is a dict {domain: list of assessments}"""
+    """TODO aaaa"""
+
+    # this first loop is on the claimreviews, and produces results grouped by assessed domain
+    # assessments is a dict {domain: list of assessments}
     assessments = defaultdict(list)
-    # final_credibility is {domain: aggregated credibility}
-    final_credibility = {}
     for cr in claimreviews:
         #print('claimreview', cr)
         review_url = cr['url']
@@ -121,9 +148,11 @@ def get_domain_assessments_from_claimreviews(claimreviews):
                 'itemReviewed': itemReviewed,
                 'domain': domain
             })
-
-
     #print(assessments)
+
+    # this second loop
+    # final_credibility is {domain: aggregated credibility}
+    final_credibility = {}
     for domain, asssessments in assessments.items():
         credibility_sum = 0
         weights_sum = 0
@@ -133,22 +162,30 @@ def get_domain_assessments_from_claimreviews(claimreviews):
         factcheck_positive_cnt = 0 # taken from the mapped value
         factcheck_negative_cnt = 0
         factcheck_neutral_cnt = 0
+
+        # something like {'snopes.com' : {'factcheck_positive_cnt': 3, ...}}}
+        cnts_by_factchecker = defaultdict(lambda: defaultdict(list))
+        counts = defaultdict(list)
         for assessment in asssessments:
             if not assessment:
                 continue
-            credibility_value = assessment['credibility']['value']
-            if credibility_value > 0:
-                factcheck_positive_cnt += 1
-            elif credibility_value < 0:
-                factcheck_negative_cnt += 1
-            else:
-                factcheck_neutral_cnt += 1
-            credibility_confidence = assessment['credibility']['confidence']
-            origin = fact_checkers.get(assessment['origin'], None)
+            origin_id = assessment['origin']
+            origin = fact_checkers.get(origin_id, None)
             if not origin:
                 # not an IFCN signatory, invalid
                 continue
             origin_weight = origin.WEIGHT
+
+            credibility_value = assessment['credibility']['value']
+            confidence_value = assessment['credibility']['confidence']
+            label_to_use = 'unknown' if confidence_value < 0.4 \
+                else 'positive' if credibility_value > 0 \
+                    else 'negative' if credibility_value < 0 else 'neutral'
+            # TODO just collect counts? nested resource or separate?
+            counts[label_to_use].append(assessment['url'])
+            # origin_id.replace('.', '_')
+            cnts_by_factchecker[origin.id][label_to_use].append(assessment['url'])
+            credibility_confidence = assessment['credibility']['confidence']
             # TODO negative fact-check counts more?
             confidence_and_weights_sum += credibility_confidence * origin_weight
             #confidence_sum +=
@@ -164,17 +201,15 @@ def get_domain_assessments_from_claimreviews(claimreviews):
             credibility_weighted = 0.
             confidence_weighted = 0.
 
+        all_counts = cnts_by_factchecker
+        cnts_by_factchecker['overall'] = counts
+
         final_credibility[domain] = {
             'credibility': {
                 'value': credibility_weighted,
                 'confidence': confidence_weighted
             },
-            'original': {
-                'factcheck_positive_cnt': factcheck_positive_cnt,
-                'factcheck_negative_cnt': factcheck_negative_cnt,
-                'factcheck_neutral_cnt': factcheck_neutral_cnt,
-                #'assessments': assessments[domain]
-            },
+            'original': all_counts,
             'url': 'http://todo.todo',
             'itemReviewed': domain,
             'origin': MY_NAME,
