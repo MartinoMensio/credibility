@@ -45,12 +45,19 @@ def get_source_credibility(source):
         credibility_value = assessment['credibility']['value']
         credibility_confidence = assessment['credibility']['confidence']
 
-        confidence_and_weights_sum += credibility_confidence * origin_weight
+        final_weight = credibility_confidence * origin_weight
+        confidence_and_weights_sum += final_weight
         #confidence_sum +=
         credibility_sum += credibility_value * origin_weight * credibility_confidence
         weights_sum += origin_weight
 
         assessment['origin_id'] = origin_id
+        assessment['origin'] = get_origin(origin_id)
+        assessment['weights'] = {
+            'origin_weight': origin_weight,
+            'final_weight': final_weight
+        }
+
         assessments[origin_id] = assessment
     # weighted average
     if confidence_and_weights_sum:
@@ -121,6 +128,8 @@ def get_origin(origin_id):
         'id': origin_id,
         'weight': origin.WEIGHT,
         'homepage': origin.HOMEPAGE,
+        'name': origin.NAME,
+        'description': origin.DESCRIPTION,
         'origin_type': origin_type,
         'assessments_count': persistence.get_origin_assessments_count(origin_id)
     }

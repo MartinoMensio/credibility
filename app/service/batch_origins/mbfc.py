@@ -11,7 +11,9 @@ from .. import persistence, utils
 WEIGHT = 7
 
 HOMEPAGE = 'https://mediabiasfactcheck.com/'
-MY_NAME = 'mbfc'
+ID = 'mbfc'
+NAME = 'Media Bias/Fact Check'
+DESCRIPTION = 'We are the most comprehensive media bias resource on the internet. There are currently 2800+ media sources listed in our database and growing every day. Don’t be fooled by Fake News sources.'
 POOL_SIZE = 30
 
 # these sources don't have a link to the homepage in the assessment
@@ -41,15 +43,15 @@ save_me_dict = {
 }
 
 def get_source_credibility(source):
-    return persistence.get_domain_assessment(MY_NAME, source)
+    return persistence.get_domain_assessment(ID, source)
 
 def update():
     assessments = scrape()
     with open('temp_mbfc_responses.json', 'w') as f:
         json.dump(assessments, f, indent=2)
     result = interpret_assessments(assessments)
-    print(MY_NAME, 'retrieved', len(result), 'assessments')
-    persistence.save_origin_assessments(MY_NAME, result)
+    print(ID, 'retrieved', len(result), 'assessments')
+    persistence.save_origin_assessments(ID, result)
     return len(result)
 
 def scrape():
@@ -290,7 +292,7 @@ def interpret_assessments(assessments):
             'credibility': credibility,
             'itemReviewed': homepage,
             'original': ass,
-            'origin': MY_NAME,
+            'origin': ID,
             'domain': domain,
             'source': source,
             'granularity': 'source'

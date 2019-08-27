@@ -6,7 +6,9 @@ from .. import utils, persistence
 WEIGHT = 8
 
 
-MY_NAME = 'ntt'
+ID = 'ntt'
+NAME = 'Newsroom Transparency Tracker'
+DESCRIPTION = 'The Newsroom Transparency Tracker shares the information published by media outlets with respect to four Trust Indicators, transparency standards that provide clarity on a media outlet’s ethics codes and related commitments, how it does its work, and the expertise of its journalists. Developed collaboratively by over 100 senior news executives within the Trust Project network, Trust Indicators are rooted in core journalistic values and based on in-depth research capturing what the public trusts and wants in news.'
 
 HOMEPAGE = 'https://www.newsroomtransparencytracker.com/'
 API_ENDPOINT = 'https://www.newsroomtransparencytracker.com/wp-admin/admin-ajax.php'
@@ -18,13 +20,13 @@ columns = [
 ]
 
 def get_source_credibility(source):
-    return persistence.get_domain_assessment(MY_NAME, source)
+    return persistence.get_domain_assessment(ID, source)
 
 def update():
     table = download_from_source()
     result = interpret_table(table)
-    print(MY_NAME, 'retrieved', len(result), 'assessments')
-    persistence.save_origin_assessments(MY_NAME, result)
+    print(ID, 'retrieved', len(result), 'assessments')
+    persistence.save_origin_assessments(ID, result)
     return len(result)
 
 
@@ -45,7 +47,7 @@ def interpret_table(table):
             'credibility': credibility,
             'itemReviewed': source,
             'original': row_parsed,
-            'origin': MY_NAME,
+            'origin': ID,
             'domain': domain,
             'source': source,
             'granularity': 'source'

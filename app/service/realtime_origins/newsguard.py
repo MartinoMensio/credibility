@@ -4,7 +4,9 @@ from .. import utils, persistence
 
 WEIGHT = 10
 
-MY_NAME = 'newsguard'
+ID = 'newsguard'
+NAME = 'NewsGuard'
+DESCRIPTION = 'NewsGuard uses journalism to fight false news, misinformation, and disinformation. Our trained analysts, who are experienced journalists, research online news brands to help readers and viewers know which ones are trying to do legitimate journalism—and which are not.'
 HOMEPAGE = 'https://www.newsguardtech.com/'
 API_ENDPOINT = 'https://api.newsguardtech.com/check'
 
@@ -27,10 +29,10 @@ def get_source_credibility(source):
         'domain': utils.get_url_domain(itemReviewed),
         'source': utils.get_url_source(itemReviewed),
         'original': original_assessment,
-        'origin': MY_NAME,
+        'origin': ID,
         'granularity': 'source'
     }
-    persistence.add_origin_assessment(MY_NAME, result)
+    persistence.add_origin_assessment(ID, result)
     return result
 
 def get_credibility_measures(original_assessment):

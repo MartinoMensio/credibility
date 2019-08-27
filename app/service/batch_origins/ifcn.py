@@ -8,22 +8,24 @@ WEIGHT = 10
 
 # TODO scrape the compliances from https://ifcncodeofprinciples.poynter.org/know-more/what-it-takes-to-be-a-signatory
 
-MY_NAME = 'ifcn'
+ID = 'ifcn'
+NAME = 'International Fact-Checking Network'
+DESCRIPTION = 'The code of principles of the International Fact-Checking Network at Poynter is a series of commitments organizations abide by to promote excellence in fact-checking. Nonpartisan and transparent fact-checking can be a powerful instrument of accountability journalism.'
 
 HOMEPAGE = 'https://ifcncodeofprinciples.poynter.org/signatories'
 
 def get_source_credibility(source):
-    return persistence.get_domain_assessment(MY_NAME, source)
+    return persistence.get_domain_assessment(ID, source)
 
 def get_all_sources_credibility():
-    return persistence.get_origin_assessments(MY_NAME)
+    return persistence.get_origin_assessments(ID)
 
 def update():
     """Updates all the informations from the signatories"""
     assessments = get_signatories_info()
     result = interpret_assessments(assessments)
-    print(MY_NAME, 'retrieved', len(result), 'assessments')
-    persistence.save_origin_assessments(MY_NAME, result)
+    print(ID, 'retrieved', len(result), 'assessments')
+    persistence.save_origin_assessments(ID, result)
     return len(result)
 
 def colors_to_value(style_str):
@@ -135,7 +137,7 @@ def interpret_assessments(assessments):
             'credibility': credibility,
             'itemReviewed': fact_checker_url,
             'original': ass,
-            'origin': MY_NAME,
+            'origin': ID,
             'domain': fact_checker_domain,
             'granularity': 'source'
         }

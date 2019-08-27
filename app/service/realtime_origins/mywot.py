@@ -6,7 +6,9 @@ from .. import utils, persistence
 
 WEIGHT = 5
 
-MY_NAME = 'mywot'
+ID = 'mywot'
+NAME = 'Web Of Trust'
+DESCRIPTION = 'Enjoy a clean and safe browsing experience for FREE with WoT. The safe browsing app that’s powered by a global community of over 140 million people, and checks every website before you visit it to let you know its safety and security rating.'
 HOMEPAGE = 'https://mywot.com/'
 API_ENDPOINT = 'http://api.mywot.com/0.4/public_link_json2'
 MYWOT_KEY = os.environ['MYWOT_KEY']
@@ -27,10 +29,10 @@ def get_source_credibility(source):
         'domain': utils.get_url_domain(interpreted['target']),
         'source': utils.get_url_source(interpreted['target']),
         'original': interpreted,
-        'origin': MY_NAME,
+        'origin': ID,
         'granularity': 'source'
     }
-    persistence.add_origin_assessment(MY_NAME, result)
+    persistence.add_origin_assessment(ID, result)
 
     return result
 

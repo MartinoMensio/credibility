@@ -12,6 +12,8 @@ class Origin(BaseModel):
     weight: float
     homepage: UrlStr
     assessments_count: int
+    name: str
+    description: str
 
 class Credibility(BaseModel):
     value: float
@@ -25,6 +27,8 @@ class GranularityEnum(str, Enum):
 class Assessment(BaseModel):
     # who assessed it
     origin_id: str
+    # details about the origin
+    origin: Origin
     # the URL where the assessment is published
     url: UrlStr
     # our conversion
@@ -37,6 +41,8 @@ class Assessment(BaseModel):
     domain: str
     # granularity
     granularity: GranularityEnum
+    # the weights used
+    weights: Any
 
 class AggregatedAssessment(BaseModel):
     # the aggregated credibility

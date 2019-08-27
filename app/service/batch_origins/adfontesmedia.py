@@ -6,19 +6,21 @@ from .. import utils, persistence
 
 WEIGHT = 1
 
-MY_NAME = 'adfontesmedia'
+ID = 'adfontesmedia'
+NAME = 'Ad Fontes Media'
+DESCRIPTION = 'Navigate the News Landscape and Contribute to a Healthy Democracy.'
 
 HOMEPAGE = 'https://www.adfontesmedia.com/'
 
 def get_source_credibility(source):
-    return persistence.get_domain_assessment(MY_NAME, source)
+    return persistence.get_domain_assessment(ID, source)
 
 def update():
     table = get_table()
     result_doc_level = interpret_assessments(table)
-    result_source_level = utils.aggregate_domain(result_doc_level, MY_NAME)
-    print(MY_NAME, 'retrieved', len(result_source_level), 'assessments')
-    persistence.save_origin_assessments(MY_NAME, result_source_level)
+    result_source_level = utils.aggregate_domain(result_doc_level, ID)
+    print(ID, 'retrieved', len(result_source_level), 'assessments')
+    persistence.save_origin_assessments(ID, result_source_level)
     return len(result_source_level)
 
 
@@ -66,7 +68,7 @@ def interpret_assessments(table):
             'credibility': credibility,
             'itemReviewed': url,
             'original': ass,
-            'origin': MY_NAME,
+            'origin': ID,
             'domain': domain,
             'source': source,
             'granularity': 'document'

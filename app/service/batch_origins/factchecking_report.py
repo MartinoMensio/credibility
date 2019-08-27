@@ -6,7 +6,9 @@ from .. import utils
 from . import ifcn
 from .. import persistence
 
-MY_NAME = 'factchecking_report'
+ID = 'factchecking_report'
+NAME = 'Statistics about the fact-checks'
+DESCRIPTION = 'From the fact-checks, we retrieve the claim appearances and therefore we evaluate the credibility of the sources involved.'
 # TODO this is the homepage of ifcn!!!
 HOMEPAGE = 'https://ifcncodeofprinciples.poynter.org/signatories'
 WEIGHT = 2
@@ -74,14 +76,14 @@ def retrieve_and_group_claimreviews():
     # THIS IS TO TEST THE SUBSET
     # by_fullfact = claimreviews_by_fc_domain['fullfact.org']
     # assessments_fullfact = get_domain_assessments_from_claimreviews(by_fullfact)
-    # persistence.save_origin_assessments(MY_NAME, assessments_fullfact.values())
+    # persistence.save_origin_assessments(ID, assessments_fullfact.values())
     # return assessments_fullfact
 
     print('all_claimreviews', len(all_claimreviews))
     domain_assessments = get_domain_assessments_from_claimreviews(all_claimreviews)
     print('domain_assessments', len(domain_assessments))
 
-    persistence.save_origin_assessments(MY_NAME, domain_assessments.values())
+    persistence.save_origin_assessments(ID, domain_assessments.values())
     return domain_assessments
 
 
@@ -89,14 +91,14 @@ def retrieve_and_group_claimreviews():
 
 
 def get_source_credibility(source):
-    return persistence.get_domain_assessment(MY_NAME, source)
+    return persistence.get_domain_assessment(ID, source)
 
 def update():
     #result = retrieve_and_group_claimreviews()
     all_claimreviews = [el for el in persistence.get_claimreviews()]
 
     domain_assessments = get_domain_assessments_from_claimreviews(all_claimreviews)
-    persistence.save_origin_assessments(MY_NAME, domain_assessments.values())
+    persistence.save_origin_assessments(ID, domain_assessments.values())
     return len(domain_assessments)
 
     claimreviews_by_fc_domain = defaultdict(list)
@@ -217,7 +219,7 @@ def get_domain_assessments_from_claimreviews(claimreviews):
             'original': all_counts,
             'url': 'http://todo.todo',
             'itemReviewed': source,
-            'origin': MY_NAME,
+            'origin': ID,
             'domain': utils.get_url_domain(source),
             'source': source,
             'granularity': 'source'

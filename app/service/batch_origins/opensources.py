@@ -6,7 +6,9 @@ from .. import utils, persistence
 
 WEIGHT = 1
 
-MY_NAME = 'opensources'
+ID = 'opensources'
+NAME = 'Open Sources'
+DESCRIPTION = 'Curated lists of credible and non-credible online sources, available for public use.'
 HOMEPAGE = 'https://github.com/OpenSourcesGroup/opensources/' #http://www.opensources.co/'
 
 source_url = 'https://raw.githubusercontent.com/OpenSourcesGroup/opensources/master/sources/sources.json'
@@ -29,13 +31,13 @@ tag_to_scores = {
 }
 
 def get_source_credibility(source):
-    return persistence.get_domain_assessment(MY_NAME, source)
+    return persistence.get_domain_assessment(ID, source)
 
 def update():
     assessments = download_source_list()
     result = interpret_assessments(assessments)
-    print(MY_NAME, 'retrieved', len(result), 'assessments')
-    persistence.save_origin_assessments(MY_NAME, result)
+    print(ID, 'retrieved', len(result), 'assessments')
+    persistence.save_origin_assessments(ID, result)
     return len(result)
 
 
@@ -69,7 +71,7 @@ def interpret_assessments(assessments):
             'credibility': credibility,
             'itemReviewed': source_raw,
             'original': ass,
-            'origin': MY_NAME,
+            'origin': ID,
             'domain': source_domain,
             'source': source,
             'granularity': 'source'

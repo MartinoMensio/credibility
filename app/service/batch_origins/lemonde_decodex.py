@@ -7,7 +7,9 @@ from .. import utils, persistence
 
 WEIGHT = 10
 
-MY_NAME = 'lemonde_decodex'
+ID = 'lemonde_decodex'
+NAME = 'Lemonde - Décodex'
+DESCRIPTION = 'Le Décodex est un outil pour vous aider à vérifier les informations qui circulent sur Internet et dénicher les rumeurs, exagérations ou déformations. '
 HOMEPAGE = 'https://www.lemonde.fr/verification/'
 
 source_url = 'https://www.lemonde.fr/webservice/decodex/updates'
@@ -40,13 +42,13 @@ classes = {
 }
 
 def get_source_credibility(source):
-    return persistence.get_domain_assessment(MY_NAME, source)
+    return persistence.get_domain_assessment(ID, source)
 
 def update():
     assessments = download_source_list()
     result = interpret_assessments(assessments)
-    print(MY_NAME, 'retrieved', len(result), 'assessments')
-    persistence.save_origin_assessments(MY_NAME, result)
+    print(ID, 'retrieved', len(result), 'assessments')
+    persistence.save_origin_assessments(ID, result)
     return len(result)
 
 
@@ -87,12 +89,12 @@ def interpret_assessments(assessments):
             'credibility': credibility,
             'itemReviewed': source_raw,
             'original': ass,
-            'origin': MY_NAME,
+            'origin': ID,
             'domain': source_domain,
             'source': source,
             'granularity': 'source'
         }
         results.append(result)
-    results_source = utils.aggregate_domain(results, MY_NAME)
+    results_source = utils.aggregate_domain(results, ID)
 
     return results_source
