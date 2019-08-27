@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from collections import defaultdict
 
 from .. import utils, persistence
 
@@ -14,16 +15,17 @@ def get_source_credibility(source):
 
 def update():
     table = get_table()
-    result = interpret_assessments(table)
-    print(MY_NAME, 'retrieved', len(result), 'assessments')
-    persistence.save_origin_assessments(MY_NAME, result)
-    return len(result)
+    result_doc_level = interpret_assessments(table)
+    result_source_level = utils.aggregate_source(result_doc_level, MY_NAME)
+    print(MY_NAME, 'retrieved', len(result_source_level), 'assessments')
+    persistence.save_origin_assessments(MY_NAME, result_source_level)
+    return len(result_source_level)
 
 
 
 def get_table():
     # the csv is here https://www.adfontesmedia.com/
-    response = requests.get(HOMEPAGE)
+    response = requests.get(f'{HOMEPAGE}interactive-media-bias-chart/')
     if response.status_code != 200:
         raise ValueError(response.status_code)
     soup = BeautifulSoup(response.text, 'lxml')
@@ -40,9 +42,12 @@ def get_table():
 
 def get_credibility_measures(row):
     # vertical rank is quality
-    quality = row['Vertical Rank']
+    quality = row['Quality']
+    quality = float(quality)
+    # maximum value is 64 https://www.adfontesmedia.com/white-paper-multi-analyst-ratings-project-august-2019/
+    quality_rescaled = (quality / 64 - 0.5) * 2
     return {
-        'value': (float(quality) - 50) / 50,
+        'value': quality_rescaled,
         'confidence': 1.0
     }
 
@@ -50,19 +55,20 @@ def interpret_assessments(table):
     results = {}
 
     for ass in table:
-        source_name = ass['News Source']
-        source = utils.name_domain_map[source_name]
-        domain = utils.get_url_domain(source)
+        source_name = ass['Source']
+        url = ass['Url']
+        domain = utils.get_url_domain(url)
         credibility = get_credibility_measures(ass)
 
         result = {
             'url': HOMEPAGE,
             'credibility': credibility,
-            'itemReviewed': source,
+            'itemReviewed': url,
             'original': ass,
             'origin': MY_NAME,
             'domain': domain,
-            'granularity': 'source'
+            'granularity': 'document'
         }
-        results[source] = result
+        results[url] = result
+
     return results.values()
