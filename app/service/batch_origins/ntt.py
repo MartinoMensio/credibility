@@ -34,8 +34,9 @@ def interpret_table(table):
         row_parsed = {columns[idx]: get_compliacy(el) for idx, el in enumerate(row)}
         source_name = row_parsed['Newsroom']
 
-        source = utils.name_domain_map[source_name]
-        domain = utils.get_url_domain(source)
+        source_raw = utils.name_domain_map[source_name]
+        domain = utils.get_url_domain(source_raw)
+        source = utils.get_url_source(source_raw)
 
         credibility = get_credibility_measures(row_parsed)
 
@@ -46,6 +47,7 @@ def interpret_table(table):
             'original': row_parsed,
             'origin': MY_NAME,
             'domain': domain,
+            'source': source,
             'granularity': 'source'
         }
 

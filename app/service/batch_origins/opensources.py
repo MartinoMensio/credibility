@@ -59,17 +59,19 @@ def get_credibility_measures(original_evaluation):
 
 def interpret_assessments(assessments):
     results = []
-    for source, ass in assessments.items():
-        source = source.lower()
-        source_domain = utils.get_url_domain(source)
+    for source_raw, ass in assessments.items():
+        source_raw = source_raw.lower()
+        source_domain = utils.get_url_domain(source_raw)
+        source = utils.get_url_source(source_raw)
         credibility = get_credibility_measures(ass)
         result = {
             'url': HOMEPAGE,
             'credibility': credibility,
-            'itemReviewed': source,
+            'itemReviewed': source_raw,
             'original': ass,
             'origin': MY_NAME,
             'domain': source_domain,
+            'source': source,
             'granularity': 'source'
         }
         results.append(result)

@@ -280,7 +280,8 @@ def interpret_assessments(assessments):
         assessment_url = ass['url']
         credibility = get_credibility_measures(ass)
         homepage = ass['homepage']
-        homepage_domain = utils.get_url_domain(homepage)
+        source = utils.get_url_source(homepage)
+        domain = utils.get_url_domain(homepage)
         if not assessment_url:
             raise ValueError(ass)
 
@@ -290,7 +291,8 @@ def interpret_assessments(assessments):
             'itemReviewed': homepage,
             'original': ass,
             'origin': MY_NAME,
-            'domain': homepage_domain,
+            'domain': domain,
+            'source': source,
             'granularity': 'source'
         }
         results.append(result)

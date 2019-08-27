@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import requests
+from collections import defaultdict
 
 from .. import utils, persistence
 
@@ -61,21 +62,22 @@ def get_credibility_measures(class_info):
 
 def interpret_assessments(assessments):
     results = []
-    for source, id in assessments['urls'].items():
+    for source_raw, id in assessments['urls'].items():
         evaluation = assessments['sites'][str(id)]
         class_id, description, name, path_id = evaluation
-        source_domain = utils.get_url_domain(source)
+        source_domain = utils.get_url_domain(source_raw)
+        source = utils.get_url_source(source_raw)
         class_info = classes[class_id]
         credibility = get_credibility_measures(class_info)
         assessment_url = f'https://www.lemonde.fr/verification/source/{path_id}/'
         # TODO find how to manage these cases (account on social media)
-        if '/' in source:
-            continue
+        # if '/' in source:
+        #     continue
         ass = {
             'id': id,
             'source_name': name,
             'class_id': class_id,
-            'source': source,
+            'source': source_raw,
             'description': description,
             'name': name,
             'path_id': path_id
@@ -83,12 +85,14 @@ def interpret_assessments(assessments):
         result = {
             'url': assessment_url,
             'credibility': credibility,
-            'itemReviewed': source,
+            'itemReviewed': source_raw,
             'original': ass,
             'origin': MY_NAME,
             'domain': source_domain,
+            'source': source,
             'granularity': 'source'
         }
         results.append(result)
+    results_source = utils.aggregate_domain(results, MY_NAME)
 
-    return results
+    return results_source

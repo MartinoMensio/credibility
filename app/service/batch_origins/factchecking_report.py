@@ -140,20 +140,23 @@ def get_domain_assessments_from_claimreviews(claimreviews):
                 print('itemReviewed', itemReviewed, 'in' , cr['url'])
                 continue
             domain = utils.get_url_domain(itemReviewed)
+            source = utils.get_url_source(itemReviewed)
+            # TODO also aggregate by source, not only domain
             assessments[domain].append({
                 'url': review_url,
                 'credibility': credibility,
                 'original': original,
                 'origin': origin,
                 'itemReviewed': itemReviewed,
-                'domain': domain
+                'domain': domain,
+                'source': source
             })
     #print(assessments)
 
     # this second loop
     # final_credibility is {domain: aggregated credibility}
     final_credibility = {}
-    for domain, asssessments in assessments.items():
+    for source, asssessments in assessments.items():
         credibility_sum = 0
         weights_sum = 0
         # accumulator for the trust*confidence
@@ -206,16 +209,17 @@ def get_domain_assessments_from_claimreviews(claimreviews):
         all_counts = cnts_by_factchecker
         cnts_by_factchecker['overall'] = counts
 
-        final_credibility[domain] = {
+        final_credibility[source] = {
             'credibility': {
                 'value': credibility_weighted,
                 'confidence': confidence_weighted
             },
             'original': all_counts,
             'url': 'http://todo.todo',
-            'itemReviewed': domain,
+            'itemReviewed': source,
             'origin': MY_NAME,
-            'domain': domain,
+            'domain': utils.get_url_domain(source),
+            'source': source,
             'granularity': 'source'
         }
     return final_credibility
@@ -279,13 +283,13 @@ def clean_claim_url(url):
     # remove the "mm:ss mark of URL" that is used for some videos
     if result:
         result = re.sub(r'.*\s+mark(\sof)?\s+(.+)', r'\2', result)
-        domain = utils.get_url_domain(result)
-        # some sameAs point to wikipedia page of person/organisation
-        if re.match(r'.*wikipedia\.org', domain):
-            result = None
-        # some sameAs point to twitter.com/screen_name and not to twitter.com/screen_name/status
-        elif re.match(r'https?://(www.)?twitter\.com/[^/]*/?', result):
-            result = None
+        # domain = utils.get_url_domain(result)
+        # # some sameAs point to wikipedia page of person/organisation
+        # if re.match(r'.*wikipedia\.org', domain):
+        #     result = None
+        # # some sameAs point to twitter.com/screen_name and not to twitter.com/screen_name/status
+        # elif re.match(r'https?://(www.)?twitter\.com/[^/]*/?', result):
+        #     result = None
     return result
 
 # the values of truthiness for the simplified labels

@@ -1,4 +1,6 @@
 import tldextract
+import re
+from collections import defaultdict
 
 # some mapping between news outlet name and homepage,
 # this is useful for some origins that reference outlets by name
@@ -143,6 +145,9 @@ name_domain_map = {
     'WorldTruth.Tv': 'https://worldtruth.tv/'
 }
 
+# this regex works for facebook and twitter and extracts the source as account name
+social_regex = r'^(https?:\/\/)?([a-z-]+\.)*(?P<res>(facebook\.com|facebook\.com\/pages|twitter\.com)\/([A-Za-z0-9_.]*))(\/.*)?'
+
 def get_url_domain(url, only_tld=True):
     """Returns the domain of the URL"""
     if not url:
@@ -156,3 +161,57 @@ def get_url_domain(url, only_tld=True):
     else:
         result = '.'.join([ext.domain, ext.suffix])
     return result.lower()
+
+def get_url_source(url, only_tld=True):
+    """Returns the source of the URL (may be different from domain)"""
+    match = re.search(social_regex, url)
+    if match:
+        result = match.group('res')
+        print(url, '-->', result)
+        return result
+    else:
+        return get_url_domain(url)
+
+def aggregate_source(doc_level, origin_name):
+    return aggregate_by(doc_level, origin_name, 'source')
+
+def aggregate_domain(doc_level, origin_name):
+    return aggregate_by(doc_level, origin_name, 'domain')
+
+def aggregate_by(doc_level, origin_name, key):
+    by_source = defaultdict(list)
+
+    for ass in doc_level:
+        by_source[ass[key]].append(ass)
+
+    results = {}
+
+    for k,v in by_source.items():
+        credibility_sum = 0.
+        confidence_sum = 0.
+        for el in v:
+            credibility = el['credibility']['value']
+            confidence = el['credibility']['confidence']
+            credibility_sum += credibility * confidence
+            confidence_sum += confidence
+        if confidence_sum:
+            credibility_weighted = credibility_sum / confidence_sum
+        else:
+            credibility_weighted = 0.0
+        if len(v) > 1:
+            print(k, 'has', len(v), 'assessments')
+            #raise ValueError(k)
+        #print(k, len(v), credibility_sum, confidence_sum)
+        results[k] = {
+            'url': 'http://todo.todo',
+            'credibility': {
+                'value': credibility_weighted,
+                'confidence': confidence_sum / len(v)
+            },
+            'itemReviewed': k,
+            'original': {'assessments': v},
+            'origin': origin_name,
+            'domain': k,
+            'granularity': 'source'
+        }
+    return results.values()

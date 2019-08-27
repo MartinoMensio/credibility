@@ -25,6 +25,7 @@ def get_source_credibility(source):
         'credibility': credibility,
         'itemReviewed': itemReviewed,
         'domain': utils.get_url_domain(itemReviewed),
+        'source': utils.get_url_source(itemReviewed),
         'original': original_assessment,
         'origin': MY_NAME,
         'granularity': 'source'

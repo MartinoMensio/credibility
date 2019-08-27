@@ -16,7 +16,7 @@ def get_source_credibility(source):
 def update():
     table = get_table()
     result_doc_level = interpret_assessments(table)
-    result_source_level = utils.aggregate_source(result_doc_level, MY_NAME)
+    result_source_level = utils.aggregate_domain(result_doc_level, MY_NAME)
     print(MY_NAME, 'retrieved', len(result_source_level), 'assessments')
     persistence.save_origin_assessments(MY_NAME, result_source_level)
     return len(result_source_level)
@@ -58,6 +58,7 @@ def interpret_assessments(table):
         source_name = ass['Source']
         url = ass['Url']
         domain = utils.get_url_domain(url)
+        source = utils.get_url_source(url)
         credibility = get_credibility_measures(ass)
 
         result = {
@@ -67,6 +68,7 @@ def interpret_assessments(table):
             'original': ass,
             'origin': MY_NAME,
             'domain': domain,
+            'source': source,
             'granularity': 'document'
         }
         results[url] = result

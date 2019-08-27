@@ -60,6 +60,13 @@ def get_domain_assessment(origin_name, domain):
     match = collection.find_one({'domain': domain})
     return match
 
+def get_source_assessment(origin_name, source):
+    """Returns the domain assessment from the specified origin about the source"""
+    collection = db_credibility[origin_name]
+    # TODO deal with multiple matches
+    match = collection.find_one({'source': source})
+    return match
+
 
 # this relies on the dataset of the factchecker scraper
 def get_claimreviews():
