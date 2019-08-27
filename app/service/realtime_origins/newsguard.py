@@ -57,7 +57,10 @@ def get_credibility_measures(original_assessment):
     }
 
 def get_assessment(url):
-    response = requests.get(API_ENDPOINT, params={'url': url})
+    try:
+        response = requests.get(API_ENDPOINT, params={'url': url}, timeout=1)
+    except requests.exceptions.RequestException:
+        return None
     if response.status_code != 200:
         print('error for', url)
         # for some sources (e.g., tinyurl.com) the response is HTTP 500
