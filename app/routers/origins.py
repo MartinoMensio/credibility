@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from ..service import credibility
 from ..models import output_classes
@@ -24,4 +24,7 @@ def get_origin(origin_id):
 @router.post('/{origin_id}')
 def update_batch_origin(origin_id):
     """Updates the origin of type batch corresponding to `origin_id`"""
-    return credibility.update_batch_origin(origin_id)
+    result = credibility.update_batch_origin(origin_id)
+    if not result:
+        raise HTTPException(404, {'message': 'Origin not found', 'suggestion': 'see the origin_id allowed values from GET /origins'})
+    return result
