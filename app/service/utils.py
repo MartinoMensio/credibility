@@ -146,7 +146,8 @@ name_domain_map = {
 }
 
 # this regex works for facebook and twitter and extracts the source as account name
-social_regex = r'^(https?:\/\/)?([a-z-]+\.)*(?P<res>(facebook\.com|facebook\.com\/pages|twitter\.com)\/([A-Za-z0-9_.]*))(\/.*)?'
+# TODO for youtube extract the channel name as in the second answer here https://stackoverflow.com/questions/17806944/how-to-get-youtube-channel-name
+social_regex = r'^(https?:\/\/)?([a-z-]+\.)*(?P<res>(facebook\.com|facebook\.com\/pages|twitter\.com|youtube\.com)\/([A-Za-z0-9_.]*))(\/.*)?'
 
 def get_url_domain(url, only_tld=True):
     """Returns the domain of the URL"""

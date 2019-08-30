@@ -95,6 +95,11 @@ def interpret_assessments(assessments):
             'granularity': 'source'
         }
         results.append(result)
-    results_source = utils.aggregate_domain(results, ID)
 
-    return results_source
+    # get only the assessment domain level
+    results_domain = [el for el in results if el['source'] == el['domain']]
+
+    # TODO do that in more structured way:
+    # results_source = utils.aggregate_domain(results, ID)
+
+    return results_domain

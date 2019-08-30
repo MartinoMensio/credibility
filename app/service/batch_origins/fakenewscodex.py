@@ -46,7 +46,13 @@ def interpret_table(table):
 
         results.append(interpreted)
 
-    return results
+    # get only the assessment domain level
+    results_domain = [el for el in results if el['source'] == el['domain']]
+
+    # TODO do that in more structured way:
+    # results_source = utils.aggregate_domain(results, ID)
+
+    return results_domain
 
 
 def download_from_source():
