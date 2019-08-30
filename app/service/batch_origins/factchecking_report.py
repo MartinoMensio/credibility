@@ -272,13 +272,6 @@ def claimreview_get_claim_appearances(claimreview):
             result.append(itemReviewed_url)
     # TODO also return sameAs if present on the claim directly, other links there!!
     return result
-    if type(result) == list:
-        # TODO consider multiple values
-        result = clean_claim_url(el)
-    else:
-        result = clean_claim_url(result)
-    print('appearance', result)
-    return result
 
 def clean_claim_url(url):
     result = url
