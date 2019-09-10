@@ -20,12 +20,15 @@ def get_source_credibility(source):
 def get_all_sources_credibility():
     return persistence.get_origin_assessments(ID)
 
+def get_url_credibility(url):
+    return None
+
 def update():
     """Updates all the informations from the signatories"""
     assessments = get_signatories_info()
     result = interpret_assessments(assessments)
     print(ID, 'retrieved', len(result), 'assessments')
-    persistence.save_origin_assessments(ID, result)
+    persistence.save_assessments(ID, result)
     return len(result)
 
 def colors_to_value(style_str):
@@ -131,15 +134,17 @@ def interpret_assessments(assessments):
         credibility = get_credibility_measures(ass)
         fact_checker_url = ass['website']
         fact_checker_domain = utils.get_url_domain(fact_checker_url)
+        fact_checker_source = utils.get_url_source(fact_checker_url)
 
         result = {
             'url': assessment_url,
             'credibility': credibility,
             'itemReviewed': fact_checker_url,
             'original': ass,
-            'origin': ID,
+            'origin_id': ID,
             'domain': fact_checker_domain,
-            'granularity': 'source'
+            'source': fact_checker_source,
+            'granularity': 'domain'
         }
         results.append(result)
     return results

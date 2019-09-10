@@ -29,13 +29,22 @@ def get_source_credibility(source):
         'domain': utils.get_url_domain(interpreted['target']),
         'source': utils.get_url_source(interpreted['target']),
         'original': interpreted,
-        'origin': ID,
+        'origin_id': ID,
         'granularity': 'source'
     }
     persistence.add_origin_assessment(ID, result)
 
     return result
 
+# def get_source_credibility(source):
+#     return persistence.get_source_assessment(ID, source)
+
+def get_domain_credibility(domain):
+    #return persistence.get_domain_assessment(ID, domain)
+    return None
+
+def get_url_credibility(url):
+    return None
 
 
 def get_credibility_measures(assessment):

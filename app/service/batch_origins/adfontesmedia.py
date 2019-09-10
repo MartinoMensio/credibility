@@ -13,15 +13,23 @@ DESCRIPTION = 'Navigate the News Landscape and Contribute to a Healthy Democracy
 HOMEPAGE = 'https://www.adfontesmedia.com/'
 
 def get_source_credibility(source):
-    return persistence.get_domain_assessment(ID, source)
+    return persistence.get_source_assessment(ID, source)
+
+def get_domain_credibility(domain):
+    return persistence.get_domain_assessment(ID, domain)
+
+def get_url_credibility(url):
+    return persistence.get_url_assessment(ID, url)
 
 def update():
     table = get_table()
-    result_doc_level = interpret_assessments(table)
-    result_source_level = utils.aggregate_domain(result_doc_level, ID)
-    print(ID, 'retrieved', len(result_source_level), 'assessments')
-    persistence.save_origin_assessments(ID, result_source_level)
-    return len(result_source_level)
+    result_document_level = interpret_assessments(table)
+    result_source_level = utils.aggregate_source(result_document_level, ID)
+    result_domain_level = utils.aggregate_domain(result_document_level, ID)
+    print(ID, 'retrieved', len(result_domain_level), 'domains', len(result_source_level), 'sources', len(result_document_level), 'documents', 'assessments')
+    all_assessments = list(result_document_level) + list(result_source_level) + list(result_domain_level)
+    persistence.save_assessments(ID, all_assessments)
+    return len(all_assessments)
 
 
 
@@ -68,10 +76,10 @@ def interpret_assessments(table):
             'credibility': credibility,
             'itemReviewed': url,
             'original': ass,
-            'origin': ID,
+            'origin_id': ID,
             'domain': domain,
             'source': source,
-            'granularity': 'document'
+            'granularity': 'url'
         }
         results[url] = result
 

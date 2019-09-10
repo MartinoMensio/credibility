@@ -39,20 +39,31 @@ save_me_dict = {
     'journal-gazette-times-courier': 'https://jg-tc.com/',
     'polipace': 'http://polipace.com/',
     'borowitz-report': 'https://www.newyorker.com/humor/borowitz-report',
-    'american-psychological-association-apa': 'https://www.apa.org/'
+    'american-psychological-association-apa': 'https://www.apa.org/',
+    'law-com': 'https://www.law.com/',
+    'unbiased-america': 'http://www.unbiasedamerica.com/', # TODO but also https://www.facebook.com/pg/UnbiasedAmerica/
+    'the-liberty-daily': 'https://thelibertydaily.com'
 }
 
 def get_source_credibility(source):
-    return persistence.get_domain_assessment(ID, source)
+    return persistence.get_source_assessment(ID, source)
+
+def get_domain_credibility(domain):
+    return persistence.get_domain_assessment(ID, domain)
+
+def get_url_credibility(url):
+    return None
 
 def update():
     assessments = scrape()
     with open('temp_mbfc_responses.json', 'w') as f:
         json.dump(assessments, f, indent=2)
-    result = interpret_assessments(assessments)
-    print(ID, 'retrieved', len(result), 'assessments')
-    persistence.save_origin_assessments(ID, result)
-    return len(result)
+    result_source_level = interpret_assessments(assessments)
+    result_domain_level = utils.aggregate_domain(result_source_level, ID)
+    print(ID, 'retrieved', len(result_domain_level), 'domains', len(result_source_level), 'sources', 'assessments') # , len(result_document_level), 'documents'
+    all_assessments = list(result_source_level) + list(result_domain_level) # list(result_document_level) +
+    persistence.save_assessments(ID, all_assessments)
+    return len(all_assessments)
 
 def scrape():
     categories = get_categories()
@@ -210,6 +221,7 @@ def scrape_assessment(assessment):
         # use an handcrafted mapping
         homepage = save_me_dict.get(path, None)
     if not homepage:
+        # TODO find a way to signal that without interrupting everything
         raise ValueError(assessment['url'])
     factual = None
     for m in paragraphs:
@@ -292,7 +304,7 @@ def interpret_assessments(assessments):
             'credibility': credibility,
             'itemReviewed': homepage,
             'original': ass,
-            'origin': ID,
+            'origin_id': ID,
             'domain': domain,
             'source': source,
             'granularity': 'source'

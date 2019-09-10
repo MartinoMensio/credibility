@@ -20,14 +20,22 @@ columns = [
 ]
 
 def get_source_credibility(source):
-    return persistence.get_domain_assessment(ID, source)
+    return persistence.get_source_assessment(ID, source)
+
+def get_domain_credibility(domain):
+    return persistence.get_domain_assessment(ID, domain)
+
+def get_url_credibility(url):
+    return None
 
 def update():
     table = download_from_source()
-    result = interpret_table(table)
-    print(ID, 'retrieved', len(result), 'assessments')
-    persistence.save_origin_assessments(ID, result)
-    return len(result)
+    result_source_level = interpret_table(table)
+    result_domain_level = utils.aggregate_domain(result_source_level, ID)
+    print(ID, 'retrieved', len(result_domain_level), 'domains', len(result_source_level), 'sources', 'assessments') # , len(result_document_level), 'documents'
+    all_assessments = list(result_source_level) + list(result_domain_level) # list(result_document_level) +
+    persistence.save_assessments(ID, all_assessments)
+    return len(all_assessments)
 
 
 def interpret_table(table):
@@ -47,7 +55,7 @@ def interpret_table(table):
             'credibility': credibility,
             'itemReviewed': source,
             'original': row_parsed,
-            'origin': ID,
+            'origin_id': ID,
             'domain': domain,
             'source': source,
             'granularity': 'source'

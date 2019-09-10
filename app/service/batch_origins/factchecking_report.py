@@ -12,6 +12,7 @@ DESCRIPTION = 'From the fact-checks, we retrieve the claim appearances and there
 # TODO this is the homepage of ifcn!!!
 HOMEPAGE = 'https://ifcncodeofprinciples.poynter.org/signatories'
 WEIGHT = 2
+PROVIDES_URL_LEVEL = True
 
 #claimreviews_by_fc_domain = {}
 
@@ -26,6 +27,7 @@ def get_factcheckers():
     Now this list is based purely on the IFCN list of signatories
     """
     # TODO this needs to be done with the graph propagation and default nodes
+    # TODO this need to be run after IFCN update (actually need to recall this function)!!!
     result = {}
     signatories_assessments = ifcn.get_all_sources_credibility()
     for sa in signatories_assessments:
@@ -91,35 +93,125 @@ def retrieve_and_group_claimreviews():
 
 
 def get_source_credibility(source):
-    return persistence.get_domain_assessment(ID, source)
+    return persistence.get_source_assessment(ID, source)
+
+def get_domain_credibility(domain):
+    return persistence.get_domain_assessment(ID, domain)
+
+def get_url_credibility(url):
+    return persistence.get_url_assessment(ID, url)
 
 def update():
     #result = retrieve_and_group_claimreviews()
     all_claimreviews = [el for el in persistence.get_claimreviews()]
 
-    domain_assessments = get_domain_assessments_from_claimreviews(all_claimreviews)
-    persistence.save_origin_assessments(ID, domain_assessments.values())
-    return len(domain_assessments)
-
-    claimreviews_by_fc_domain = defaultdict(list)
+    # Step 1: get the list of URL assessments with properties:
+    # - original: the original assessment (claimReview)
+    # - credibility: interpreted from reviewRating
+    # - itemReviewed: the appearance URL
+    # - review_url: the URL of the assessment
+    # - origin_domain: the domain of the review_url
+    url_assessments = []
     for cr in all_claimreviews:
-        fc_url = cr['url']
-        fc_domain = utils.get_url_domain(fc_url)
-        claimreviews_by_fc_domain[fc_domain].append(cr)
-    processing_stats = []
-    for fc_domain, claimreviews_for_domain in claimreviews_by_fc_domain.items():
-        claimreview_cnt = len(claimreviews_for_domain)
-        domain_assessments = get_domain_assessments_from_claimreviews(claimreviews_for_domain)
-        domain_assessed_cnt = len(domain_assessments)
-        processing_stats.append({
-            'fc_domain': fc_domain,
-            'claimreview_cnt': claimreview_cnt,
-            'domain_assessed_cnt': domain_assessed_cnt
+        #serialisation issues with mongo objectid
+        del cr['_id']
+        credibility = claimreview_interpret_rating(cr)
+        review_url = cr['url']
+        origin_domain = utils.get_url_domain(review_url)
+
+        for appearance in claimreview_get_claim_appearances(cr):
+            # TODO unshorten appearance
+            domain = utils.get_url_domain(appearance)
+            source = utils.get_url_source(appearance)
+            url_assessments.append({
+                'itemReviewed': appearance,
+                'granularity': 'url',
+                'review_url': review_url,
+                'credibility': credibility,
+                'origin_domain': origin_domain,
+                'domain': domain,
+                'source': source,
+                'original': cr
+            })
+    print(len(url_assessments), 'URL assessments')
+    # persistence.save_url_assessments(ID, url_assessments)
+
+    # Step 2: propagate the credibility of the assessor, generating objects with the properties:
+    # - original: from before
+    # - credibility_raw: from credibility of before
+    # - itemReviewed: from before
+    # - review_url: from before
+    # - credibility_propagated: computed with the propagation
+    # - origin: details about the origin (Fact-Checker)
+    # - origin_weight: the value used for the origin
+    url_assessments_propagated = []
+    for ass in url_assessments:
+        origin_domain = ass['origin_domain']
+        origin = fact_checkers.get(origin_domain, None)
+        if not origin:
+            # not an IFCN signatory, don't consider it
+            # TODO maybe also other factcheckers can be trusted!
+            origin_weight = 0
+            origin_id = origin_domain.replace('.', '_')
+        else:
+            origin_weight = origin.WEIGHT
+            origin_id = origin.id
+
+        credibility_value = ass['credibility']['value']
+        credibility_confidence = ass['credibility']['confidence']
+
+        # TODO redefine the weight maximum value, for now it's 10
+        confidence_rescored = credibility_confidence * (float(origin_weight) / 10)
+
+        url_assessments_propagated.append({
+            'original': ass['original'],
+            'credibility_raw': ass['credibility'],
+            'itemReviewed': ass['itemReviewed'],
+            'domain': ass['domain'],
+            'source': ass['source'],
+            'url': ass['review_url'],
+            'credibility': {
+                'value': credibility_value,
+                'confidence': confidence_rescored
+            },
+            'origin_id': origin_id,
+            'origin_weight': origin_weight
         })
+    print('propagation done')
+
+    # Step 3: aggregate by URL, source and domain
+    result_url_level = utils.aggregate_by(url_assessments_propagated, ID, 'itemReviewed')
+    result_source_level = utils.aggregate_source(url_assessments_propagated, ID)
+    result_domain_level = utils.aggregate_domain(url_assessments_propagated, ID)
+    print(ID, 'retrieved', len(result_domain_level), 'domains', len(result_source_level), 'sources', len(result_url_level), 'documents', 'assessments')
+    all_assessments = list(result_url_level) + list(result_source_level) + list(result_domain_level)
+    persistence.save_assessments(ID, all_assessments)
+    return len(all_assessments)
 
 
-    return sorted(processing_stats, key=lambda el: el['domain_assessed_cnt'], reverse=True)
-    #return len(result)
+    # domain_assessments = get_domain_assessments_from_claimreviews(all_claimreviews)
+    # persistence.save_origin_assessments(ID, domain_assessments.values())
+    # return len(domain_assessments)
+
+    # claimreviews_by_fc_domain = defaultdict(list)
+    # for cr in all_claimreviews:
+    #     fc_url = cr['url']
+    #     fc_domain = utils.get_url_domain(fc_url)
+    #     claimreviews_by_fc_domain[fc_domain].append(cr)
+    # processing_stats = []
+    # for fc_domain, claimreviews_for_domain in claimreviews_by_fc_domain.items():
+    #     claimreview_cnt = len(claimreviews_for_domain)
+    #     domain_assessments = get_domain_assessments_from_claimreviews(claimreviews_for_domain)
+    #     domain_assessed_cnt = len(domain_assessments)
+    #     processing_stats.append({
+    #         'fc_domain': fc_domain,
+    #         'claimreview_cnt': claimreview_cnt,
+    #         'domain_assessed_cnt': domain_assessed_cnt
+    #     })
+
+
+    # return sorted(processing_stats, key=lambda el: el['domain_assessed_cnt'], reverse=True)
+    # #return len(result)
 
 
 def get_domain_assessments_from_claimreviews(claimreviews):
@@ -135,6 +227,7 @@ def get_domain_assessments_from_claimreviews(claimreviews):
         original = cr
         #serialisation issues with mongo objectid
         del original['_id']
+        print(review_url)
         origin = utils.get_url_domain(review_url)
         for appearance in claimreview_get_claim_appearances(cr):
             itemReviewed = appearance
@@ -182,8 +275,8 @@ def get_domain_assessments_from_claimreviews(claimreviews):
             origin_weight = origin.WEIGHT
 
             credibility_value = assessment['credibility']['value']
-            confidence_value = assessment['credibility']['confidence']
-            label_to_use = 'unknown' if confidence_value < 0.4 \
+            credibility_confidence = assessment['credibility']['confidence']
+            label_to_use = 'unknown' if credibility_confidence < 0.4 \
                 else 'positive' if credibility_value > 0 \
                     else 'negative' if credibility_value < 0 else 'neutral'
             # TODO just collect counts? nested resource or separate?
@@ -192,7 +285,6 @@ def get_domain_assessments_from_claimreviews(claimreviews):
             cnts_by_factchecker[origin.id][label_to_use].append(assessment['url'])
             # add this also inside the object
             cnts_by_factchecker[origin.id]['origin_id'] = origin.id
-            credibility_confidence = assessment['credibility']['confidence']
             # TODO negative fact-check counts more?
             confidence_and_weights_sum += credibility_confidence * origin_weight
             #confidence_sum +=
@@ -219,7 +311,7 @@ def get_domain_assessments_from_claimreviews(claimreviews):
             'original': all_counts,
             'url': 'http://todo.todo',
             'itemReviewed': source,
-            'origin': ID,
+            'origin_id': ID,
             'domain': utils.get_url_domain(source),
             'source': source,
             'granularity': 'source'
@@ -271,7 +363,7 @@ def claimreview_get_claim_appearances(claimreview):
             #raise ValueError(claimreview['url'])
             result.append(itemReviewed_url)
     # TODO also return sameAs if present on the claim directly, other links there!!
-    return result
+    return [el for el in result if el]
 
 def clean_claim_url(url):
     result = url
@@ -490,6 +582,8 @@ def claimreview_get_rating(claimreview):
     if score == None:
         try:
             scoreTxt = reviewRating.get('alternateName', '') or reviewRating.get('properties', {}).get('alternateName', '')
+            if isinstance(scoreTxt, dict):
+                scoreTxt = scoreTxt['@value']
         except Exception as e:
             print(reviewRating)
             raise e

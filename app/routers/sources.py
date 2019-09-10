@@ -7,7 +7,7 @@ from ..models import output_classes, input_classes
 
 router = APIRouter()
 
-@router.get('/{source}', response_model=output_classes.AggregatedAssessment)
+@router.get('/', response_model=output_classes.AggregatedAssessment)
 def get_source(source: str):
     return credibility.get_source_credibility(source)
 

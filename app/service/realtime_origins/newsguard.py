@@ -11,6 +11,7 @@ HOMEPAGE = 'https://www.newsguardtech.com/'
 API_ENDPOINT = 'https://api.newsguardtech.com/check'
 
 def get_source_credibility(source):
+    # TODO find a way to avoid being too intensive for newsguard, use cache by checking last updated
     original_assessment = get_assessment(source)
     # condition for failure
     if not original_assessment:
@@ -29,11 +30,21 @@ def get_source_credibility(source):
         'domain': utils.get_url_domain(itemReviewed),
         'source': utils.get_url_source(itemReviewed),
         'original': original_assessment,
-        'origin': ID,
+        'origin_id': ID,
         'granularity': 'source'
     }
     persistence.add_origin_assessment(ID, result)
     return result
+
+# def get_source_credibility(source):
+#     return persistence.get_source_assessment(ID, source)
+
+def get_domain_credibility(domain):
+    #return persistence.get_domain_assessment(ID, domain)
+    return None
+
+def get_url_credibility(url):
+    return None
 
 def get_credibility_measures(original_assessment):
     rank = original_assessment['rank']

@@ -156,14 +156,14 @@ def get_url_domain(url, only_tld=True):
     ext = tldextract.extract(url)
     if not only_tld:
         result = '.'.join(part for part in ext if part)
-        if result.startswith('www.'):
-            # sometimes the www is there, sometimes not
-            result = result[4:]
     else:
         result = '.'.join([ext.domain, ext.suffix])
+    if result.startswith('www.'):
+            # sometimes the www is there, sometimes not
+            result = result[4:]
     return result.lower()
 
-def get_url_source(url, only_tld=True):
+def get_url_source(url):
     """Returns the source of the URL (may be different from domain)"""
     match = re.search(social_regex, url)
     if match:
@@ -171,7 +171,7 @@ def get_url_source(url, only_tld=True):
         print(url, '-->', result)
         return result
     else:
-        return get_url_domain(url)
+        return get_url_domain(url, only_tld=False)
 
 def aggregate_source(doc_level, origin_name):
     return aggregate_by(doc_level, origin_name, 'source')
@@ -190,11 +190,31 @@ def aggregate_by(doc_level, origin_name, key):
     for k,v in by_source.items():
         credibility_sum = 0.
         confidence_sum = 0.
+
+        # something like {'snopes.com' : {'factcheck_positive_cnt': 3, ...}}}
+        cnts_by_factchecker = defaultdict(lambda: defaultdict(list))
+        counts = defaultdict(list)
+
+        assessment_urls = set()
         for el in v:
-            credibility = el['credibility']['value']
-            confidence = el['credibility']['confidence']
-            credibility_sum += credibility * confidence
-            confidence_sum += confidence
+            credibility_value = el['credibility']['value']
+            credibility_confidence = el['credibility']['confidence']
+            assessment_urls.add(el['url'])
+            credibility_sum += credibility_value * credibility_confidence
+            confidence_sum += credibility_confidence
+            # TODO collect counts of positive, negative, neutral assessments
+            label_to_use = 'unknown' if credibility_confidence < 0.4 \
+                else 'positive' if credibility_value > 0 \
+                    else 'negative' if credibility_value < 0 else 'neutral'
+            # TODO just collect counts? nested resource or separate?
+            counts[label_to_use].append(el['url'])
+            origin_id = el['origin_id']
+            # raise ValueError(origin.id)
+            # origin_id.replace('.', '_')
+            cnts_by_factchecker[origin_id][label_to_use].append(el['url'])
+            # add this also inside the object
+            cnts_by_factchecker[origin_id]['origin_id'] = origin_id
+
         if confidence_sum:
             credibility_weighted = credibility_sum / confidence_sum
         else:
@@ -203,16 +223,28 @@ def aggregate_by(doc_level, origin_name, key):
             print(k, 'has', len(v), 'assessments')
             #raise ValueError(k)
         #print(k, len(v), credibility_sum, confidence_sum)
+
+        # see whether there is just one assessment url
+        if len(assessment_urls) == 1:
+            assessment_url = assessment_urls.pop()
+            # TODO should do the same when aggregating on source, keeping the domain
+            # TODO: we need to propagate the review URLs and itemReviewed to allow transparency
+        else:
+            assessment_url = 'http://todo.todo'
+
+        all_counts = cnts_by_factchecker
+        cnts_by_factchecker['overall'] = counts
+
         results[k] = {
-            'url': 'http://todo.todo',
+            'url': assessment_url,
             'credibility': {
                 'value': credibility_weighted,
                 'confidence': confidence_sum / len(v)
             },
             'itemReviewed': k,
-            'original': {'assessments': v},
-            'origin': origin_name,
-            'domain': k,
-            'granularity': 'source'
+            'original': cnts_by_factchecker,
+            'origin_id': origin_name,
+            key: k,
+            'granularity': key
         }
     return results.values()

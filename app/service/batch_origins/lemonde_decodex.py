@@ -41,15 +41,26 @@ classes = {
     }
 }
 
-def get_source_credibility(source):
+def get_domain_credibility(source):
     return persistence.get_domain_assessment(ID, source)
+
+def get_source_credibility(source):
+    return persistence.get_source_assessment(ID, source)
+
+def get_url_credibility(url):
+    # TODO decide where to do that, maybe in "datasets" aka "claimreviews"?
+    # debunks_url = 'https://s1.lemde.fr/mmpub/data/decodex/hoax/hoax_debunks.json'
+    return None
 
 def update():
     assessments = download_source_list()
-    result = interpret_assessments(assessments)
-    print(ID, 'retrieved', len(result), 'assessments')
-    persistence.save_origin_assessments(ID, result)
-    return len(result)
+    # TODO add url_debunks
+    result_source_level = interpret_assessments(assessments)
+    result_domain_level = utils.aggregate_domain(result_source_level, ID)
+    print(ID, 'retrieved', len(result_domain_level), 'domains', len(result_source_level), 'sources', 'assessments') # , len(result_document_level), 'documents'
+    all_assessments = list(result_source_level) + list(result_domain_level) # list(result_document_level) +
+    persistence.save_assessments(ID, all_assessments)
+    return len(all_assessments)
 
 
 def download_source_list():
@@ -89,7 +100,7 @@ def interpret_assessments(assessments):
             'credibility': credibility,
             'itemReviewed': source_raw,
             'original': ass,
-            'origin': ID,
+            'origin_id': ID,
             'domain': source_domain,
             'source': source,
             'granularity': 'source'
@@ -97,9 +108,9 @@ def interpret_assessments(assessments):
         results.append(result)
 
     # get only the assessment domain level
-    results_domain = [el for el in results if el['source'] == el['domain']]
+    #results_domain = [el for el in results if el['source'] == el['domain']]
 
     # TODO do that in more structured way:
     # results_source = utils.aggregate_domain(results, ID)
 
-    return results_domain
+    return results

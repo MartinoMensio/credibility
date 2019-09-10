@@ -20,7 +20,10 @@ batch_origins = {
     'realorsatire': realorsatire,
     'reporterslab': reporterslab
 }
-#batch_origins = {**batch_origins, **fact_checkers.get_factcheckers()}
+# # TODO define this as a class
+# for o in batch_origins.values():
+#     # TODO see if the origin supports that level of evaluation
+#     o.get_source_credibility = 'TODO'
 
 realtime_origins = {
     'newsguard': newsguard,
@@ -29,18 +32,32 @@ realtime_origins = {
 
 origins = {**batch_origins, **realtime_origins}
 
+def get_domain_credibility(domain):
+    get_fn_to_call = lambda el: el.get_domain_credibility
+    return get_weighted_credibility(domain, get_fn_to_call)
+
 def get_source_credibility(source):
+    get_fn_to_call = lambda el: el.get_source_credibility
+    return get_weighted_credibility(source, get_fn_to_call)
+
+def get_url_credibility(url):
+    get_fn_to_call = lambda el: el.get_url_credibility
+    return get_weighted_credibility(url, get_fn_to_call)
+
+def get_weighted_credibility(item, get_fn_to_call):
     """retrieve the credibility score for the source, by using the origins available"""
     # TODO be sure to be at the source level, e.g. use utils.get_domain but be careful to facebook/twitter/... platforms
     #source = utils.get_url_domain(source)
     assessments = {}
+    # TODO make it an array, sort by final weight
     credibility_sum = 0
     weights_sum = 0
     # accumulator for the trust*confidence
     confidence_and_weights_sum = 0
 
     for origin_id, origin in origins.items():
-        assessment = origin.get_source_credibility(source)
+        fn_to_call = get_fn_to_call(origin)
+        assessment = fn_to_call(item)
         if not assessment:
             continue
         # TODO source evaluation, now is a fixed value
@@ -78,12 +95,17 @@ def get_source_credibility(source):
             'confidence': confidence_weighted
         },
         'assessments': list(assessments.values()),
-        'itemReviewed': source
+        'itemReviewed': item
     }
 
 def get_source_credibility_tuple_wrap(argument):
     """This method wraps another method giving back a tuple of (argument, result)"""
     result = get_source_credibility(argument)
+    return (argument, result)
+
+def get_urls_credibility_tuple_wrap(argument):
+    """This method wraps another method giving back a tuple of (argument, result)"""
+    result = get_url_credibility(argument)
     return (argument, result)
 
 def get_source_credibility_parallel(sources):
@@ -96,10 +118,16 @@ def get_source_credibility_parallel(sources):
                 results[source] = result
     return results
 
-
-def get_url_credibility(url):
-    # TODO
-    raise NotImplementedError()
+def get_url_credibility_parallel(urls):
+    # TODO this seriously needs to query mongo more efficiently (no realtime checking, just batch. Need to refactor a bit!)
+    urls = set(urls)
+    results = {}
+    with ThreadPool(POOL_SIZE) as pool:
+        for result_tuple in tqdm.tqdm(pool.imap_unordered(get_urls_credibility_tuple_wrap, urls), total=len(urls)):
+            url, result = result_tuple
+            if result:
+                results[url] = result
+    return results
 
 def update_batch_origin(origin_id):
     if origin_id not in batch_origins:
@@ -142,5 +170,8 @@ def get_origins():
 
     for origin_id in origins.keys():
         result.append(get_origin(origin_id))
+
+    # sort by weight descending
+    result = sorted(result, key=lambda el: el['weight'], reverse=True)
 
     return result

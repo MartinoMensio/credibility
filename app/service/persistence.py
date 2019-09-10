@@ -14,27 +14,30 @@ client = pymongo.MongoClient(MONGO_URI)
 db_credibility = client['credibility']
 claimreviews_collection = client['datasets_resources']['claim_reviews']
 
-def save_origin_assessments(origin_name, assessments):
+def save_assessments(origin_name, assessments):
     """Saves all the assessments for the specified origin. It erases the collection!!!"""
     if not assessments:
         # an empty array of values could mean failure, prevent it
         raise ValueError('there are no assessments!!!')
     collection = db_credibility[origin_name]
 
-    if len(set(ass['itemReviewed'] for ass in assessments)) < len(assessments):
-        done = set()
-        for ass in assessments:
-            el = ass['itemReviewed']
-            if el in done:
-                raise ValueError('check the assessments, they are evaluating the same item!!!', el)
-            done.add(el)
-    for ass in assessments:
-        ass['_id'] = ass['itemReviewed']
+    # if len(set(ass['itemReviewed'] for ass in assessments)) < len(assessments):
+    #     done = set()
+    #     for ass in assessments:
+    #         el = ass['itemReviewed']
+    #         if el in done:
+    #             raise ValueError('check the assessments, they are evaluating the same item!!!', el)
+    #         done.add(el)
+    # for ass in assessments:
+    #     ass['_id'] = ass['itemReviewed']
         # TODO add date of last update
         # ass['updated'] =
 
     collection.drop()
-    collection.create_index([('domain', pymongo.ASCENDING)], name='domain_index')
+    # collection.create_index([('domain', pymongo.ASCENDING)], name='domain_index')
+    # collection.create_index([('source', pymongo.ASCENDING)], name='source_index')
+    # collection.create_index([('itemReviewed', pymongo.ASCENDING)], name='itemReviewed_index')
+
     return collection.insert_many(assessments)
 
 def add_origin_assessment(origin_name, ass):
@@ -57,14 +60,21 @@ def get_domain_assessment(origin_name, domain):
     """Returns the domain assessment from the specified origin about the domain"""
     collection = db_credibility[origin_name]
     # TODO deal with multiple matches
-    match = collection.find_one({'domain': domain})
+    match = collection.find_one({'domain': domain, 'granularity': 'domain'})
     return match
 
 def get_source_assessment(origin_name, source):
     """Returns the domain assessment from the specified origin about the source"""
     collection = db_credibility[origin_name]
     # TODO deal with multiple matches
-    match = collection.find_one({'source': source})
+    match = collection.find_one({'source': source, 'granularity': 'source'})
+    return match
+
+def get_url_assessment(origin_name, url):
+    """Returns the domain assessment from the specified origin about the source"""
+    collection = db_credibility[origin_name]
+    # TODO deal with multiple matches
+    match = collection.find_one({'itemReviewed': url, 'granularity': 'itemReviewed'})
     return match
 
 
