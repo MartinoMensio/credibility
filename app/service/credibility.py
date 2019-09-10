@@ -1,5 +1,6 @@
 from multiprocessing.pool import ThreadPool
 import tqdm
+from collections import defaultdict
 
 from .realtime_origins import newsguard, mywot
 from .batch_origins import ntt, ifcn, opensources, adfontesmedia, mbfc, lemonde_decodex, fakenewscodex, realorsatire, reporterslab
@@ -120,13 +121,24 @@ def get_source_credibility_parallel(sources):
 
 def get_url_credibility_parallel(urls):
     # TODO this seriously needs to query mongo more efficiently (no realtime checking, just batch. Need to refactor a bit!)
-    urls = set(urls)
+    urls = list(set(urls))
     results = {}
-    with ThreadPool(POOL_SIZE) as pool:
-        for result_tuple in tqdm.tqdm(pool.imap_unordered(get_urls_credibility_tuple_wrap, urls), total=len(urls)):
-            url, result = result_tuple
-            if result:
-                results[url] = result
+
+    db_results_by_origin_id = defaultdict(dict)
+    for origin_id, origin in origins.items():
+        res_origin = persistence.get_multiple_url_assessments(origin_id, urls)
+        for r in res_origin:
+            db_results_by_origin_id[origin_id][r['itemReviewed']] = r
+
+    def performance_trick_query_already_done(origin):
+        origin_id = origin.ID
+        def get_assessment(url):
+            return db_results_by_origin_id[origin_id].get(url, None)
+        return get_assessment
+
+
+    for url in urls:
+        results[url] = get_weighted_credibility(url, performance_trick_query_already_done)
     return results
 
 def update_batch_origin(origin_id):

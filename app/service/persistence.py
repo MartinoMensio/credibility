@@ -77,6 +77,13 @@ def get_url_assessment(origin_name, url):
     match = collection.find_one({'itemReviewed': url, 'granularity': 'itemReviewed'})
     return match
 
+def get_multiple_url_assessments(origin_name, urls):
+    """Find multiple"""
+    print(origin_name)
+    collection = db_credibility[origin_name]
+    # TODO deal with multiple matches
+    matches = collection.find({'itemReviewed': {'$in': urls}, 'granularity': 'itemReviewed'})
+    return matches
 
 # this relies on the dataset of the factchecker scraper
 def get_claimreviews():
