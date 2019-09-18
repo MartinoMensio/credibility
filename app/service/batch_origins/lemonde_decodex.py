@@ -8,7 +8,7 @@ from .. import utils, persistence
 WEIGHT = 10
 
 ID = 'lemonde_decodex'
-NAME = 'Lemonde - Décodex'
+NAME = 'Le Monde - Décodex'
 DESCRIPTION = 'Le Décodex est un outil pour vous aider à vérifier les informations qui circulent sur Internet et dénicher les rumeurs, exagérations ou déformations. '
 HOMEPAGE = 'https://www.lemonde.fr/verification/'
 
