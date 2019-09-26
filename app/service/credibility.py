@@ -133,7 +133,7 @@ def get_url_credibility_parallel(urls):
             db_results_by_origin_id[origin_id][r['itemReviewed']] = r
 
     def performance_trick_query_already_done(origin):
-        origin_id = origin.ID
+        origin_id = origin.id
         def get_assessment(url):
             return db_results_by_origin_id[origin_id].get(url, None)
         return get_assessment
