@@ -14,6 +14,7 @@ class Origin(BaseModel):
     assessments_count: int
     name: str
     description: str
+    logo: str
 
 class Credibility(BaseModel):
     value: float

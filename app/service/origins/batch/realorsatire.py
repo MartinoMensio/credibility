@@ -1,38 +1,32 @@
 import requests
 from bs4 import BeautifulSoup
 
-from .. import utils, persistence
+from ... import utils
+from . import OriginBatch
 
-WEIGHT = 1
+class Origin(OriginBatch):
+    def __init__(self):
+        OriginBatch.__init__(
+            self = self,
+            id = 'realorsatire',
+            name = 'Real or Satire',
+            description = 'Tired of sharing an article that filled you with righteous indignation, only to be scolded by your social media circle for posting fake news? Tired of living in constant fear that the ‘news’ you read isn’t actually news? Wish there was a one-stop shop to check if a site is ‘satirical’ or submit a site to be labeled as ‘satire’? Well, now there’s Real or Satire.',
+            homepage = 'https://realorsatire.com',
+            logo = 'http://logo.clearbit.com/realorsatire.com',
+            default_weight = 1
+        )
 
-
-ID = 'realorsatire'
-NAME = 'Real or Satire'
-DESCRIPTION = 'Tired of sharing an article that filled you with righteous indignation, only to be scolded by your social media circle for posting fake news? Tired of living in constant fear that the ‘news’ you read isn’t actually news? Wish there was a one-stop shop to check if a site is ‘satirical’ or submit a site to be labeled as ‘satire’? Well, now there’s Real or Satire.'
-
-HOMEPAGE = 'https://realorsatire.com'
-
-
-def get_source_credibility(source):
-    return persistence.get_source_assessment(ID, source)
-
-def get_domain_credibility(domain):
-    return persistence.get_domain_assessment(ID, domain)
-
-def get_url_credibility(url):
-    return None
-
-def update():
-    table = download_from_source()
-    result_source_level = interpret_table(table)
-    result_domain_level = utils.aggregate_domain(result_source_level, ID)
-    print(ID, 'retrieved', len(result_domain_level), 'domains', len(result_source_level), 'sources', 'assessments') # , len(result_document_level), 'documents'
-    all_assessments = list(result_source_level) + list(result_domain_level) # list(result_document_level) +
-    persistence.save_assessments(ID, all_assessments)
-    return len(all_assessments)
+    def retreive_source_assessments(self):
+        return _retrieve_assessments(self.id, self.homepage)
 
 
-def interpret_table(table):
+def _retrieve_assessments(origin_id, homepage):
+    table = _download_from_source(homepage)
+    result_source_level = _interpret_table(table, origin_id)
+    return result_source_level
+
+
+def _interpret_table(table, origin_id):
     results = []
     for row in table:
         itemReviewed = row['domain']
@@ -46,7 +40,7 @@ def interpret_table(table):
             'credibility': credibility,
             'itemReviewed': itemReviewed,
             'original': row,
-            'origin_id': ID,
+            'origin_id': origin_id,
             'domain': domain,
             'source': source,
             'granularity': 'source'
@@ -57,8 +51,8 @@ def interpret_table(table):
     return results
 
 
-def download_from_source():
-    response = requests.get(HOMEPAGE)
+def _download_from_source(homepage):
+    response = requests.get(homepage)
     if response.status_code != 200:
         raise ValueError(response.status_code)
 
@@ -68,7 +62,7 @@ def download_from_source():
     results = []
     for c in categories:
         category_url = c['href']
-        category_name = c.text
+        # category_name = c.text
 
         page = 1
         while True:

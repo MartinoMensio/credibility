@@ -1,61 +1,57 @@
 import requests
 from bs4 import BeautifulSoup
 
-from .. import utils, persistence
+from ... import utils
 
-WEIGHT = 8
+from . import OriginBatch
 
+class Origin(OriginBatch):
+    def __init__(self):
+        OriginBatch.__init__(
+            self = self,
+            id = 'ntt',
+            name = 'Newsroom Transparency Tracker',
+            description = 'The Newsroom Transparency Tracker shares the information published by media outlets with respect to four Trust Indicators, transparency standards that provide clarity on a media outlet’s ethics codes and related commitments, how it does its work, and the expertise of its journalists. Developed collaboratively by over 100 senior news executives within the Trust Project network, Trust Indicators are rooted in core journalistic values and based on in-depth research capturing what the public trusts and wants in news.',
+            homepage = 'https://www.newsroomtransparencytracker.com/',
+            logo = 'https://www.newsroomtransparencytracker.com/wp-content/uploads/2019/04/NTT_regular.png',
+            default_weight = 9
+        )
+        self.api_endpoint = 'https://www.newsroomtransparencytracker.com/wp-admin/admin-ajax.php'
 
-ID = 'ntt'
-NAME = 'Newsroom Transparency Tracker'
-DESCRIPTION = 'The Newsroom Transparency Tracker shares the information published by media outlets with respect to four Trust Indicators, transparency standards that provide clarity on a media outlet’s ethics codes and related commitments, how it does its work, and the expertise of its journalists. Developed collaboratively by over 100 senior news executives within the Trust Project network, Trust Indicators are rooted in core journalistic values and based on in-depth research capturing what the public trusts and wants in news.'
+    def retreive_source_assessments(self):
+        return _retrieve_assessments(self.id, self.homepage, self.api_endpoint)
 
-HOMEPAGE = 'https://www.newsroomtransparencytracker.com/'
-API_ENDPOINT = 'https://www.newsroomtransparencytracker.com/wp-admin/admin-ajax.php'
-
-columns = [
+_columns = [
     'id', 'Newsroom', 'Ethics Policy', 'Ownership/ Funding', 'Mission/ Coverage Priorities', 'Verification/ Fact-checking',
     'Corrections Policy', 'Unnamed Sources Policy', 'Masthead/ Leadership', 'Founding Date', 'Newsroom Contact Info',
     'Author/ Reporter Bios', 'Byline Attribution', 'Type of Work Labels', 'Diverse Voices Statement', 'Diverse Staffing Report', 'Trust Project Partner', 'reportanissue'
 ]
 
-def get_source_credibility(source):
-    return persistence.get_source_assessment(ID, source)
 
-def get_domain_credibility(domain):
-    return persistence.get_domain_assessment(ID, domain)
-
-def get_url_credibility(url):
-    return None
-
-def update():
-    table = download_from_source()
-    result_source_level = interpret_table(table)
-    result_domain_level = utils.aggregate_domain(result_source_level, ID)
-    print(ID, 'retrieved', len(result_domain_level), 'domains', len(result_source_level), 'sources', 'assessments') # , len(result_document_level), 'documents'
-    all_assessments = list(result_source_level) + list(result_domain_level) # list(result_document_level) +
-    persistence.save_assessments(ID, all_assessments)
-    return len(all_assessments)
+def _retrieve_assessments(origin_id, homepage, api_endpoint):
+    table = _download_from_source(homepage, api_endpoint)
+    result_source_level = _interpret_table(table, origin_id, homepage)
+    return result_source_level
 
 
-def interpret_table(table):
+def _interpret_table(table, origin_id, homepage):
     results = []
     for row in table['data']:
-        row_parsed = {columns[idx]: get_compliacy(el) for idx, el in enumerate(row)}
+        row_parsed = {_columns[idx]: _get_compliacy(el) for idx, el in enumerate(row)}
         source_name = row_parsed['Newsroom']
 
         source_raw = utils.name_domain_map[source_name]
         domain = utils.get_url_domain(source_raw)
         source = utils.get_url_source(source_raw)
 
-        credibility = get_credibility_measures(row_parsed)
+        credibility = _get_credibility_measures(row_parsed)
 
         interpreted = {
-            'url': HOMEPAGE,
+            'url': homepage,
             'credibility': credibility,
             'itemReviewed': source,
             'original': row_parsed,
-            'origin_id': ID,
+            'origin_id': origin_id,
             'domain': domain,
             'source': source,
             'granularity': 'source'
@@ -66,9 +62,9 @@ def interpret_table(table):
     return results
 
 
-def download_from_source():
+def _download_from_source(homepage, api_endpoint):
     # from https://www.newsroomtransparencytracker.com/
-    response = requests.get(HOMEPAGE)
+    response = requests.get(homepage)
     if response.status_code != 200:
         raise ValueError(response.status_code)
 
@@ -198,7 +194,7 @@ def download_from_source():
         'wdtNonce': wdtNonce
     }
 
-    response = requests.request("POST", API_ENDPOINT, data=payload, params=querystring)
+    response = requests.request("POST", api_endpoint, data=payload, params=querystring)
     if response.status_code != 200:
         print('error retrieving list')
         raise ValueError(response.status_code)
@@ -206,7 +202,7 @@ def download_from_source():
     result = response.json()
     return result
 
-def get_credibility_measures(row):
+def _get_credibility_measures(row):
     full_compliant_cnt = sum([1 for el in row.values() if el == 'Full'])
     partial_compliant_cnt = sum([1 for el in row.values() if el == 'Partial'])
     none_compliant_cnt = sum([1 for el in row.values() if el == 'None'])
@@ -218,7 +214,7 @@ def get_credibility_measures(row):
         'confidence': 1.0
     }
 
-def get_compliacy(html_string):
+def _get_compliacy(html_string):
     if not html_string:
         result = html_string
     elif '"fa fa-circle-o\"' in html_string:

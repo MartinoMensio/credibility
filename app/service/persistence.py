@@ -1,5 +1,6 @@
 import os
 import pymongo
+from typing import List
 
 MONGO_HOST = os.environ.get('MONGO_HOST', 'localhost:27017')
 MONGO_USER = os.environ.get('MONGO_USER', None)
@@ -14,8 +15,9 @@ client = pymongo.MongoClient(MONGO_URI)
 db_credibility = client['credibility']
 claimreviews_collection = client['datasets_resources']['claim_reviews']
 
-def save_assessments(origin_name, assessments):
-    """Saves all the assessments for the specified origin. It erases the collection!!!"""
+def save_assessments(origin_name: str, assessments: list, drop: bool = False, replace_existing: bool = True):
+    """Saves all the assessments for the specified origin. With drop, it clears before insertion.
+    With replace_existing it will overwrite the existing item with same itemReviewed and granularity"""
     if not assessments:
         # an empty array of values could mean failure, prevent it
         raise ValueError('there are no assessments!!!')
@@ -33,12 +35,19 @@ def save_assessments(origin_name, assessments):
         # TODO add date of last update
         # ass['updated'] =
 
-    collection.drop()
-    # collection.create_index([('domain', pymongo.ASCENDING)], name='domain_index')
-    # collection.create_index([('source', pymongo.ASCENDING)], name='source_index')
-    # collection.create_index([('itemReviewed', pymongo.ASCENDING)], name='itemReviewed_index')
+    if drop:
+        collection.drop()
+        replace_existing = False
+        # collection.create_index([('domain', pymongo.ASCENDING)], name='domain_index')
+        # collection.create_index([('source', pymongo.ASCENDING)], name='source_index')
+        # collection.create_index([('itemReviewed', pymongo.ASCENDING)], name='itemReviewed_index')
 
-    return collection.insert_many(assessments)
+    if replace_existing:
+        # TODO would be better to do a replace_many
+        for ass in assessments:
+            add_origin_assessment(origin_name, ass)
+    else:
+        return collection.insert_many(assessments)
 
 def add_origin_assessment(origin_name, ass):
     """Adds a single assessment to the collection identified by origin_name. This is for realtime assessments cache"""
@@ -56,28 +65,45 @@ def get_origin_assessments_count(origin_name):
     collection = db_credibility[origin_name]
     return collection.count()
 
-def get_domain_assessment(origin_name, domain):
+def get_domain_assessment(origin_name: str, domain: str):
     """Returns the domain assessment from the specified origin about the domain"""
     collection = db_credibility[origin_name]
     # TODO deal with multiple matches
     match = collection.find_one({'domain': domain, 'granularity': 'domain'})
     return match
 
-def get_source_assessment(origin_name, source):
+def get_source_assessment(origin_name: str, source: str):
     """Returns the domain assessment from the specified origin about the source"""
     collection = db_credibility[origin_name]
     # TODO deal with multiple matches
     match = collection.find_one({'source': source, 'granularity': 'source'})
     return match
 
-def get_url_assessment(origin_name, url):
+def get_url_assessment(origin_name: str, url: str):
     """Returns the domain assessment from the specified origin about the source"""
     collection = db_credibility[origin_name]
     # TODO deal with multiple matches
     match = collection.find_one({'itemReviewed': url, 'granularity': 'itemReviewed'})
     return match
 
-def get_multiple_url_assessments(origin_name, urls):
+def get_domain_assessment_multiple(origin_name: str, domains: List[str]):
+    """Same as get_domain_assessment, but allows faster execution for multiple lookups"""
+    collection = db_credibility[origin_name]
+    matches = collection.find({'itemReviewed': {'$in': domains}, 'granularity': 'domain'})
+    return matches
+
+def get_source_assessment_multiple(origin_name: str, domains: List[str]):
+    """Same as get_source_assessment, but allows faster execution for multiple lookups"""
+    collection = db_credibility[origin_name]
+    matches = collection.find({'itemReviewed': {'$in': domains}, 'granularity': 'source'})
+    return matches
+
+def get_source_assessments_all(origin_name: str):
+    collection = db_credibility[origin_name]
+    matches = collection.find({'granularity': 'source'})
+    return matches
+
+def get_url_assessment_multiple(origin_name: str, urls: List[str]):
     """Find multiple"""
     print(origin_name)
     collection = db_credibility[origin_name]

@@ -2,22 +2,55 @@ import os
 import json
 import requests
 
-from .. import utils, persistence
+from ... import utils
+from . import OriginRealtime
 
-WEIGHT = 5
+class Origin(OriginRealtime):
+    api_key: str
+    api_endpoint: str
 
-ID = 'mywot'
-NAME = 'Web Of Trust'
-DESCRIPTION = 'Enjoy a clean and safe browsing experience for FREE with WoT. The safe browsing app that’s powered by a global community of over 140 million people, and checks every website before you visit it to let you know its safety and security rating.'
-HOMEPAGE = 'https://mywot.com/'
-API_ENDPOINT = 'http://api.mywot.com/0.4/public_link_json2'
-MYWOT_KEY = os.environ['MYWOT_KEY']
+    def __init__(self):
+        OriginRealtime.__init__(
+            self = self,
+            id = 'mywot',
+            name = 'Web Of Trust',
+            description = 'Ever wondered how to check if a website is safe? Get the community to do the website security checks for you.',
+            homepage = 'https://mywot.com/',
+            logo = 'https://www.mywot.com/images/logo.png',
+            default_weight = 5
+        )
+        self.api_key = os.environ['MYWOT_KEY']
+        self.api_endpoint = 'http://api.mywot.com/0.4/public_link_json2'
 
-def get_source_credibility(source):
-    # TODO optimisation: find a way to use this in parallel, maybe using queues
-    api_response = query_api([source]).get(source, {})
-    interpreted = interpret_api_value(api_response)
-    credibility = get_credibility_measures(interpreted)
+    def retrieve_domain_credibility(self, domain):
+        return _retrieve_assessment(domain, self.api_endpoint, self.api_key, self.id)
+
+    def retrieve_source_credibility(self, source):
+        return _retrieve_assessment(source, self.api_endpoint, self.api_key, self.id)
+
+    def retrieve_domain_credibility_multiple(self, domains):
+        return _retrieve_assessment_multiple(domains, self.api_endpoint, self.api_endpoint, self.id)
+
+
+
+def _retrieve_assessment(source, api_endpoint, api_key, origin_id):
+    api_response = _query_api([source], api_endpoint, api_key).get(source, {})
+    return _pack_response(api_response, origin_id)
+
+
+def _retrieve_assessment_multiple(sources, api_endpoint, api_key, origin_id):
+    # the API allows up to 100 targets for each call
+    all_results = {}
+    for chunk in _split_in_chunks(sources, 100):
+        api_response = _query_api(chunk, api_endpoint, api_key)
+        all_results = {**all_results, **api_response}
+
+    packed_response = {k: _pack_response(v, origin_id) for k, v in all_results.items()}
+    return packed_response
+
+def _pack_response(response, origin_id):
+    interpreted = _interpret_api_value(response)
+    credibility = _get_credibility_measures(interpreted)
     # condition for 'not evaluated'
     if not interpreted['reputation_components']:
         return None
@@ -29,25 +62,13 @@ def get_source_credibility(source):
         'domain': utils.get_url_domain(interpreted['target']),
         'source': utils.get_url_source(interpreted['target']),
         'original': interpreted,
-        'origin_id': ID,
+        'origin_id': origin_id,
         'granularity': 'source'
     }
-    persistence.add_origin_assessment(ID, result)
-
     return result
 
-# def get_source_credibility(source):
-#     return persistence.get_source_assessment(ID, source)
 
-def get_domain_credibility(domain):
-    #return persistence.get_domain_assessment(ID, domain)
-    return None
-
-def get_url_credibility(url):
-    return None
-
-
-def get_credibility_measures(assessment):
+def _get_credibility_measures(assessment):
     trustworthiness_component = assessment['reputation_components'].get('0', {'reputation_value': 50, 'confidence': 0})
     credibility = (trustworthiness_component['reputation_value'] - 50) / 50
     confidence = trustworthiness_component['confidence'] / 100
@@ -57,22 +78,24 @@ def get_credibility_measures(assessment):
     }
     return result
 
-def query_api(hosts):
-    """maximum 100 hosts per request"""
+def _query_api(hosts, api_endpoint, api_key):
+    """maximum 100 hosts per request https://www.mywot.com/wiki/index.php/API"""
+    if len(hosts) > 100:
+        raise ValueError(f'API only allows up to 100 hosts per request! Received call with {len(hosts)}')
     hosts_param = '/'.join(hosts) + '/'
-    response = requests.get(API_ENDPOINT, params={'hosts': hosts_param, 'key': MYWOT_KEY})
+    response = requests.get(api_endpoint, params={'hosts': hosts_param, 'key': api_key})
     if response.status_code != 200:
         raise ValueError(response.status_code)
     json_string = response.text
     content = json.loads(json_string)
     return content
 
-def get_reputation_range(reputation_value):
+def _get_reputation_range(reputation_value):
     reputation_groups = ['Very poor', 'Poor', 'Unsatisfactory', 'Good', 'Excellent']
     index = min(reputation_value, 99) * len(reputation_groups) // 100
     return reputation_groups[index]
 
-def interpret_api_value(api_value):
+def _interpret_api_value(api_value):
     # from https://www.mywot.com/wiki/index.php/API
     reputation_component_map = {
         '0': 'Trustworthiness',
@@ -87,7 +110,7 @@ def interpret_api_value(api_value):
             reputation_components[k] = {
                 'type': v,
                 'reputation_value': reputation_item_raw[0],
-                'reputation_scale': get_reputation_range(reputation_item_raw[0]),
+                'reputation_scale': _get_reputation_range(reputation_item_raw[0]),
                 'confidence': reputation_item_raw[1]
             }
     categories_id_map = {
@@ -158,5 +181,8 @@ def interpret_api_value(api_value):
         'blacklists': blacklists,
         'detail_page': f'https://www.mywot.com/en/scorecard/{target}'
     }
-
     return result
+
+def _split_in_chunks(iterable, chunk_size):
+    for i in range(0, len(iterable), chunk_size):
+        yield iterable[i:i+chunk_size]

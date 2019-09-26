@@ -2,19 +2,27 @@ from collections import defaultdict
 import re
 import json
 
-from .. import utils
+from ... import utils, persistence
 from . import ifcn
-from .. import persistence
+
+from . import OriginBatch
+
+class Origin(OriginBatch):
+    def __init__(self):
+        OriginBatch.__init__(
+            self = self,
+            id = 'factchecking_report',
+            name = 'Fact-check analysis',
+            description = 'From the fact-checks, we retrieve the claim appearances and therefore we evaluate the credibility of the sources involved.',
+            homepage = 'http://socsem.kmi.open.ac.uk/misinfo', # TODO double check if appropriate
+            logo = 'http://socsem.kmi.open.ac.uk/misinfo/assets/MisinfoMe-icon-square.png',
+            default_weight = 2
+        )
+
+    def retreive_source_assessments(self):
+        return _retrieve_assessments()
 
 ID = 'factchecking_report'
-NAME = 'Statistics about the fact-checks'
-DESCRIPTION = 'From the fact-checks, we retrieve the claim appearances and therefore we evaluate the credibility of the sources involved.'
-# TODO this is the homepage of ifcn!!!
-HOMEPAGE = 'https://ifcncodeofprinciples.poynter.org/signatories'
-WEIGHT = 2
-PROVIDES_URL_LEVEL = True
-
-#claimreviews_by_fc_domain = {}
 
 def get_factcheckers():
     """returns the list of factcheckers, intended as objects with the following attributes:
@@ -35,7 +43,7 @@ def get_factcheckers():
         id = sa['original']['id']
         domain = utils.get_url_domain(homepage)
         # TODO this is kinda of the formula for propagation (warning negative weights? mapping function?)
-        weight = sa['credibility']['value'] * sa['credibility']['confidence'] * ifcn.WEIGHT
+        weight = sa['credibility']['value'] * sa['credibility']['confidence'] * ifcn.Origin().default_weight
         fact_checker = FactChecker(homepage, id, weight)
         print(fact_checker.id, fact_checker.WEIGHT)
         result[domain] = fact_checker
@@ -57,51 +65,40 @@ class FactChecker(object):
     # def get_source_credibility(self, source):
     #     return get_source_credibility_from(source, self.id)
 
-    def update(self):
-        domain_assessments = retrieve_and_group_claimreviews()
-        my_group = claimreviews_by_fc_domain[self.id]
-        print(self.id, 'has', len(my_group), 'claimReviews')
+    # def update(self):
+    #     domain_assessments = retrieve_and_group_claimreviews()
+    #     my_group = claimreviews_by_fc_domain[self.id]
+    #     print(self.id, 'has', len(my_group), 'claimReviews')
         # with open('temp_fc.json', 'w') as f:
         #     json.dump(domain_assessments, f, indent=2)
         # return 0
         #domain_assessments = get_domain_assessments_from_claimreviews(my_group)
 
-def retrieve_and_group_claimreviews():
-    global claimreviews_by_fc_domain
-    all_claimreviews = [el for el in persistence.get_claimreviews()]
-    claimreviews_by_fc_domain = defaultdict(list)
-    for cr in all_claimreviews:
-        fc_url = cr['url']
-        fc_domain = utils.get_url_domain(fc_url)
-        claimreviews_by_fc_domain[fc_domain].append(cr)
+# def retrieve_and_group_claimreviews():
+#     global claimreviews_by_fc_domain
+#     all_claimreviews = [el for el in persistence.get_claimreviews()]
+#     claimreviews_by_fc_domain = defaultdict(list)
+#     for cr in all_claimreviews:
+#         fc_url = cr['url']
+#         fc_domain = utils.get_url_domain(fc_url)
+#         claimreviews_by_fc_domain[fc_domain].append(cr)
 
-    # THIS IS TO TEST THE SUBSET
-    # by_fullfact = claimreviews_by_fc_domain['fullfact.org']
-    # assessments_fullfact = get_domain_assessments_from_claimreviews(by_fullfact)
-    # persistence.save_origin_assessments(ID, assessments_fullfact.values())
-    # return assessments_fullfact
+#     # THIS IS TO TEST THE SUBSET
+#     # by_fullfact = claimreviews_by_fc_domain['fullfact.org']
+#     # assessments_fullfact = get_domain_assessments_from_claimreviews(by_fullfact)
+#     # persistence.save_origin_assessments(ID, assessments_fullfact.values())
+#     # return assessments_fullfact
 
-    print('all_claimreviews', len(all_claimreviews))
-    domain_assessments = get_domain_assessments_from_claimreviews(all_claimreviews)
-    print('domain_assessments', len(domain_assessments))
+#     print('all_claimreviews', len(all_claimreviews))
+#     domain_assessments = get_domain_assessments_from_claimreviews(all_claimreviews)
+#     print('domain_assessments', len(domain_assessments))
 
-    persistence.save_origin_assessments(ID, domain_assessments.values())
-    return domain_assessments
-
-
+#     persistence.save_assessments(ID, domain_assessments.values())
+#     return domain_assessments
 
 
 
-def get_source_credibility(source):
-    return persistence.get_source_assessment(ID, source)
-
-def get_domain_credibility(domain):
-    return persistence.get_domain_assessment(ID, domain)
-
-def get_url_credibility(url):
-    return persistence.get_url_assessment(ID, url)
-
-def update():
+def _retrieve_assessments():
     #result = retrieve_and_group_claimreviews()
     all_claimreviews = [el for el in persistence.get_claimreviews()]
 
@@ -147,7 +144,7 @@ def update():
     url_assessments_propagated = []
     for ass in url_assessments:
         origin_domain = ass['origin_domain']
-        origin = fact_checkers.get(origin_domain, None)
+        origin = _fact_checkers.get(origin_domain, None)
         if not origin:
             # not an IFCN signatory, don't consider it
             # TODO maybe also other factcheckers can be trusted!
@@ -180,13 +177,14 @@ def update():
     print('propagation done')
 
     # Step 3: aggregate by URL, source and domain
+    # TODO for now this is the only origin that does this on its own
     result_url_level = utils.aggregate_by(url_assessments_propagated, ID, 'itemReviewed')
     result_source_level = utils.aggregate_source(url_assessments_propagated, ID)
     result_domain_level = utils.aggregate_domain(url_assessments_propagated, ID)
     print(ID, 'retrieved', len(result_domain_level), 'domains', len(result_source_level), 'sources', len(result_url_level), 'documents', 'assessments')
     all_assessments = list(result_url_level) + list(result_source_level) + list(result_domain_level)
-    persistence.save_assessments(ID, all_assessments)
-    return len(all_assessments)
+    persistence.save_assessments(ID, all_assessments, drop=True)
+    return []
 
 
     # domain_assessments = get_domain_assessments_from_claimreviews(all_claimreviews)
@@ -268,7 +266,7 @@ def get_domain_assessments_from_claimreviews(claimreviews):
             if not assessment:
                 continue
             origin_id = assessment['origin']
-            origin = fact_checkers.get(origin_id, None)
+            origin = _fact_checkers.get(origin_id, None)
             if not origin:
                 # not an IFCN signatory, invalid
                 continue
@@ -613,4 +611,4 @@ def claimreview_interpret_rating(claimreview):
 
 
 
-fact_checkers = get_factcheckers()
+_fact_checkers = get_factcheckers()

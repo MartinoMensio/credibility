@@ -6,18 +6,28 @@ import multiprocessing
 from multiprocessing.pool import ThreadPool
 from bs4 import BeautifulSoup
 
-from .. import persistence, utils
+from ... import utils
+from . import OriginBatch
 
-WEIGHT = 7
+class Origin(OriginBatch):
+    def __init__(self):
+        OriginBatch.__init__(
+            self = self,
+            id = 'mbfc',
+            name = 'Media Bias/Fact Check',
+            description = 'We are the most comprehensive media bias resource on the internet. There are currently 2800+ media sources listed in our database and growing every day. Don’t be fooled by Fake News sources.',
+            homepage = 'https://mediabiasfactcheck.com/',
+            logo = 'https://i1.wp.com/mediabiasfactcheck.com/wp-content/uploads/2019/09/70594586_2445557865563713_6069591037599285248_n.png?resize=300%2C300&ssl=1',
+            default_weight = 7
+        )
 
-HOMEPAGE = 'https://mediabiasfactcheck.com/'
-ID = 'mbfc'
-NAME = 'Media Bias/Fact Check'
-DESCRIPTION = 'We are the most comprehensive media bias resource on the internet. There are currently 2800+ media sources listed in our database and growing every day. Don’t be fooled by Fake News sources.'
-POOL_SIZE = 30
+    def retreive_source_assessments(self):
+        return _retrieve_assessments(self.id, self.homepage)
+
+_POOL_SIZE = 30
 
 # these sources don't have a link to the homepage in the assessment
-save_me_dict = {
+_save_me_dict = {
     'seventeen': 'https://www.seventeen.com/',
     'the-fucking-news': 'http://thefingnews.com/',
     'denver-westword': 'https://www.westword.com/',
@@ -42,31 +52,19 @@ save_me_dict = {
     'american-psychological-association-apa': 'https://www.apa.org/',
     'law-com': 'https://www.law.com/',
     'unbiased-america': 'http://www.unbiasedamerica.com/', # TODO but also https://www.facebook.com/pg/UnbiasedAmerica/
-    'the-liberty-daily': 'https://thelibertydaily.com'
+    'the-liberty-daily': 'https://thelibertydaily.com',
+    'united-nations-environment-programme-unep': 'https://www.unenvironment.org/'
 }
 
-def get_source_credibility(source):
-    return persistence.get_source_assessment(ID, source)
-
-def get_domain_credibility(domain):
-    return persistence.get_domain_assessment(ID, domain)
-
-def get_url_credibility(url):
-    return None
-
-def update():
-    assessments = scrape()
+def _retrieve_assessments(origin_id, homepage):
+    assessments = _scrape(homepage)
     with open('temp_mbfc_responses.json', 'w') as f:
         json.dump(assessments, f, indent=2)
-    result_source_level = interpret_assessments(assessments)
-    result_domain_level = utils.aggregate_domain(result_source_level, ID)
-    print(ID, 'retrieved', len(result_domain_level), 'domains', len(result_source_level), 'sources', 'assessments') # , len(result_document_level), 'documents'
-    all_assessments = list(result_source_level) + list(result_domain_level) # list(result_document_level) +
-    persistence.save_assessments(ID, all_assessments)
-    return len(all_assessments)
+    result_source_level = _interpret_assessments(assessments, origin_id)
+    return result_source_level
 
-def scrape():
-    categories = get_categories()
+def _scrape(homepage):
+    categories = _get_categories(homepage)
     assessments = {}
     for c in categories:
         if c['label'] == 're-evaluated-sources':
@@ -83,9 +81,11 @@ def scrape():
             assessments[ass_url] = assessment
     assessments = assessments.values()
 
+    scrape_assessment_wrapper = lambda ass: scrape_assessment(ass, homepage)
+
     assessments_scraped = []
-    with ThreadPool(POOL_SIZE) as pool:
-        for assessment_scraped in tqdm.tqdm(pool.imap_unordered(scrape_assessment, assessments), total=len(assessments)):
+    with ThreadPool(_POOL_SIZE) as pool:
+        for assessment_scraped in tqdm.tqdm(pool.imap_unordered(scrape_assessment_wrapper, assessments), total=len(assessments)):
             #print(assessment_scraped)
             if assessment_scraped:
                 assessments_scraped.append(assessment_scraped)
@@ -113,11 +113,10 @@ def scrape():
 
 
     return result
-    #return len(assessments)
 
 
-def get_categories():
-    response = requests.get(HOMEPAGE)
+def _get_categories(homepage):
+    response = requests.get(homepage)
     if response.status_code != 200:
         raise ValueError(response.status_code)
 
@@ -126,12 +125,12 @@ def get_categories():
     return [{
         'url': b['href'],
         'name': b.text,
-        'path': get_path_from_full_url(b['href']),
-        'label': get_path_from_full_url(b['href']).replace('/', '')
+        'path': _get_path_from_full_url(b['href'], homepage),
+        'label': _get_path_from_full_url(b['href'], homepage).replace('/', '')
     } for b in biases]
 
-def get_path_from_full_url(full_url):
-    return full_url.replace(HOMEPAGE, '/').replace('http://mediabiasfactcheck.com/', '/')
+def _get_path_from_full_url(full_url, homepage):
+    return full_url.replace(homepage, '/').replace('http://mediabiasfactcheck.com/', '/')
 
 def get_assessments_urls(category):
     response = requests.get(category['url'])
@@ -157,7 +156,7 @@ def get_assessments_urls(category):
 
     return source_urls
 
-def scrape_assessment(assessment):
+def scrape_assessment(assessment, mbfc_homepage):
     response = requests.get(assessment['url'])
     if response.status_code != 200:
         # These 6 pages return HTTP 404
@@ -180,17 +179,17 @@ def scrape_assessment(assessment):
 
     # searching the homepage
     paragraphs = soup.select('p')
-    homepage = None
+    source_homepage = None
     # usually is in a paragraph...
     for m in paragraphs:
         par_text = m.text.replace('"','')
         # that starts with a specific string
         if par_text.startswith('Source:') or par_text.startswith('Sources:'):
-            homepage = m.select_one('a')
-            if homepage:
-                homepage = homepage['href']
+            source_homepage = m.select_one('a')
+            if source_homepage:
+                source_homepage = source_homepage['href']
                 break
-    if not homepage:
+    if not source_homepage:
         # or sometimes starting with 'Notes:' but has to contain an <a> and no other text
         for m in paragraphs:
             #print('p', m)
@@ -204,23 +203,23 @@ def scrape_assessment(assessment):
                 link = m.select_one('a')['href']
                 if not 'mediabiasfactcheck.com' in link:
                     # https://mediabiasfactcheck.com/rare-news/ has a 'Notes:' in <em> that makes all the previous conditions to match
-                    homepage = link
+                    source_homepage = link
                     break
-    # some instead have the homepage in a div instead than a p
-    if not homepage:
+    # some instead have the source_homepage in a div instead than a p
+    if not source_homepage:
         for m in soup.select('div'):
             par_text = m.text.replace('"','')
             if par_text.startswith('Source:') or par_text.startswith('Sources:'):
-                homepage = m.select_one('a')
-                if homepage:
-                    homepage = homepage['href']
+                source_homepage = m.select_one('a')
+                if source_homepage:
+                    source_homepage = source_homepage['href']
                     break
-    if not homepage:
+    if not source_homepage:
         # last hope when the assessment does not have the homepage linked
-        path = get_path_from_full_url(assessment['url']).replace('/', '')
+        path = _get_path_from_full_url(assessment['url'], mbfc_homepage).replace('/', '')
         # use an handcrafted mapping
-        homepage = save_me_dict.get(path, None)
-    if not homepage:
+        source_homepage = _save_me_dict.get(path, None)
+    if not source_homepage:
         # TODO find a way to signal that without interrupting everything
         raise ValueError(assessment['url'])
     factual = None
@@ -247,7 +246,7 @@ def scrape_assessment(assessment):
         'bias': assessment['bias'],
         'id': id,
         'name': name,
-        'homepage': homepage,
+        'homepage': source_homepage,
         'factual': factual
     }
 
@@ -257,7 +256,7 @@ def scrape_assessment(assessment):
     return result
 
 
-def get_credibility_measures(mbfc_assessment):
+def _get_credibility_measures(mbfc_assessment):
     confidence = 1.0
     factual_level = mbfc_assessment.get('factual', None)
     # from the values reported here https://mediabiasfactcheck.com/methodology/
@@ -288,23 +287,23 @@ def get_credibility_measures(mbfc_assessment):
     }
     return result
 
-def interpret_assessments(assessments):
+def _interpret_assessments(assessments, origin_id):
     results = []
     for ass in assessments:
         assessment_url = ass['url']
-        credibility = get_credibility_measures(ass)
-        homepage = ass['homepage']
-        source = utils.get_url_source(homepage)
-        domain = utils.get_url_domain(homepage)
+        credibility = _get_credibility_measures(ass)
+        source_homepage = ass['homepage']
+        source = utils.get_url_source(source_homepage)
+        domain = utils.get_url_domain(source_homepage)
         if not assessment_url:
             raise ValueError(ass)
 
         result = {
             'url': assessment_url,
             'credibility': credibility,
-            'itemReviewed': homepage,
+            'itemReviewed': source_homepage,
             'original': ass,
-            'origin_id': ID,
+            'origin_id': origin_id,
             'domain': domain,
             'source': source,
             'granularity': 'source'

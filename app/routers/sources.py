@@ -15,6 +15,6 @@ def get_source(source: str):
 def get_sources(request_body: input_classes.BatchSourceRequest):
     sources = request_body.sources
     try:
-        return credibility.get_source_credibility_parallel(sources)
+        return credibility.get_source_credibility_multiple(sources)
     except requests.exceptions.ConnectionError:
         raise HTTPException(422, {'message': 'ConnectionError with some of the realtime APIs', 'suggestion': 'perform requests in smaller chunks, like 400'})

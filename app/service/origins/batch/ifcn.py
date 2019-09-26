@@ -2,36 +2,39 @@ import requests
 import tqdm
 from bs4 import BeautifulSoup
 
-from .. import utils, persistence
+from ... import utils, persistence
+from . import OriginBatch
 
-WEIGHT = 10
+class Origin(OriginBatch):
+    def __init__(self):
+        OriginBatch.__init__(
+            self = self,
+            id = 'ifcn',
+            name = 'International Fact-Checking Network',
+            description = 'The code of principles of the International Fact-Checking Network at Poynter is a series of commitments organizations abide by to promote excellence in fact-checking. Nonpartisan and transparent fact-checking can be a powerful instrument of accountability journalism.',
+            homepage = 'https://ifcncodeofprinciples.poynter.org/signatories',
+            # logo = 'https://logo.clearbit.com/ifcncodeofprinciples.poynter.org',
+            logo = 'https://pbs.twimg.com/profile_images/1059903297778339842/z6-2Zj_C_400x400.jpg',
+            default_weight = 10
+        )
+
+    def retreive_source_assessments(self):
+        return _retrieve_assessments(self.id, self.homepage)
 
 # TODO scrape the compliances from https://ifcncodeofprinciples.poynter.org/know-more/what-it-takes-to-be-a-signatory
 
-ID = 'ifcn'
-NAME = 'International Fact-Checking Network'
-DESCRIPTION = 'The code of principles of the International Fact-Checking Network at Poynter is a series of commitments organizations abide by to promote excellence in fact-checking. Nonpartisan and transparent fact-checking can be a powerful instrument of accountability journalism.'
-
-HOMEPAGE = 'https://ifcncodeofprinciples.poynter.org/signatories'
-
-def get_source_credibility(source):
-    return persistence.get_domain_assessment(ID, source)
-
 def get_all_sources_credibility():
-    return persistence.get_origin_assessments(ID)
+    """This one is used by factchecking_report"""
+    return persistence.get_source_assessments_all('ifcn')
 
-def get_url_credibility(url):
-    return None
 
-def update():
+def _retrieve_assessments(origin_id, homepage):
     """Updates all the informations from the signatories"""
-    assessments = get_signatories_info()
-    result = interpret_assessments(assessments)
-    print(ID, 'retrieved', len(result), 'assessments')
-    persistence.save_assessments(ID, result)
-    return len(result)
+    assessments = _get_signatories_info(homepage)
+    result = _interpret_assessments(assessments, origin_id)
+    return result
 
-def colors_to_value(style_str):
+def _colors_to_value(style_str):
     color_map = {
         '#4caf50': 'fully_compliant',
         '#03a9f4': 'partially_compliant',
@@ -44,7 +47,7 @@ def colors_to_value(style_str):
     raise ValueError(style_str)
 
 
-def extract_signatory_info(detail_url, media_logo):
+def _extract_signatory_info(detail_url, media_logo):
     response = requests.get(detail_url)
     if response.status_code != 200:
         print(f'error retrieving {detail_url}')
@@ -83,7 +86,7 @@ def extract_signatory_info(detail_url, media_logo):
     for s in skills_elements:
         skill_name = s.select('small b')[0].text
         circles = s.select('span.circle')
-        values = [colors_to_value(c['style']) for c in circles]
+        values = [_colors_to_value(c['style']) for c in circles]
         skills.append({'name': skill_name, 'values': values})
     result = {
         'assessment_url': detail_url,
@@ -101,9 +104,9 @@ def extract_signatory_info(detail_url, media_logo):
     return result
 
 
-def get_signatories_info():
+def _get_signatories_info(homepage):
 
-    response = requests.get(HOMEPAGE)
+    response = requests.get(homepage)
     if response.status_code != 200:
         print('error retrieving list')
         raise ValueError(response.status_code)
@@ -123,15 +126,15 @@ def get_signatories_info():
             'div.media-body div div div a')[0]['href']
         media_logo = signatory_el.select_one('img.signatory-avatar')['src']
         # here get the details
-        result.append(extract_signatory_info(detail_url, media_logo))
+        result.append(_extract_signatory_info(detail_url, media_logo))
 
     return result
 
-def interpret_assessments(assessments):
+def _interpret_assessments(assessments, origin_id):
     results = []
     for ass in assessments:
         assessment_url = ass['assessment_url']
-        credibility = get_credibility_measures(ass)
+        credibility = _get_credibility_measures(ass)
         fact_checker_url = ass['website']
         fact_checker_domain = utils.get_url_domain(fact_checker_url)
         fact_checker_source = utils.get_url_source(fact_checker_url)
@@ -139,17 +142,17 @@ def interpret_assessments(assessments):
         result = {
             'url': assessment_url,
             'credibility': credibility,
-            'itemReviewed': fact_checker_url,
+            'itemReviewed': fact_checker_source,
             'original': ass,
-            'origin_id': ID,
+            'origin_id': origin_id,
             'domain': fact_checker_domain,
             'source': fact_checker_source,
-            'granularity': 'domain'
+            'granularity': 'source'
         }
         results.append(result)
     return results
 
-def get_credibility_measures(ifcn_assessment):
+def _get_credibility_measures(ifcn_assessment):
     credibility = 1.0
     confidence = 1.0
     if ifcn_assessment['expired']:

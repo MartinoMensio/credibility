@@ -2,24 +2,25 @@ from multiprocessing.pool import ThreadPool
 import tqdm
 from collections import defaultdict
 
-from .realtime_origins import newsguard, mywot
-from .batch_origins import ntt, ifcn, opensources, adfontesmedia, mbfc, lemonde_decodex, fakenewscodex, realorsatire, reporterslab
-from .batch_origins import factchecking_report
+from .origins.batch import factchecking_report
+from .origins.realtime import mywot, newsguard
+from .origins.batch import adfontesmedia, fakenewscodex, ifcn, lemonde_decodex, mbfc, ntt, opensources, realorsatire, reporterslab
+
 from . import utils, persistence
 
 POOL_SIZE = 30
 
 batch_origins = {
-    'ntt': ntt,
-    'ifcn': ifcn,
-    'opensources': opensources,
-    'adfontesmedia': adfontesmedia,
-    'mbfc': mbfc,
-    'factchecking_report': factchecking_report,
-    'lemonde_decodex': lemonde_decodex,
-    'fakenewscodex': fakenewscodex,
-    'realorsatire': realorsatire,
-    'reporterslab': reporterslab
+    'ntt': ntt.Origin(),
+    'ifcn': ifcn.Origin(),
+    'opensources': opensources.Origin(),
+    'adfontesmedia': adfontesmedia.Origin(),
+    'mbfc': mbfc.Origin(),
+    'factchecking_report': factchecking_report.Origin(),
+    'lemonde_decodex': lemonde_decodex.Origin(),
+    'fakenewscodex': fakenewscodex.Origin(),
+    'realorsatire': realorsatire.Origin(),
+    'reporterslab': reporterslab.Origin()
 }
 # # TODO define this as a class
 # for o in batch_origins.values():
@@ -27,8 +28,8 @@ batch_origins = {
 #     o.get_source_credibility = 'TODO'
 
 realtime_origins = {
-    'newsguard': newsguard,
-    'mywot': mywot,
+    'newsguard': newsguard.Origin(),
+    'mywot': mywot.Origin(),
 }
 
 origins = {**batch_origins, **realtime_origins}
@@ -62,7 +63,7 @@ def get_weighted_credibility(item, get_fn_to_call):
         if not assessment:
             continue
         # TODO source evaluation, now is a fixed value
-        origin_weight = origin.WEIGHT
+        origin_weight = origin.default_weight
         credibility_value = assessment['credibility']['value']
         credibility_confidence = assessment['credibility']['confidence']
 
@@ -101,6 +102,7 @@ def get_weighted_credibility(item, get_fn_to_call):
 
 def get_source_credibility_tuple_wrap(argument):
     """This method wraps another method giving back a tuple of (argument, result)"""
+    # TODO: to avoid lots of calls, here we should allow cached results
     result = get_source_credibility(argument)
     return (argument, result)
 
@@ -109,7 +111,7 @@ def get_urls_credibility_tuple_wrap(argument):
     result = get_url_credibility(argument)
     return (argument, result)
 
-def get_source_credibility_parallel(sources):
+def get_source_credibility_multiple(sources):
     sources = set(sources)
     results = {}
     with ThreadPool(POOL_SIZE) as pool:
@@ -126,7 +128,7 @@ def get_url_credibility_parallel(urls):
 
     db_results_by_origin_id = defaultdict(dict)
     for origin_id, origin in origins.items():
-        res_origin = persistence.get_multiple_url_assessments(origin_id, urls)
+        res_origin = persistence.get_url_assessment_multiple(origin_id, urls)
         for r in res_origin:
             db_results_by_origin_id[origin_id][r['itemReviewed']] = r
 
@@ -163,17 +165,14 @@ def get_origin(origin_id):
         print(f'origin {origin_id} not found')
         return None
     origin = origins[origin_id]
-    if origin_id in batch_origins:
-        origin_type = 'batch'
-    else:
-        origin_type = 'realtime'
     return {
         'id': origin_id,
-        'weight': origin.WEIGHT,
-        'homepage': origin.HOMEPAGE,
-        'name': origin.NAME,
-        'description': origin.DESCRIPTION,
-        'origin_type': origin_type,
+        'weight': origin.default_weight,
+        'homepage': origin.homepage,
+        'name': origin.name,
+        'description': origin.description,
+        'origin_type': origin.origin_type,
+        'logo': origin.logo,
         'assessments_count': persistence.get_origin_assessments_count(origin_id)
     }
 
