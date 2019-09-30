@@ -112,13 +112,28 @@ def get_urls_credibility_tuple_wrap(argument):
     return (argument, result)
 
 def get_source_credibility_multiple(sources):
-    sources = set(sources)
+    sources = list(set(sources))
     results = {}
-    with ThreadPool(POOL_SIZE) as pool:
-        for result_tuple in tqdm.tqdm(pool.imap_unordered(get_source_credibility_tuple_wrap, sources), total=len(sources)):
-            source, result = result_tuple
-            if result:
-                results[source] = result
+
+    db_results_by_origin_id = defaultdict(dict)
+    for origin_id, origin in origins.items():
+        res_origin = persistence.get_source_assessment_multiple(origin_id, sources)
+        for r in res_origin:
+            db_results_by_origin_id[origin_id][r['itemReviewed']] = r
+
+    def performance_trick_query_already_done(origin):
+        origin_id = origin.id
+        def get_assessment(source):
+            result = db_results_by_origin_id[origin_id].get(source, None)
+            # TODO ask with a parameter whether to retrieve new evaluation or not if missing
+            # if not result:
+            #     if origin.origin_type == 'realtime':
+            #         result = origin.retrieve_source_credibility(source)
+            return result
+        return get_assessment
+
+    for source in sources:
+        results[source] = get_weighted_credibility(source, performance_trick_query_already_done)
     return results
 
 def get_url_credibility_parallel(urls):
