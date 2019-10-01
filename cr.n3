@@ -1,0 +1,1252 @@
+@prefix : <http://schema.org/> .
+@prefix bibo: <http://purl.org/ontology/bibo/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dctype: <http://purl.org/dc/dcmitype/> .
+@prefix eli: <http://data.europa.eu/eli/ontology#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfa: <http://www.w3.org/ns/rdfa#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix snomed: <http://purl.bioontology.org/ontology/SNOMEDCT/> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix xsd1: <hhttp://www.w3.org/2001/XMLSchema#> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "John F. Kennedy posed a speculative question about what would happen if God were black." ;
+    schema:datePublished "2018-08-08"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Misattributed" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/kennedy-suppose-god-is-black/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "\"Emma Gonzalez bullied school shooter, isn’t sorry; then retweets message blaming ‘white boys’ entitlement’ as cause of all school shootings\"" ;
+    schema:datePublished "2018-03-30"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Project Republic" ] ;
+            schema:datePublished "2018-03-28"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/punditfact/statements/2018/mar/30/project-republic/no-emma-gonzalez-did-not-admit-bullying-parkland-s/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "UNESCO declared India's national anthem, 'Jana Gana Mana,' to be the world's best." ;
+    schema:datePublished "2016-03-14"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/unesco-india-national-anthem/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Due to new laws and policies allowing transgender people to use the bathroom that matches their gender identity, a Pennsylvania man snuck into a women's restroom and took photographs of a young girl." ;
+    schema:datePublished "2016-04-23"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/man-pics-in-womens-bathroom/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "The census \"for years and years and years, decades, has asked, ‘Are you a citizen of the United States of America?’\"" ;
+    schema:datePublished "2018-04-03"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Ronna McDaniel" ] ;
+            schema:datePublished "2018-03-28"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/wisconsin/statements/2018/apr/03/ronna-mcdaniel/rnc-chair-ronna-mcdaniel-says-us-census-bureau-ask/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Disney announced that the Simba character will be portrayed as gay in the new 'The Lion King' movie." ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/simba-gay-lion-king-remake/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Fox News host Sean Hannity has died after a bicycling accident" ;
+    schema:datePublished "2017-06-19"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/sean-hannity-bike-accident/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "FactCheck.org" ;
+            schema:url <http://www.factcheck.org/> ] ;
+    schema:claimReviewed "“Smoking in cars with children is illegal starting January 30, 2018.”" ;
+    schema:datePublished "2018-02-23"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "amomama.com" ] ;
+            schema:datePublished "2018-02-20"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.factcheck.org/2018/02/no-federal-ban-smoking-children-car/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Most canned pumpkin isn't actually pumpkin, but a mixture of other squashes (including butternut)." ;
+    schema:datePublished "2016-09-26"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mixture" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/canned-pumpkin-isnt-actually-pumpkin/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "We \"have laws on the books designed to prevent people with mental illnesses from getting firearms.\"" ;
+    schema:datePublished "2018-02-26"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Paul Ryan" ] ;
+            schema:datePublished "2018-02-15"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Half True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/wisconsin/statements/2018/feb/26/paul-ryan/wake-parkland-paul-ryans-claim-about-laws-aimed-st/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "The facts behind Elizabeth Warren, her claimed Native American ties and Trump's 'Pocahontas' insult" ;
+    schema:datePublished "2017-12-01"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Elizabeth Warren" ] ;
+            schema:datePublished "2012-04-28"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "She told law schools" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/truth-o-meter/article/2017/dec/01/facts-behind-elizabeth-warren-and-her-native-ameri/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Washington Post" ;
+            schema:url <https://www.washingtonpost.com/> ] ;
+    schema:claimReviewed "Drug dealers \"kill thousands of people over the course of their lives through drugs. So we’re going to have to get much, much tougher in terms of penalty. And if you want to stop it — if you look at certain countries where they have, as an example, the death penalty, and say, ‘How’s your drug problem?’ And they will tell you, ‘We don’t have much of a drug problem.’ ”" ;
+    schema:datePublished "2018-04-25"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Donald Trump" ] ;
+            schema:datePublished "2018-03-22"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Three Pinocchios" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.washingtonpost.com/news/fact-checker/wp/2018/04/25/president-trumps-claim-that-death-sentences-would-stop-drug-trafficking/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "In first week as governor, Tim Kaine “proposed a nearly $4 billion tax increase, $4 billion, including a tax increase on people earning as little as $17,000 a year.\"" ;
+    schema:datePublished "2016-07-28"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Donald Trump" ] ;
+            schema:datePublished "2016-07-25"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/virginia/statements/2016/jul/28/donald-trump/donald-trump-says-tim-kaine-proposed-4-billion-tax/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "\"Trump: police officers and firefighters make too much money…hits them with tax penalty.\"" ;
+    schema:datePublished "2018-01-05"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Bluedot Daily" ] ;
+            schema:datePublished "2017-12-26"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/punditfact/statements/2018/jan/05/bluedot-daily/headline-misleads-about-president-trump-and-tax-de/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "After a 1977 episode of Happy Days aired, the American Library Association reported a nationwide 500% increase in library card applications from children." ;
+    schema:datePublished "2010-11-07"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/getting-carded/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "'Star Trek' star Patrick Stewart admitted he originally refused to see the 'Galaxy Quest' movie, but eventually he did so and greatly enjoyed the film." ;
+    schema:datePublished "2016-05-19"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/patrick-stewart-on-galaxy-quest/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A DNA test confirmed that actor Bryshere Y. Gray is the biological son of rap mogu Jay-Z." ;
+    schema:datePublished "2015-09-22"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/jay-z-dna-son-hakeem/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "The word \"guacamole\" literally translates as \"testicle sauce.\"" ;
+    schema:datePublished "2016-02-09"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/guacamole-means-testicle-sauce/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "\"The Dutch (Afrikaners) were\" in South Africa \"first.\"" ;
+    schema:datePublished "2018-08-27"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Ann Coulter" ] ;
+            schema:datePublished "2018-08-23"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Pants on Fire" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/punditfact/statements/2018/aug/27/ann-coulter/coulters-strange-claim-dutch-settlers-preceded-bla/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A video shows Hillary Clinton laughing as the words \"under God\" were removed from the Pledge of Allegiance." ;
+    schema:datePublished "2016-10-26"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mixture" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/hillary-laughs-as-under-god-removed-from-pledge/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Kim Kardashian is replacing Tarji P. Henson in the role of Cookie on the television drama 'Empire.'" ;
+    schema:datePublished "2016-05-29"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/kim-kardashian-replace-cookie-empire/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A baby left on a bed is smothered under coats dropped by Christmas visitors." ;
+    schema:datePublished "2007-01-03"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Legend" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/coat-check/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A woman was nearly kidnapped by human traffickers using a ring placed on her windshield as bait." ;
+    schema:datePublished "2016-07-20"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Unproven" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/warning-kay-jewelers-free-ring-gift/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "We fact-check a series of claims about gun control and gun violence in the United States." ;
+    schema:datePublished "2018-04-24"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "No Rating" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/actors-gun-facts-2/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "\"A trade war is something very different (than curbing new trade agreements). We went down that road in the 1930s. It made the Great Depression longer and more painful.\"" ;
+    schema:datePublished "2016-06-06"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Hillary Clinton" ] ;
+            schema:datePublished "2016-06-02"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/truth-o-meter/statements/2016/jun/06/hillary-clinton/shot-donald-trump-hillary-clinton-correct-about-ta/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Former president Jimmy Carter has announced that the cancer in his liver has spread to other parts of his body." ;
+    schema:datePublished "2018-08-29"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Outdated" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/jimmy-carter-cancer-spreading/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "“Anyone who knows you can just” look it up to “see if you voted.”" ;
+    schema:datePublished "2016-11-09"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Amy Schumer" ] ;
+            schema:datePublished "2016-11-03"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Half True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/wisconsin/statements/2016/nov/09/amy-schumer/didnt-vote-president-youll-be-shamed-comedian-amy-/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Hours after Massachusetts legalized recreational marijuana, the state had its first cannabis overdose." ;
+    schema:datePublished "2016-12-15"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/first-recorded-marijuana-overdose-occurs-hours-after-massachusetts-legalization/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A photograph shows a group of deported veterans in the Mexican border city of Ciudad Juárez." ;
+    schema:datePublished "2017-11-14"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/image-shows-a-group-of-deported-veterans/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Police sketches of Madeleine McCann's alleged kidnappers are a perfect match for Tony and John Podesta." ;
+    schema:datePublished "2016-12-12"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/tony-and-john-podesta-match-madeleine-mccann-police-sketches/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A photograph shows Sean Spicer wearing one black shoe and one brown shoe." ;
+    schema:datePublished "2017-03-15"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mixture" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/sean-spicer-shoes/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "In 1964, Hillary Clinton campaigned and voted for Barry Goldwater, who promised to overturn the Civil Rights Act and \"re-segregate\" America." ;
+    schema:datePublished "2016-01-19"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mixture" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/goldwater-girl/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "KFC in Dearborn uses separate lines for men and women, a menu written in Arabic, and abides by Shariah Law." ;
+    schema:datePublished "2017-06-29"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/kfc-dearborn-shariah-law/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "Says Dick Cheney \"supported gay marriage sooner\" than Hillary Clinton." ;
+    schema:datePublished "2016-09-08"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "AlternativePAC" ] ;
+            schema:datePublished "2016-08-25"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/colorado/statements/2016/sep/08/alternativepac/pac-backing-gary-johnson-says-dick-cheney-supporte/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A photograph shows an insect spy drone that can take photographs and DNA samples." ;
+    schema:datePublished "2012-08-14"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mixture" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/insect-spy-drone/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A photograph shows a middle school student with two broken arms next to a science fair project about jumping off tall buildings." ;
+    schema:datePublished "2017-07-25"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/middle-school-break-arms-jumping-off-water-tower-science-project/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "FactCheck.org" ;
+            schema:url <http://www.factcheck.org/> ] ;
+    schema:claimReviewed "\"Facebook Will Give Koch Brothers ‘Unprecedented Access’ to Our Personal Information\"" ;
+    schema:datePublished "2018-04-12"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Grit Post" ] ;
+            schema:datePublished "2018-04-09"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.factcheck.org/2018/04/facebook-not-giving-kochs-user-data/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Virginia Governor Terry McAuliffe restored voting rights to a large number of convicted felons." ;
+    schema:datePublished "2016-04-26"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/felons-voting-rights-virginia/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "\"When you look at all the state and local taxes we pay in Wisconsin, the wealthiest 1 percent pay the lowest overall tax rate.\"" ;
+    schema:datePublished "2017-06-06"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Mike McCabe" ] ;
+            schema:datePublished "2017-05-21"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/wisconsin/statements/2017/jun/02/mike-mccabe/richest-1-percent-pay-lowest-rate-state-and-local/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A secret tape recorded aboard the doomed space shuttle Challenger captured the final panic-stricken moments of the crew." ;
+    schema:datePublished "2001-02-22"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/challenger-crew-tape/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Donald Trump owns a stake in Energy Transfer Partners (the builders of the Dakota Access Pipeline) as well as Phillips 66, an affiliated company." ;
+    schema:datePublished "2016-11-29"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Unproven" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/does-donald-trump-own-a-stake-in-the-dakota-access-pipeline/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A video showing an airplane losing altitude and then crashing in Pakistan is \"disappearing from the Internet.\"" ;
+    schema:datePublished "2016-12-14"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mixture" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/plane-crash-video-disappearing-from-the-internet/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Amazon's use of the USPS for package delivery services has resulted in a severe financial loss to the Postal Service." ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/amazon-bankrupting-united-states-postal-service/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "David Attenborough said that \"I am unaware of any animal that is as cruel as Israelis\" as part of a scathing attack on the country's treatment of the Palestinian people." ;
+    schema:datePublished "2018-09-19"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Misattributed" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/david-attenborough-israelis/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A person's intelligence is genetically determined by the mother alone." ;
+    schema:datePublished "2016-10-11"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Unproven" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/intelligence-is-inherited-only-from-your-mother/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "In November 2017, the National Football League decided to end its donations to various existing charitable commitments and shifted that funding to the Black Lives Matter movement." ;
+    schema:datePublished "2017-12-28"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/nfl-donations-black-lives-matter/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "\"Crime is rising.\"" ;
+    schema:datePublished "2016-06-09"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Donald Trump" ] ;
+            schema:datePublished "2016-06-07"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Pants on Fire" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/truth-o-meter/statements/2016/jun/09/donald-trump/donald-trump-said-crime-rising-its-not-and-hasnt-b/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "7 million people the Congressional Budget Office says won't have health insurance coverage under the Senate health care bill \"don't exist.\"" ;
+    schema:datePublished "2017-07-05"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Marc Short" ] ;
+            schema:datePublished "2017-07-02"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Half True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/truth-o-meter/statements/2017/jul/05/marc-short/cbo-counted-7-million-people-who-dont-exist-says-w/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A photograph shows a group of children in South Africa giving a meerkat a bath." ;
+    schema:datePublished "2017-06-21"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/meerkat-bath-photograph/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "President Obama signed a law permanently protecting the federal funding of Planned Parenthood." ;
+    schema:datePublished "2016-11-10"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mixture" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/obama-permanently-protected-planned-parenthood-from-defunding/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A photograph shows a security wall outside Joe Kennedy's Palm Beach house." ;
+    schema:datePublished "2018-02-02"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/joe-kennedys-palm-beach-house-security-wall/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A National Geographic cameraman was eaten alive by a giant ocean sunfish." ;
+    schema:datePublished "2016-05-26"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/cameraman-eaten-alive-sunfish/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "FactCheck.org" ;
+            schema:url <https://www.factcheck.org/> ] ;
+    schema:claimReviewed "Claims video corroborates its story that “police officers in Charlottesville believed the driver was not acting maliciously.”" ;
+    schema:datePublished "2017-08-21"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Department of Memes" ] ;
+            schema:datePublished "2017-08-13"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.factcheck.org/2017/08/driver-acting-self-defense/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "FactCheck.org" ;
+            schema:url <https://www.factcheck.org/> ] ;
+    schema:claimReviewed "“We’ve achieved a historic increase in defense spending.”" ;
+    schema:datePublished "2017-07-27"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Donald Trump" ] ;
+            schema:datePublished "2017-07-25"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.factcheck.org/2017/07/factchecking-trumps-rally-ohio/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A list accurately portrays the NFL's history on free speech issues." ;
+    schema:datePublished "2018-06-14"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mixture" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/is-nfls-free-speech-accurately-portrayed/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "The makers of a television commercial for a car company were so \"freaked out\" by an apparent \"ghostly\" apparition in the raw footage that the ad was never released." ;
+    schema:datePublished "2017-09-13"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/ghost-car-commercial/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Donald Trump and his children face charges of evading $250 million in taxes." ;
+    schema:datePublished "2016-07-19"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/trump-and-children-face-250-million-tax-evasion-charges/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A San Diego Zoo employee was hospitalized after trying to have sex with an octopus and sustaining heavy damage to his genitalia." ;
+    schema:datePublished "2017-11-12"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/employee-emasculated-octopus/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "The Clinton Foundation donated a total of $7.1 million to anti-fascist groups, including during the 2016 presidential election campaign." ;
+    schema:datePublished "2017-09-27"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/clinton-foundation-antifa/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A law professor is working to take Donald Trump's election win away by appealing to electoral college voters." ;
+    schema:datePublished "2016-12-15"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/harvard-professor-wants-electoral-college-to-reject-trump/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "\"The various people who have, in fact, committed terrorist acts in this country, from 9/11 on, none of them came from any of the seven countries that are the subject of the president's executive order.\"" ;
+    schema:datePublished "2017-04-11"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Jerrold Nadler" ] ;
+            schema:datePublished "2017-01-28"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Half True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/truth-o-meter/statements/2017/jan/29/jerrold-nadler/have-there-been-terrorist-attacks-post-911-countri/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A Congresswoman called for hurricanes to be given African-American names." ;
+    schema:datePublished "2006-03-25"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/african-american-hurricane-names/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A court ruling means priests in Louisiana don't have to report sexual abuse." ;
+    schema:datePublished "2016-11-03"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/louisiana-priests-dont-have-to-report-sexual-abuse/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A meme offers instructions for creating harmless homemade glow sticks." ;
+    schema:datePublished "2016-05-10"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/bernie-sanders-glow-sticks/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "In 2018, White House Press Secretary Sarah Huckabee Sanders was listed as one of the 10 \"most admired\" women in the United States." ;
+    schema:datePublished "2018-05-15"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/sarah-huckabee-sanders-voted-among-admired-women-united-states/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Airlines are giving away free tickets or spending money to Facebook users who share and like a page." ;
+    schema:datePublished "2016-02-08"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Scam" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/airline-ticket-giveaway-scam/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Google Earth helped locate a woman who had been stranded on an island for years." ;
+    schema:datePublished "2014-03-19"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/this-island-google-earth/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "Says delegates can't \"legally\" change the Republican National Convention rules to prevent Donald Trump’s nomination." ;
+    schema:datePublished "2016-06-19"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Donald Trump" ] ;
+            schema:datePublished "2016-06-19"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/truth-o-meter/statements/2016/jun/19/donald-trump/donald-trump-said-its-illegal-delegates-change-rul/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "\"One in four inmates is an illegal immigrant.\"" ;
+    schema:datePublished "2016-08-15"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Lisa Boothe" ] ;
+            schema:datePublished "2016-07-26"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/punditfact/statements/2016/aug/15/lisa-boothe/republican-strategist-says-25-percent-inmates-are-/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A cemetery in Delaware, Ohio, is exhuming the bodies of confederate soldiers and relocating them to a nearby dump." ;
+    schema:datePublished "2017-08-23"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/delaware-cemetery-begins-exhuming-bodies-confederate-soldiers/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "ISIS called for the assassination of Barron Trump in November 2017." ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mixture" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/isis-called-for-assassination-of-barron-trump/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "PS 169 Principal Eujin Jaela Kim banned the Pledge of Allegiance, Santa, and Thanksgiving." ;
+    schema:datePublished "2015-12-14"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/ps-169-pledge-allegiance-holiday-ban-controversy/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "Even among \"second and third generation\" Muslims in the United States, \"there's no real assimilation.\"" ;
+    schema:datePublished "2016-06-18"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Donald Trump" ] ;
+            schema:datePublished "2016-06-15"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/nbc/statements/2016/jun/18/donald-trump/donald-trump-wrong-theres-no-real-assimilation-us-/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "\"(Mexican immigrants) are more law-abiding than U.S. citizens and that is a statistic.\"" ;
+    schema:datePublished "2016-07-14"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Gary Johnson" ] ;
+            schema:datePublished "2016-07-03"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/truth-o-meter/statements/2016/jul/14/gary-johnson/mexican-immigrants-more-law-abiding/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "\"It has been 269 days since (Hillary) Clinton has held a press conference.\"" ;
+    schema:datePublished "2016-08-31"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Donald Trump" ] ;
+            schema:datePublished "2016-08-30"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/truth-o-meter/statements/2016/aug/31/donald-trump/has-hillary-clinton-not-had-press-conference-269-d/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Middle Eastern men purchased dozens of burner cell phones at Walmarts in and around Lebanon, Missouri (ostensibly to carry out terror attacks); at the same time, multiple stores reported propane tank thefts." ;
+    schema:datePublished "2015-12-11"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/lebanon-mo-walmart-cell-phone-rumor/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "\"The Obama administration had cut $300 million from school safety.\"" ;
+    schema:datePublished "2018-03-09"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Ted Cruz" ] ;
+            schema:datePublished "2018-03-07"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/truth-o-meter/statements/2018/mar/09/ted-cruz/did-obama-cut-300-million-school-safety-not-really/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "An Oregon man was jailed for collecting rainwater on his own property." ;
+    schema:datePublished "2015-04-13"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/man-gets-prison-sentence-for-collecting-rainwater-on-his-own-property/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Bill Murray said that you can always trust a dog but not a human." ;
+    schema:datePublished "2016-02-02"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/bill-murray-dog-quote/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Congressman John Lewis didn't pay property taxes on his townhouse in Washington, D.C." ;
+    schema:datePublished "2017-01-19"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Unproven" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/john-lewis-avoided-paying-taxes-d-c-townhouse/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A photograph depicts a rabbit subjected to animal testing at the L'Oreal cosmetic company's labs." ;
+    schema:datePublished "2015-03-17"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Miscaptioned" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/animal-testing-image/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Infamous mother Casey Anthony has died at age 29." ;
+    schema:datePublished "2015-09-22"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/casey-anthony-dead/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Donald Trump hung a photograph of the Women's March at the White House believing that it showed his inauguration." ;
+    schema:datePublished "2017-01-26"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/womens-march-photo-white-house/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Snopes.com is an extremely liberal site with an agenda to discredit conservatives, paid for either by George Soros or the Clintons, or maybe Facebook." ;
+    schema:datePublished "2018-02-17"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/was-snopes-busted-ties-to-soros/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "An American teenager got 30 years in prison for killing a \"Muslim refugee\" who raped his sister." ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/american-teenager-in-prison/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "FactCheck.org" ;
+            schema:url <http://www.factcheck.org/> ] ;
+    schema:claimReviewed "\"Facebook Hires George Soros to Help Remove Conservative Content from Platform\"" ;
+    schema:datePublished "2018-07-11"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Neon Nettle" ] ;
+            schema:datePublished "2018-07-08"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.factcheck.org/2018/07/facebook-didnt-hire-george-soros/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "\"Most people on Medicaid are kids, or seniors, or the disabled.\"" ;
+    schema:datePublished "2017-08-23"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Sean Patrick Maloney" ] ;
+            schema:datePublished "2017-08-03"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/new-york/statements/2017/aug/23/sean-patrick-maloney/most-people-medicaid-are-children-seniors-or-have-/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "\"The president in no way, form or fashion has ever promoted or encouraged violence.\"" ;
+    schema:datePublished "2017-07-05"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Sarah Huckabee Sanders" ] ;
+            schema:datePublished "2017-06-29"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/truth-o-meter/statements/2017/jul/05/sarah-huckabee-sanders/has-donald-trump-never-promoted-or-encouraged-viol/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "Says that in 2015, \"illegal\" immigrants accounted for 75 percent of federal drug possession convictions and 5 percent to 30 percent of convictions for murder and kidnapping plus two other crimes." ;
+    schema:datePublished "2016-09-02"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Sean Hannity" ] ;
+            schema:datePublished "2016-08-23"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/texas/statements/2016/sep/02/sean-hannity/sean-hannity-says-illegal-immigrants-account-75-pe/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Three poll workers in Birmingham were arrested for voter fraud in connection with the special Alabama Senate election." ;
+    schema:datePublished "2017-12-23"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/alabama-poll-workers-arrest/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "\"Nancy Pelosi suffers breakdown, taken from Capitol Hill on a stretcher.\"" ;
+    schema:datePublished "2017-06-20"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "FreedomCrossroads.us" ] ;
+            schema:datePublished "2017-06-14"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Pants on Fire" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/punditfact/statements/2017/jun/20/freedomcrossroadsus/fake-news-pelosi-had-breakdown-credited-familiar-t/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A meme shows the American flag displayed on the White House in 2017, and a rainbow display in 2016." ;
+    schema:datePublished "2017-07-11"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/american-flag-white-house/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A 1972 sign warned Irish motorists not to drive after having five pints of beer." ;
+    schema:datePublished "2015-05-20"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/drink-irresponsibly/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "\"FBI crime statistics have found that labeled ‘sanctuary’ cities experience lower rates of all crime types, including homicides.\"" ;
+    schema:datePublished "2017-05-10"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Sally Hernandez" ] ;
+            schema:datePublished "2017-05-10"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Half True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/texas/statements/2017/may/10/sally-hernandez/sally-hernandez-says-cities-labeled-sanctuaries-ha/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Popular R&B singer Ciara was born male." ;
+    schema:datePublished "2005-02-24"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/false-ciara-was-born-a-man/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "Publishing \"copy and paste\" and \"don't share\" status messages on Facebook leave users vulnerable to hacking." ;
+    schema:datePublished "2017-02-14"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/facebook-copy-and-paste-dont-share-hackers/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "Says there is a \"traditional 60-vote threshold for confirming Supreme Court nominees.\"" ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Maggie Hassan" ] ;
+            schema:datePublished "2017-03-28"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly False" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/new-hampshire/statements/2017/mar/31/maggie-hassan/hassan-says-gorsuch-should-be-held-60-vote-thresho/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "Snopes.com" ;
+            schema:url <https://www.snopes.com/> ] ;
+    schema:claimReviewed "A photograph shows an orphan lying in the chalk outline of her absent mother." ;
+    schema:datePublished "2016-06-04"^^schema:Date ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Miscaptioned" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.snopes.com/fact-check/orphan-chalk-outline/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "FactCheck.org" ;
+            schema:url <http://www.factcheck.org/> ] ;
+    schema:claimReviewed "Republicans’ “sabotage of the Affordable Care Act has already cost more than 3 million Americans their health insurance.”" ;
+    schema:datePublished "2018-09-12"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Barack Obama" ] ;
+            schema:datePublished "2018-09-07"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Cherry Picks" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.factcheck.org/2018/09/obama-cherry-picks-uninsured-figure/> .
+
+[] a schema:ClaimReview ;
+    schema:author [ a schema:Organization ;
+            schema:name "PolitiFact" ;
+            schema:url <https://www.politifact.com/> ] ;
+    schema:claimReviewed "\"We’re … getting into the pool of the 100 million people that are not working. That pool is now coming back.\"" ;
+    schema:datePublished "2017-12-07"^^schema:Date ;
+    schema:itemReviewed [ a schema:CreativeWork ;
+            schema:author [ a schema:Organization ;
+                    schema:name "Donald Trump" ] ;
+            schema:datePublished "2017-12-06"^^schema:Date ] ;
+    schema:reviewRating [ a schema:Rating ;
+            schema:alternateName "Mostly True" ] ;
+    schema:sdLicense <https://creativecommons.org/licenses/by-nc/4.0/> ;
+    schema:url <https://www.politifact.com/truth-o-meter/statements/2017/dec/07/donald-trump/donald-trump-says-job-market-getting-non-workers-w/> .
+

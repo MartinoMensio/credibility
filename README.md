@@ -81,3 +81,11 @@ Trigger the update of the origins:
 ```
 curl -v -X POST http://localhost:20300/origins/
 ```
+
+
+GraphDB notes:
+
+path for data volume:
+/graphdb/data
+
+docker run --rm -it -p 7200:7200 --name graphdb dhlabbasel/graphdb-free
