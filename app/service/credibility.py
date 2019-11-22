@@ -4,7 +4,7 @@ from collections import defaultdict
 
 from .origins.batch import factchecking_report
 from .origins.realtime import mywot, newsguard
-from .origins.batch import adfontesmedia, fakenewscodex, ifcn, lemonde_decodex, mbfc, ntt, opensources, realorsatire, reporterslab
+from .origins.batch import adfontesmedia, fakenewscodex, ifcn, lemonde_decodex, mbfc, ntt, opensources, realorsatire, reporterslab, disinfo_eu_indian_net
 
 from . import utils, persistence
 
@@ -20,7 +20,8 @@ batch_origins = {
     'lemonde_decodex': lemonde_decodex.Origin(),
     'fakenewscodex': fakenewscodex.Origin(),
     'realorsatire': realorsatire.Origin(),
-    'reporterslab': reporterslab.Origin()
+    'reporterslab': reporterslab.Origin(),
+    'disinfo_eu_indian_net': disinfo_eu_indian_net.Origin()
 }
 # # TODO define this as a class
 # for o in batch_origins.values():
@@ -111,6 +112,31 @@ def get_urls_credibility_tuple_wrap(argument):
     result = get_url_credibility(argument)
     return (argument, result)
 
+def get_domain_credibility_multiple(domains):
+    domains = list(set(domains))
+    results = {}
+
+    db_results_by_origin_id = defaultdict(dict)
+    for origin_id, origin in origins.items():
+        res_origin = persistence.get_domain_assessment_multiple(origin_id, domains)
+        for r in res_origin:
+            db_results_by_origin_id[origin_id][r['itemReviewed']] = r
+
+    def performance_trick_query_already_done(origin):
+        origin_id = origin.id
+        def get_assessment(domain):
+            result = db_results_by_origin_id[origin_id].get(domain, None)
+            # TODO ask with a parameter whether to retrieve new evaluation or not if missing
+            # if not result:
+            #     if origin.origin_type == 'realtime':
+            #         result = origin.retrieve_source_credibility(source)
+            return result
+        return get_assessment
+
+    for domain in tqdm.tqdm(domains):
+        results[domain] = get_weighted_credibility(domain, performance_trick_query_already_done)
+    return results
+
 def get_source_credibility_multiple(sources):
     sources = list(set(sources))
     results = {}
@@ -132,7 +158,7 @@ def get_source_credibility_multiple(sources):
             return result
         return get_assessment
 
-    for source in sources:
+    for source in tqdm.tqdm(sources):
         results[source] = get_weighted_credibility(source, performance_trick_query_already_done)
     return results
 
