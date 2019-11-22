@@ -53,7 +53,8 @@ _save_me_dict = {
     'law-com': 'https://www.law.com/',
     'unbiased-america': 'http://www.unbiasedamerica.com/', # TODO but also https://www.facebook.com/pg/UnbiasedAmerica/
     'the-liberty-daily': 'https://thelibertydaily.com',
-    'united-nations-environment-programme-unep': 'https://www.unenvironment.org/'
+    'united-nations-environment-programme-unep': 'https://www.unenvironment.org/',
+    'genesius-times': 'https://genesiustimes.com/',
 }
 
 def _retrieve_assessments(origin_id, homepage):
@@ -184,7 +185,7 @@ def scrape_assessment(assessment, mbfc_homepage):
     for m in paragraphs:
         par_text = m.text.replace('"','')
         # that starts with a specific string
-        if par_text.startswith('Source:') or par_text.startswith('Sources:'):
+        if par_text.startswith('Source:') or par_text.startswith('.Source:') or par_text.startswith('Sources:'):
             source_homepage = m.select_one('a')
             if source_homepage:
                 source_homepage = source_homepage['href']
@@ -220,7 +221,7 @@ def scrape_assessment(assessment, mbfc_homepage):
         # use an handcrafted mapping
         source_homepage = _save_me_dict.get(path, None)
     if not source_homepage:
-        # TODO find a way to signal that without interrupting everything
+        # TODO find a way to signal this without interrupting everything
         raise ValueError(assessment['url'])
     factual = None
     for m in paragraphs:
