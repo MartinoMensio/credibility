@@ -5,6 +5,9 @@ from collections import defaultdict
 from ... import utils
 from . import OriginBatch
 
+# TODO deeplink to https://www.adfontesmedia.com/rankings-by-individual-news-source/
+# see why the aggregated scores on the source don't match with the ones done at the source level https://www.adfontesmedia.com/how-ad-fontes-ranks-news-sources/
+
 
 class Origin(OriginBatch):
 

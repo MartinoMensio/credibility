@@ -19,8 +19,29 @@ class Origin(OriginBatch):
             default_weight = 2
         )
 
-    def retreive_source_assessments(self):
+    def retreive_urls_assessments(self):
         return _retrieve_assessments()
+
+    def update(self):
+        # this origin updates differently
+        url_assessments_propagated = self.retreive_urls_assessments()
+
+        # Step 3: aggregate by URL, source and domain
+        # TODO for now this is the only origin that does this on its own
+        result_url_level = utils.aggregate_by(url_assessments_propagated, self.id, 'itemReviewed')
+        result_source_level = utils.aggregate_source(url_assessments_propagated, self.id)
+        result_domain_level = utils.aggregate_domain(url_assessments_propagated, self.id)
+        all_assessments = list(result_url_level) + list(result_source_level) + list(result_domain_level)
+        persistence.save_assessments(self.id, all_assessments, drop=True)
+        counts = {
+            'native_urls': len(url_assessments_propagated),
+            'native_source': 0,
+            'native_domains': 0,
+            'urls_by_source': len(result_source_level),
+            'urls_by_domain': len(result_domain_level),
+            'sources_by_domain': 0,
+        }
+        return counts
 
 ID = 'factchecking_report'
 
@@ -113,7 +134,13 @@ def _retrieve_assessments():
         #serialisation issues with mongo objectid
         del cr['_id']
         credibility = claimreview_interpret_rating(cr)
-        review_url = cr['url']
+        # review_url = cr['url']
+        try:
+            review_url = cr['url']
+            assert type(review_url) == str
+        except:
+            print('no url for', cr)
+            continue
         origin_domain = utils.get_url_domain(review_url)
 
         for appearance in claimreview_get_claim_appearances(cr):
@@ -176,15 +203,8 @@ def _retrieve_assessments():
         })
     print('propagation done')
 
-    # Step 3: aggregate by URL, source and domain
-    # TODO for now this is the only origin that does this on its own
-    result_url_level = utils.aggregate_by(url_assessments_propagated, ID, 'itemReviewed')
-    result_source_level = utils.aggregate_source(url_assessments_propagated, ID)
-    result_domain_level = utils.aggregate_domain(url_assessments_propagated, ID)
-    print(ID, 'retrieved', len(result_domain_level), 'domains', len(result_source_level), 'sources', len(result_url_level), 'documents', 'assessments')
-    all_assessments = list(result_url_level) + list(result_source_level) + list(result_domain_level)
-    persistence.save_assessments(ID, all_assessments, drop=True)
-    return []
+    # step 3 is done by another method
+    return url_assessments_propagated
 
 
     # domain_assessments = get_domain_assessments_from_claimreviews(all_claimreviews)
@@ -212,109 +232,109 @@ def _retrieve_assessments():
     # #return len(result)
 
 
-def get_domain_assessments_from_claimreviews(claimreviews):
-    """TODO aaaa"""
+# def get_domain_assessments_from_claimreviews(claimreviews):
+#     """TODO aaaa"""
 
-    # this first loop is on the claimreviews, and produces results grouped by assessed domain
-    # assessments is a dict {domain: list of assessments}
-    assessments = defaultdict(list)
-    for cr in claimreviews:
-        #print('claimreview', cr)
-        review_url = cr['url']
-        credibility = claimreview_interpret_rating(cr)
-        original = cr
-        #serialisation issues with mongo objectid
-        del original['_id']
-        print(review_url)
-        origin = utils.get_url_domain(review_url)
-        for appearance in claimreview_get_claim_appearances(cr):
-            itemReviewed = appearance
-            if not itemReviewed:
-                print('itemReviewed', itemReviewed, 'in' , cr['url'])
-                continue
-            domain = utils.get_url_domain(itemReviewed)
-            source = utils.get_url_source(itemReviewed)
-            # TODO also aggregate by source, not only domain
-            assessments[domain].append({
-                'url': review_url,
-                'credibility': credibility,
-                'original': original,
-                'origin': origin,
-                'itemReviewed': itemReviewed,
-                'domain': domain,
-                'source': source
-            })
-    #print(assessments)
+#     # this first loop is on the claimreviews, and produces results grouped by assessed domain
+#     # assessments is a dict {domain: list of assessments}
+#     assessments = defaultdict(list)
+#     for cr in claimreviews:
+#         #print('claimreview', cr)
+#         review_url = cr['url']
+#         credibility = claimreview_interpret_rating(cr)
+#         original = cr
+#         #serialisation issues with mongo objectid
+#         del original['_id']
+#         print(review_url)
+#         origin = utils.get_url_domain(review_url)
+#         for appearance in claimreview_get_claim_appearances(cr):
+#             itemReviewed = appearance
+#             if not itemReviewed:
+#                 print('itemReviewed', itemReviewed, 'in' , cr['url'])
+#                 continue
+#             domain = utils.get_url_domain(itemReviewed)
+#             source = utils.get_url_source(itemReviewed)
+#             # TODO also aggregate by source, not only domain
+#             assessments[domain].append({
+#                 'url': review_url,
+#                 'credibility': credibility,
+#                 'original': original,
+#                 'origin': origin,
+#                 'itemReviewed': itemReviewed,
+#                 'domain': domain,
+#                 'source': source
+#             })
+#     #print(assessments)
 
-    # this second loop
-    # final_credibility is {domain: aggregated credibility}
-    final_credibility = {}
-    for source, asssessments in assessments.items():
-        credibility_sum = 0
-        weights_sum = 0
-        # accumulator for the trust*confidence
-        confidence_and_weights_sum = 0
+#     # this second loop
+#     # final_credibility is {domain: aggregated credibility}
+#     final_credibility = {}
+#     for source, asssessments in assessments.items():
+#         credibility_sum = 0
+#         weights_sum = 0
+#         # accumulator for the trust*confidence
+#         confidence_and_weights_sum = 0
 
-        factcheck_positive_cnt = 0 # taken from the mapped value
-        factcheck_negative_cnt = 0
-        factcheck_neutral_cnt = 0
+#         factcheck_positive_cnt = 0 # taken from the mapped value
+#         factcheck_negative_cnt = 0
+#         factcheck_neutral_cnt = 0
 
-        # something like {'snopes.com' : {'factcheck_positive_cnt': 3, ...}}}
-        cnts_by_factchecker = defaultdict(lambda: defaultdict(list))
-        counts = defaultdict(list)
-        for assessment in asssessments:
-            if not assessment:
-                continue
-            origin_id = assessment['origin']
-            origin = _fact_checkers.get(origin_id, None)
-            if not origin:
-                # not an IFCN signatory, invalid
-                continue
-            origin_weight = origin.WEIGHT
+#         # something like {'snopes.com' : {'factcheck_positive_cnt': 3, ...}}}
+#         cnts_by_factchecker = defaultdict(lambda: defaultdict(list))
+#         counts = defaultdict(list)
+#         for assessment in asssessments:
+#             if not assessment:
+#                 continue
+#             origin_id = assessment['origin']
+#             origin = _fact_checkers.get(origin_id, None)
+#             if not origin:
+#                 # not an IFCN signatory, invalid
+#                 continue
+#             origin_weight = origin.WEIGHT
 
-            credibility_value = assessment['credibility']['value']
-            credibility_confidence = assessment['credibility']['confidence']
-            label_to_use = 'unknown' if credibility_confidence < 0.4 \
-                else 'positive' if credibility_value > 0 \
-                    else 'negative' if credibility_value < 0 else 'neutral'
-            # TODO just collect counts? nested resource or separate?
-            counts[label_to_use].append(assessment['url'])
-            # origin_id.replace('.', '_')
-            cnts_by_factchecker[origin.id][label_to_use].append(assessment['url'])
-            # add this also inside the object
-            cnts_by_factchecker[origin.id]['origin_id'] = origin.id
-            # TODO negative fact-check counts more?
-            confidence_and_weights_sum += credibility_confidence * origin_weight
-            #confidence_sum +=
-            credibility_sum += credibility_value * origin_weight * credibility_confidence
-            weights_sum += origin_weight
+#             credibility_value = assessment['credibility']['value']
+#             credibility_confidence = assessment['credibility']['confidence']
+#             label_to_use = 'unknown' if credibility_confidence < 0.4 \
+#                 else 'positive' if credibility_value > 0 \
+#                     else 'negative' if credibility_value < 0 else 'neutral'
+#             # TODO just collect counts? nested resource or separate?
+#             counts[label_to_use].append(assessment['url'])
+#             # origin_id.replace('.', '_')
+#             cnts_by_factchecker[origin.id][label_to_use].append(assessment['url'])
+#             # add this also inside the object
+#             cnts_by_factchecker[origin.id]['origin_id'] = origin.id
+#             # TODO negative fact-check counts more?
+#             confidence_and_weights_sum += credibility_confidence * origin_weight
+#             #confidence_sum +=
+#             credibility_sum += credibility_value * origin_weight * credibility_confidence
+#             weights_sum += origin_weight
 
-        if confidence_and_weights_sum:
-            # there is something useful in the origins
-            credibility_weighted = credibility_sum / (confidence_and_weights_sum)
-            confidence_weighted = confidence_and_weights_sum / weights_sum
-        else:
-            # TODO maybe return a 404? For now we assume the client will look at the confidence
-            credibility_weighted = 0.
-            confidence_weighted = 0.
+#         if confidence_and_weights_sum:
+#             # there is something useful in the origins
+#             credibility_weighted = credibility_sum / (confidence_and_weights_sum)
+#             confidence_weighted = confidence_and_weights_sum / weights_sum
+#         else:
+#             # TODO maybe return a 404? For now we assume the client will look at the confidence
+#             credibility_weighted = 0.
+#             confidence_weighted = 0.
 
-        all_counts = cnts_by_factchecker
-        cnts_by_factchecker['overall'] = counts
+#         all_counts = cnts_by_factchecker
+#         cnts_by_factchecker['overall'] = counts
 
-        final_credibility[source] = {
-            'credibility': {
-                'value': credibility_weighted,
-                'confidence': confidence_weighted
-            },
-            'original': all_counts,
-            'url': 'http://todo.todo',
-            'itemReviewed': source,
-            'origin_id': ID,
-            'domain': utils.get_url_domain(source),
-            'source': source,
-            'granularity': 'source'
-        }
-    return final_credibility
+#         final_credibility[source] = {
+#             'credibility': {
+#                 'value': credibility_weighted,
+#                 'confidence': confidence_weighted
+#             },
+#             'original': all_counts,
+#             'url': 'http://todo.todo',
+#             'itemReviewed': source,
+#             'origin_id': ID,
+#             'domain': utils.get_url_domain(source),
+#             'source': source,
+#             'granularity': 'source'
+#         }
+#     return final_credibility
 
 
 
@@ -522,6 +542,9 @@ label_maps = {
     'c’eri quasi': 'mixed', # almost true
     'pinocchio andante': 'fake',
     'panzana pazzesca': 'fake',
+
+    # euvsdisinfo
+    'disinfo': 'fake',
 
 
 

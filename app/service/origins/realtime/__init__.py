@@ -1,6 +1,11 @@
 from .. import OriginBase
 from ... import persistence
 
+
+# TODO find a way to also cache the domain assessment when the source assessment is retrieved (always)
+# - populate the cache
+# - if confidence == 0, return domain assessment (does it make sense?)
+
 def _cache_wrap_one(func):
     """This decorator takes care of the cache, and is used when there is only one assessment to retrieve"""
     def wrapped(self, *args, **kwargs):
