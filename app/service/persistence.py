@@ -13,6 +13,7 @@ print('MONGO_URI', MONGO_URI)
 client = pymongo.MongoClient(MONGO_URI)
 
 db_credibility = client['credibility']
+# TODO use db claimreview_scraper instead of datasets_resources
 claimreviews_collection = client['datasets_resources']['claim_reviews']
 
 def save_assessments(origin_name: str, assessments: list, drop: bool = False, replace_existing: bool = True):
@@ -63,7 +64,12 @@ def get_origin_assessments(origin_name):
 def get_origin_assessments_count(origin_name):
     """Returns how many assessments are stored from the specified origin"""
     collection = db_credibility[origin_name]
-    return collection.count()
+    return {
+        'total': collection.count(),
+        'sources': len(collection.distinct('source', {'granularity': 'source'})),
+        'domains': len(collection.distinct('domain', {'granularity': 'domain'})),
+        'urls': len(collection.distinct('itemReviewed', {'granularity': 'itemReviewed'}))
+    }
 
 def get_domain_assessment(origin_name: str, domain: str):
     """Returns the domain assessment from the specified origin about the domain"""

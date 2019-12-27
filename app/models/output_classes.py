@@ -11,7 +11,7 @@ class Origin(BaseModel):
     origin_type: TypeEnum
     weight: float
     homepage: UrlStr
-    assessments_count: int
+    assessments_count: Dict[str, int]
     name: str
     description: str
     logo: str
