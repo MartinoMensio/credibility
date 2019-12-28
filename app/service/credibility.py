@@ -4,7 +4,7 @@ from collections import defaultdict
 
 from .origins.batch import factchecking_report
 from .origins.realtime import mywot, newsguard
-from .origins.batch import adfontesmedia, fakenewscodex, ifcn, lemonde_decodex, mbfc, ntt, opensources, realorsatire, reporterslab, disinfo_eu_indian_net
+from .origins.batch import adfontesmedia, fakenewscodex, ifcn, lemonde_decodex, mbfc, ntt, opensources, realorsatire, reporterslab, disinfo_eu_indian_net, wikipedia_lists
 
 from . import utils, persistence
 
@@ -21,7 +21,8 @@ batch_origins = {
     'fakenewscodex': fakenewscodex.Origin(),
     'realorsatire': realorsatire.Origin(),
     'reporterslab': reporterslab.Origin(),
-    'disinfo_eu_indian_net': disinfo_eu_indian_net.Origin()
+    'disinfo_eu_indian_net': disinfo_eu_indian_net.Origin(),
+    'wikipedia_lists': wikipedia_lists.Origin()
 }
 # # TODO define this as a class
 # for o in batch_origins.values():
