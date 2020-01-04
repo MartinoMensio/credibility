@@ -53,8 +53,7 @@ def _interpret_table(table, origin_id):
 
 def _download_from_source(homepage):
     response = requests.get(homepage)
-    if response.status_code != 200:
-        raise ValueError(response.status_code)
+    response.raise_for_status()
 
     soup = BeautifulSoup(response.text, 'lxml')
 

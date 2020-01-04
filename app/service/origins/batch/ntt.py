@@ -65,8 +65,7 @@ def _interpret_table(table, origin_id, homepage):
 def _download_from_source(homepage, api_endpoint):
     # from https://www.newsroomtransparencytracker.com/
     response = requests.get(homepage)
-    if response.status_code != 200:
-        raise ValueError(response.status_code)
+    response.raise_for_status()
 
     soup = BeautifulSoup(response.text, 'lxml')
     wdtNonce = soup.find('input', {'id': 'wdtNonceFrontendEdit'})['value']
@@ -197,7 +196,7 @@ def _download_from_source(homepage, api_endpoint):
     response = requests.request("POST", api_endpoint, data=payload, params=querystring)
     if response.status_code != 200:
         print('error retrieving list')
-        raise ValueError(response.status_code)
+        response.raise_for_status()
 
     result = response.json()
     return result

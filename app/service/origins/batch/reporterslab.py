@@ -29,8 +29,8 @@ def _download_from_source():
     source_url = 'https://spreadsheets.google.com/feeds/list/10nFzJbHbPho7_kMFCRoX7VsQLSNIB3EaUh4ITDlsV0M/1/public/values?alt=json'
 
     response = requests.get(source_url)
-    if response.status_code != 200:
-        raise ValueError(response.status_code)
+    response.raise_for_status()
+    
     data = response.json()
     return data
 

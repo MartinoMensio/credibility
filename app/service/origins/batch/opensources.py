@@ -46,8 +46,8 @@ def _retrieve_assessments(source_url, origin_id, homepage):
 
 def _download_source_list(source_url):
     response = requests.get(source_url)
-    if response.status_code != 200:
-        raise ValueError(response.status_code)
+    response.raise_for_status()
+    
     data = response.json()
     return data
 

@@ -84,8 +84,7 @@ def _query_api(hosts, api_endpoint, api_key):
         raise ValueError(f'API only allows up to 100 hosts per request! Received call with {len(hosts)}')
     hosts_param = '/'.join(hosts) + '/'
     response = requests.get(api_endpoint, params={'hosts': hosts_param, 'key': api_key})
-    if response.status_code != 200:
-        raise ValueError(response.status_code)
+    response.raise_for_status()
     json_string = response.text
     content = json.loads(json_string)
     return content

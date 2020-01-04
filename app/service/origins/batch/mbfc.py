@@ -118,8 +118,7 @@ def _scrape(homepage):
 
 def _get_categories(homepage):
     response = requests.get(homepage)
-    if response.status_code != 200:
-        raise ValueError(response.status_code)
+    response.raise_for_status()
 
     soup = BeautifulSoup(response.text, features='lxml')
     biases = soup.select('ul#mega-menu-info_nav a.mega-menu-link')
@@ -135,8 +134,7 @@ def _get_path_from_full_url(full_url, homepage):
 
 def get_assessments_urls(category):
     response = requests.get(category['url'])
-    if response.status_code != 200:
-        raise ValueError(response.status_code)
+    response.raise_for_status()
 
     soup = BeautifulSoup(response.text, features='lxml')
     name =  soup.select_one('.page > h1.page-title').text

@@ -30,8 +30,8 @@ def _retrieve_assessments(origin_id, homepage):
 def _download_from_source():
     kml_url = 'https://www.google.com/maps/d/kml?mid=1-_KpPuAyLGUhz_R84V12Hu5C_i2oJPSs&forcekml=1'
     response = requests.get(kml_url)
-    if response.status_code != 200:
-        raise ValueError(response.status_code)
+    response.raise_for_status()
+    
     xmlstring = response.text
     # remove namespace that 
     # xmlstring = re.sub(r'\sxmlns="[^"]+"', '', xmlstring, count=1)

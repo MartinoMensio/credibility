@@ -56,8 +56,8 @@ _classes = {
 
 def _download_source_list():
     response = requests.get(source_url)
-    if response.status_code != 200:
-        raise ValueError(response.status_code)
+    response.raise_for_status()
+    
     data = response.json()
     return data
 
