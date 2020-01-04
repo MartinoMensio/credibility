@@ -225,6 +225,9 @@ name_domain_map = {
     'Centre for Research on Globalization': 'https://www.globalresearch.ca/',
     'CliffsNotes': 'http://www.cliffsnotes.com/',
     # 'Scriptural texts': ??
+    'CNN Video': 'https://edition.cnn.com/videos',
+    'The Root': 'https://www.theroot.com/',
+    'The Weather Channel': 'https://weather.com/',
 }
 
 # this regex works for facebook and twitter and extracts the source as account name

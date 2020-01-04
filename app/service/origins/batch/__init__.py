@@ -15,18 +15,24 @@ class OriginBatch(OriginBase):
             default_weight=default_weight
         )
 
-    def update(self):
+    def update(self, enable_urls_to_source_propagation=True, enable_urls_to_domain_propagation=True, enable_source_to_domain_propagation=True):
         assessments_urls = self.retreive_urls_assessments()
         assessments_sources = self.retreive_source_assessments()
         assessments_domains = self.retreive_domain_assessments()
 
         # now let's combine together at coarser granularity
-        assessments_urls_aggregated_by_source = utils.aggregate_source(
-            assessments_urls, self.id)
-        assessments_urls_aggregated_by_domain = utils.aggregate_domain(
-            assessments_urls, self.id)
-        assessments_sources_aggregated_by_domain = utils.aggregate_domain(
-            assessments_sources, self.id)
+        if enable_urls_to_source_propagation:
+            assessments_urls_aggregated_by_source = utils.aggregate_source(assessments_urls, self.id)
+        else:
+            assessments_urls_aggregated_by_source = []
+        if enable_urls_to_domain_propagation:
+            assessments_urls_aggregated_by_domain = utils.aggregate_domain(assessments_urls, self.id)
+        else:
+            assessments_urls_aggregated_by_domain = []
+        if enable_source_to_domain_propagation:
+            assessments_sources_aggregated_by_domain = utils.aggregate_domain(assessments_sources, self.id)
+        else:
+            assessments_sources_aggregated_by_domain = []
 
         counts = {
             'native_urls': len(assessments_urls),
@@ -53,7 +59,6 @@ class OriginBatch(OriginBase):
         return counts
 
     # override this method if the origin provides domain assessments
-
     def retreive_domain_assessments(self):
         return []
 
