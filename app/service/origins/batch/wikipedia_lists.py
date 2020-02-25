@@ -161,6 +161,9 @@ def _get_perennial_sources(self_id):
                 if official_website:
                     url = official_website['href']
                 else:
+                    if 'WP:' in name:
+                        # things like 'Scriptural textsWP:RSPSCRIPTURE\xa0📌'
+                        continue
                     url = utils.name_domain_map[name]
 
             original = {

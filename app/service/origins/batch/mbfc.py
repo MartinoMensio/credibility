@@ -55,6 +55,7 @@ _save_me_dict = {
     'the-liberty-daily': 'https://thelibertydaily.com',
     'united-nations-environment-programme-unep': 'https://www.unenvironment.org/',
     'genesius-times': 'https://genesiustimes.com/',
+    'la-repubblica': 'https://www.repubblica.it/',
 }
 
 def _retrieve_assessments(origin_id, homepage):
@@ -230,6 +231,7 @@ def scrape_assessment(assessment, mbfc_homepage):
             break
     if not factual:
         print('no factuality rating in', assessment['url'])
+        # TODO look at the image on the top (factual, high, mostly, mixed, ...)
 
     # the ones in questionable (fake-news) have an attribute called "reasoning"
     reasoning = None
