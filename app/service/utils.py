@@ -233,6 +233,9 @@ name_domain_map = {
     'Exposition Daily': 'https://expositiondaily.com/',
     'OpIndia': 'https://www.opindia.com/',
     'The Grayzone': 'https://thegrayzone.com/',
+    'Next News Network': 'https://www.youtube.com/user/NextNewsNetwork/',
+    'Christwire': 'http://christwire.org/',
+    'Topeka News': 'https://www.cjonline.com/',
 }
 
 # this regex works for facebook and twitter and extracts the source as account name

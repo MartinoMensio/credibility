@@ -79,6 +79,8 @@ def _get_satire_news_websites(self_id):
             name = row['Name'].text.strip()
             name = re.sub(r'\s*\([^)]*\)', '', name)
             name = re.sub(r'\s*\[[^)]*\]', '', name)
+            if not name:
+                continue
             # go to the wikipedia page to find the official website
             href = row['Name'].find('a')['href']
             if href.startswith('http://') or href.startswith('https://'):
