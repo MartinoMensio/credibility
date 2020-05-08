@@ -237,6 +237,8 @@ name_domain_map = {
     'Christwire': 'http://christwire.org/',
     'Topeka News': 'https://www.cjonline.com/',
     'The Buffalo Chronicle': 'https://buffalochronicle.com/',
+    'OANN (One America News Network)': 'https://www.oann.com/',
+    'Postcard News': 'https://postcard.news/',
 }
 
 # this regex works for facebook and twitter and extracts the source as account name

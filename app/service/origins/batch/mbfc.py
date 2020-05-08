@@ -56,7 +56,8 @@ _save_me_dict = {
     'united-nations-environment-programme-unep': 'https://www.unenvironment.org/',
     'genesius-times': 'https://genesiustimes.com/',
     'la-repubblica': 'https://www.repubblica.it/',
-    'disrn': 'https://disrn.com/'
+    'disrn': 'https://disrn.com/',
+    'philly-voice': 'https://www.phillyvoice.com/',
 }
 
 def _retrieve_assessments(origin_id, homepage):

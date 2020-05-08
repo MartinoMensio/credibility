@@ -342,46 +342,54 @@ def _retrieve_assessments():
 #### utilities for claimReview
 
 def claimreview_get_claim_appearances(claimreview):
-    result = []
-    itemReviewed = claimreview.get('itemReviewed', None)
-    if not itemReviewed:
-        itemReviewed = claimreview.get('properties', {}).get('itemReviewed', None)
-    if itemReviewed:
-        # TODO include appearance but be careful to cases like https://africacheck.org/fbcheck/pineapple-leaves-not-a-wonder-cure/
-        # where the appearance is an upload of the screenshot (on the fact-checker website)
-        # we don't know the stance of the other appearances!!!
-        appearances = [itemReviewed.get('firstAppearance', None)] + itemReviewed.get('appearance', [])
-        if appearances:
-            # new field appearance in https://pending.schema.org/Claim
-            #print(appearances)
-            result = [el['url'] for el in appearances if el]
-        else:
-            sameAs = itemReviewed.get('sameAs', None)
-            if sameAs:
-                result = [itemReviewed['sameAs']]
+    try:
+        result = []
+        itemReviewed = claimreview.get('itemReviewed', None)
+        if not itemReviewed:
+            itemReviewed = claimreview.get('properties', {}).get('itemReviewed', None)
+        if itemReviewed:
+            # TODO include appearance but be careful to cases like https://africacheck.org/fbcheck/pineapple-leaves-not-a-wonder-cure/
+            # where the appearance is an upload of the screenshot (on the fact-checker website)
+            # we don't know the stance of the other appearances!!!
+            appearance = itemReviewed.get('appearance', [])
+            if isinstance(appearance, str):
+                # checkyourfact.com sometimes just puts the url as string
+                appearance  = [{'url': appearance}]
+            appearances = [itemReviewed.get('firstAppearance', None)] + appearance
+            if appearances:
+                # new field appearance in https://pending.schema.org/Claim
+                #print(appearances)
+                result = [el['url'] for el in appearances if el]
             else:
-                author = itemReviewed.get('author', None)
-                if not author:
-                    author = itemReviewed.get('properties', {}).get('author', None)
-                if author:
-                    #exit(0)
-                    sameAs = author.get('sameAs', None)
-                    if not sameAs:
-                        sameAs = author.get('properties', {}).get('sameAs', None)
-                    #if sameAs:
-                    #    print(sameAs)
+                sameAs = itemReviewed.get('sameAs', None)
                 if sameAs:
-                    if isinstance(sameAs, list):
-                        result = sameAs
-                    else:
-                        result = [sameAs]
-        # itemReviewed.url
-        itemReviewed_url = itemReviewed.get('url', None)
-        if itemReviewed_url:
-            #raise ValueError(claimreview['url'])
-            result.append(itemReviewed_url)
-    # TODO also return sameAs if present on the claim directly, other links there!!
-    return [el for el in result if el]
+                    result = [itemReviewed['sameAs']]
+                else:
+                    author = itemReviewed.get('author', None)
+                    if not author:
+                        author = itemReviewed.get('properties', {}).get('author', None)
+                    if author:
+                        #exit(0)
+                        sameAs = author.get('sameAs', None)
+                        if not sameAs:
+                            sameAs = author.get('properties', {}).get('sameAs', None)
+                        #if sameAs:
+                        #    print(sameAs)
+                    if sameAs:
+                        if isinstance(sameAs, list):
+                            result = sameAs
+                        else:
+                            result = [sameAs]
+            # itemReviewed.url
+            itemReviewed_url = itemReviewed.get('url', None)
+            if itemReviewed_url:
+                #raise ValueError(claimreview['url'])
+                result.append(itemReviewed_url)
+        # TODO also return sameAs if present on the claim directly, other links there!!
+        return [el for el in result if el]
+    except Exception as e:
+        print(claimreview)
+        raise(e)
 
 def clean_claim_url(url):
     result = url
