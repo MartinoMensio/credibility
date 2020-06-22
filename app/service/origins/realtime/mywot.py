@@ -56,6 +56,8 @@ def _pack_response(response, origin_id):
     target = response['target']
     review_url = f'https://www.mywot.com/en/scorecard/{target}'
     credibility = _get_credibility_measures(response)
+    if not credibility:
+        return None
     result = {
         'url': review_url,
         'credibility': credibility,
@@ -70,9 +72,11 @@ def _pack_response(response, origin_id):
 
 
 def _get_credibility_measures(assessment):
-    safety_component = assessment.get('safety', {'reputations': 50, 'confidence': 0})
-    credibility = (safety_component['reputations'] - 50) / 50
-    confidence = safety_component['confidence'] / 100
+    safety_component = assessment.get('safety', {})
+    if not 'reputations' in safety_component:
+        return None
+    credibility = (safety_component.get('reputations', 50) - 50) / 50
+    confidence = safety_component.get('confidence', 0) / 100
     result = {
         'value': credibility,
         'confidence': confidence
