@@ -46,3 +46,36 @@ def get_all_edges(): # fields: List[str] = Query(None)
     # for a in all_a:
     #     result.append({field_key: a.get(field_key) for field_key in fields})
     return all_a
+
+
+@router.get('/status')
+def get_status():
+    """Returns the status of the service"""
+
+    # test db
+    try:
+        mongo_ok = persistence.ping_db()['ok']
+        mongo_status = 'ok' if mongo_ok == 1.0 else 'error'
+    except:
+        mongo_status = 'exception'
+
+    # test credibility
+    try:
+        example = credibility.get_source_credibility('google.com')
+        test_credibility_status = 'ok' if 'credibility' in example else 'error'
+    except:
+        test_credibility_status = 'exception'
+
+    # overall
+    if test_credibility_status == 'ok' and mongo_status == 'ok':
+        status = 'ok'
+    else:
+        status = 'error'
+    
+    return {
+        'status': status,
+        'details': {
+            'mongo_status': mongo_status,
+            'test_credibility_status': test_credibility_status
+        }
+    }

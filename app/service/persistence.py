@@ -120,3 +120,6 @@ def get_url_assessment_multiple(origin_name: str, urls: List[str]):
 # this relies on the dataset of the factchecker scraper
 def get_claimreviews():
     return claimreviews_collection.find()
+
+def ping_db():
+    return db_credibility.command('ping')
