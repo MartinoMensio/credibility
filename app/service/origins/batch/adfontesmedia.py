@@ -45,7 +45,7 @@ def _retrieve_source_assessments(origin_id, homepage):
 
 def _get_credibility_measures(row):
     # vertical rank is quality
-    quality = row.get('Quality', None)
+    quality = row.get('quality', None)
     if quality:
         quality = float(quality)
         # maximum value is 64 https://www.adfontesmedia.com/white-paper-multi-analyst-ratings-project-august-2019/
@@ -126,29 +126,43 @@ def _scrape_source_assessment(url):
 
 def _get_table(homepage):
     # deprecated: the csv is here https://www.adfontesmedia.com/
-    response = requests.get(f'{homepage}interactive-media-bias-chart/')
+    # https://docs.google.com/spreadsheets/d/1nmUD5CglEuHq6airlHWI8AWtsQ5XjIdKRxUHF4IVUDM/edit#gid=24078135
+    source_url = 'https://spreadsheets.google.com/feeds/list/1nmUD5CglEuHq6airlHWI8AWtsQ5XjIdKRxUHF4IVUDM/1/public/values?alt=json'
+
+    response = requests.get(source_url)
     response.raise_for_status()
+    
+    table = response.json()
 
-    soup = BeautifulSoup(response.text, 'lxml')
-    table_element = soup.find('table')
-    table_headers = [el.text.strip()
-                     for el in table_element.select('thead tr th')]
-    results = []
-    for tr in table_element.select('tbody tr'):
-        fields = [el.text.strip() for el in tr.select('td')]
-        row_parsed = {header: value for header,
-                      value in zip(table_headers, fields)}
-        results.append(row_parsed)
+    cleaned_table = []
+    for row in table['feed']['entry']:
+        properties = {k[4:].replace('.', '_'): v['$t'].strip() for k, v in row.items() if k.startswith('gsx$')}
+        cleaned_table.append(properties)
+    return cleaned_table
 
-    return results
+    # response = requests.get(f'{homepage}interactive-media-bias-chart/')
+    # response.raise_for_status()
+
+    # soup = BeautifulSoup(response.text, 'lxml')
+    # table_element = soup.find('table')
+    # table_headers = [el.text.strip()
+    #                  for el in table_element.select('thead tr th')]
+    # results = []
+    # for tr in table_element.select('tbody tr'):
+    #     fields = [el.text.strip() for el in tr.select('td')]
+    #     row_parsed = {header: value for header,
+    #                   value in zip(table_headers, fields)}
+    #     results.append(row_parsed)
+    #
+    # return results
 
 def _interpret_assessments(table, origin_id, homepage):
     # deprecated
     results = {}
 
     for ass in table:
-        source_name = ass['Source']
-        url = ass['Url']
+        source_name = ass['source']
+        url = ass['url']
         domain = utils.get_url_domain(url)
         source = utils.get_url_source(url)
         credibility = _get_credibility_measures(ass)

@@ -145,28 +145,34 @@ def _get_perennial_sources(self_id):
             raw_row = row['_raw_']
             css_class = raw_row['class'][0]
 
-            href = row['Source'].find('a')['href']
-            if href.startswith('http://') or href.startswith('https://'):
-                # absolute URL, to another language
-                details_url = href
-            else:
-                # relative URL
-                details_url = f"https://en.wikipedia.org{href}"
-            details = requests.get(details_url)
-            details.raise_for_status()
-            soup = BeautifulSoup(details.text, 'lxml')
-            official_website = soup.select_one('span.official-website a')
-            if official_website:
-                url = official_website['href']
-            else:
-                official_website = soup.select_one('table.infobox a.external')
+            try:
+                href = row['Source'].find('a')['href']
+                if href.startswith('http://') or href.startswith('https://'):
+                    # absolute URL, to another language
+                    details_url = href
+                else:
+                    # relative URL
+                    details_url = f"https://en.wikipedia.org{href}"
+                details = requests.get(details_url)
+                details.raise_for_status()
+                soup = BeautifulSoup(details.text, 'lxml')
+                official_website = soup.select_one('span.official-website a')
                 if official_website:
                     url = official_website['href']
                 else:
-                    if 'WP:' in name:
-                        # things like 'Scriptural textsWP:RSPSCRIPTURE\xa0📌'
-                        continue
-                    url = utils.name_domain_map[name]
+                    official_website = soup.select_one('table.infobox a.external')
+                    if official_website:
+                        url = official_website['href']
+                    else:
+                        if 'WP:' in name:
+                            # things like 'Scriptural textsWP:RSPSCRIPTURE\xa0📌'
+                            continue
+                        url = utils.name_domain_map[name]
+
+            except:
+                # https://starsunfolded.com/
+                url = utils.name_domain_map[name]
+
 
             original = {
                 'source': name,

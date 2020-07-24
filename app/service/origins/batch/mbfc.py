@@ -58,6 +58,12 @@ _save_me_dict = {
     'la-repubblica': 'https://www.repubblica.it/',
     'disrn': 'https://disrn.com/',
     'philly-voice': 'https://www.phillyvoice.com/',
+    'elle-magazine': 'https://www.elle.com/',
+    'refinery29': 'https://www.refinery29.com/',
+    'algemeen-dagblad': 'https://www.ad.nl/',
+    'il-giornale': 'https://www.ilgiornale.it/',
+    'herb': 'https://herb.co/',
+    'shafaq-news': 'https://www.shafaaq.com/',
 }
 
 def _retrieve_assessments(origin_id, homepage):

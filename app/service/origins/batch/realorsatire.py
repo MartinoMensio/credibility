@@ -52,7 +52,7 @@ def _interpret_table(table, origin_id):
 
 
 def _download_from_source(homepage):
-    response = requests.get(homepage)
+    response = get(homepage)
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, 'lxml')
@@ -66,7 +66,7 @@ def _download_from_source(homepage):
         page = 1
         while True:
             page_url = f'{category_url}page/{page}/'
-            response = requests.get(page_url)
+            response = get(page_url)
             if response.status_code != 200:
                 break
 
@@ -124,3 +124,7 @@ def get_credibility_measures(row):
         'value': value,
         'confidence': confidence
     }
+
+def get(url):
+    # basic block on user agent
+    return requests.get(url, headers={'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36'})
