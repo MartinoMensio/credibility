@@ -64,6 +64,7 @@ _save_me_dict = {
     'il-giornale': 'https://www.ilgiornale.it/',
     'herb': 'https://herb.co/',
     'shafaq-news': 'https://www.shafaaq.com/',
+    'kcra-3': 'https://www.kcra.com/',
 }
 
 def _retrieve_assessments(origin_id, homepage):
