@@ -355,7 +355,13 @@ def claimreview_get_claim_appearances(claimreview):
             if isinstance(appearance, str):
                 # checkyourfact.com sometimes just puts the url as string
                 appearance  = [{'url': appearance}]
-            appearances = [itemReviewed.get('firstAppearance', None)] + appearance
+            if not isinstance(appearance, list):
+                appearance = [appearance]
+            # get also the firstAppearance
+            firstAppearance = itemReviewed.get('firstAppearance', None)
+            if not isinstance(firstAppearance, list):
+                firstAppearance = [firstAppearance]
+            appearances = firstAppearance + appearance
             if appearances:
                 # new field appearance in https://pending.schema.org/Claim
                 #print(appearances)
