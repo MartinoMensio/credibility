@@ -3,6 +3,7 @@ import tqdm
 from bs4 import BeautifulSoup
 from collections import defaultdict
 from multiprocessing.pool import ThreadPool
+from requests.exceptions import TooManyRedirects
 
 from ... import utils
 from . import OriginBatch
@@ -75,7 +76,15 @@ def _get_sources_scores(homepage):
 def _scrape_source_assessment(url):
     origin_id = 'adfontesmedia'
     # retrieves and maps a single assessment
-    response = requests.get(url)
+    try:
+        response = requests.get(url)
+    except TooManyRedirects:
+        print('Too many redirects for', url)
+        return None
+    except Exception as e:
+        print(e)
+        print(url)
+        raise ValueError(url)
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, 'lxml')
