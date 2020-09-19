@@ -14,7 +14,7 @@ client = pymongo.MongoClient(MONGO_URI)
 
 db_credibility = client['credibility']
 # TODO use db claimreview_scraper instead of datasets_resources
-claimreviews_collection = client['datasets_resources']['claim_reviews']
+claimreviews_collection = client['claimreview_scraper']['claim_reviews']
 
 def save_assessments(origin_name: str, assessments: list, drop: bool = False, replace_existing: bool = True):
     """Saves all the assessments for the specified origin. With drop, it clears before insertion.
