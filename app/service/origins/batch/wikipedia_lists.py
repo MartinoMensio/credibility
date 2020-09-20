@@ -89,7 +89,7 @@ def _get_satire_news_websites(self_id):
             else:
                 # relative URL
                 details_url = f"https://en.wikipedia.org{href}"
-            details = requests.get(details_url)
+            details = requests.get(details_url, headers={'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'})
             details.raise_for_status()
             soup = BeautifulSoup(details.text, 'lxml')
             official_website = soup.select_one('span.official-website a')
@@ -153,7 +153,7 @@ def _get_perennial_sources(self_id):
                 else:
                     # relative URL
                     details_url = f"https://en.wikipedia.org{href}"
-                details = requests.get(details_url)
+                details = requests.get(details_url, headers={'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'})
                 details.raise_for_status()
                 soup = BeautifulSoup(details.text, 'lxml')
                 official_website = soup.select_one('span.official-website a')
