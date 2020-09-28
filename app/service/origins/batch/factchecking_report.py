@@ -342,15 +342,14 @@ def _retrieve_assessments():
 #### utilities for claimReview
 
 def claimreview_get_claim_appearances(claimreview):
+    """from a `ClaimReview`, get all the URLs mentioned as appearances"""
     try:
         result = []
         itemReviewed = claimreview.get('itemReviewed', None)
         if not itemReviewed:
             itemReviewed = claimreview.get('properties', {}).get('itemReviewed', None)
         if itemReviewed:
-            # TODO include appearance but be careful to cases like https://africacheck.org/fbcheck/pineapple-leaves-not-a-wonder-cure/
-            # where the appearance is an upload of the screenshot (on the fact-checker website)
-            # we don't know the stance of the other appearances!!!
+            # sometimes the appearances are stored in the correct place
             appearance = itemReviewed.get('appearance', [])
             if isinstance(appearance, str):
                 # checkyourfact.com sometimes just puts the url as string
@@ -367,32 +366,51 @@ def claimreview_get_claim_appearances(claimreview):
                 #print(appearances)
                 result = [el['url'] for el in appearances if el]
             else:
+                # sometimes instead the appearances are listed in itemReviewed
                 sameAs = itemReviewed.get('sameAs', None)
                 if sameAs:
-                    result = [itemReviewed['sameAs']]
+                    result = [sameAs]
                 else:
                     author = itemReviewed.get('author', None)
                     if not author:
                         author = itemReviewed.get('properties', {}).get('author', None)
                     if author:
-                        #exit(0)
                         sameAs = author.get('sameAs', None)
                         if not sameAs:
                             sameAs = author.get('properties', {}).get('sameAs', None)
-                        #if sameAs:
-                        #    print(sameAs)
                     if sameAs:
                         if isinstance(sameAs, list):
                             result = sameAs
                         else:
                             result = [sameAs]
-            # itemReviewed.url
+            # sometimes in itemReviewed.url
             itemReviewed_url = itemReviewed.get('url', None)
             if itemReviewed_url:
                 #raise ValueError(claimreview['url'])
                 result.append(itemReviewed_url)
         # TODO also return sameAs if present on the claim directly, other links there!!
-        return [el for el in result if el]
+
+        # split appearances that are a single field with comma or ` and `
+        cleaned_result = []
+        for el in result:
+            if not isinstance(el, str):
+                cleaned_result.extend(el)
+            if ',' in el:
+                els = el.split(',')
+                cleaned_result.extend(els)
+            if ' ' in el:
+                els = el.split(' ')
+                cleaned_result.extend(els)
+            elif ' and ' in el:
+                els = el.split(' and ')
+                cleaned_result.extend(els)
+            else:
+                cleaned_result.append(el)
+        # remove spaces around
+        cleaned_result = [el.strip() for el in cleaned_result if el]
+        # just keep http(s) links
+        cleaned_result = [el for el in cleaned_result if re.match('^https?:\/\/.*$', el)]
+        return cleaned_result
     except Exception as e:
         print(claimreview)
         raise(e)
@@ -411,8 +429,17 @@ def clean_claim_url(url):
         #     result = None
     return result
 
-# the values of truthiness for the simplified labels
+
+# The following dicts are used to map the labels and the scores coming from the claimReviews
+
+# the values of truthiness for the simplified labels in [0;1] range with None for 'not_verifiable'
 simplified_labels_scores = {
+    'credible': 1.0,
+    'mostly_credible': 0.8,
+    'uncertain': 0.5,
+    'not_credible': 0.0,
+    'not_verifiable': None,
+    # legacy labels
     'true': 1.0,
     'mixed': 0.5,
     'fake': 0.0
@@ -420,219 +447,271 @@ simplified_labels_scores = {
 # simplified to the three cases true/mixed/fake
 label_maps = {
     # from buzzface
-    'mostly true': 'true',
-    'mixture of true and false': 'mixed',
-    'mostly false': 'fake',
-    'no factual content': None,
+    'mostly true': 'mostly_credible',
+    'mixture of true and false': 'uncertain',
+    'mostly false': 'not_credible',
+    'no factual content': 'not_credible',
     # from factcheckni
-    'Accurate': 'true',
-    #'Unsubstantiated': not true nor false, no proofs --> discard
-    'Inaccurate': 'fake',
-    'inaccurate': 'fake',
+    'Accurate': 'credible',
+    'Unsubstantiated': 'not_verifiable', #not true nor false, no proofs
+    'Inaccurate': 'not_credible',
+    'inaccurate': 'not_credible',
     # from mrisdal, opensources, pontes_fakenewssample
-    'fake': 'fake',
-    'bs': 'fake',
-    'bias': 'fake',
-    'conspiracy': 'fake',
-    'junksci': 'fake',
+    'fake': 'not_credible',
+    'bs': 'not_credible', # bullshit
+    'bias': 'uncertain',
+    'conspiracy': 'not_credible',
+    'junksci': 'not_credible',
     #'hate': 'fake', # hate speech is not necessarily fake
-    'clickbait': 'fake',
+    'clickbait': 'not_credible',
     #'unreliable': 'fake',
-    'reliable': 'true',
-    'conspirancy': 'fake',
+    'reliable': 'credible',
+    'conspirancy': 'not_credible',
     # from leadstories
-    'Old Fake News': 'fake',
-    'Fake News': 'fake',
-    'Hoax Alert': 'fake',
+    'Old Fake News': 'not_credible',
+    'Fake News': 'not_credible',
+    'Hoax Alert': 'not_credible',
     # from politifact
-    'False': 'fake',
-    'True': 'true',
-    'Mostly True': 'true',
-    'Half True': 'mixed',
-    'Half-True': 'mixed',
-    'Mostly False': 'fake',
-    'Pants on Fire!': 'fake',
-    'pants on fire': 'fake',
+    'False': 'not_credible',
+    'True': 'credible',
+    'Mostly True': 'mostly_credible',
+    'Half True': 'uncertain',
+    'Half-True': 'uncertain',
+    'Mostly False': 'not_credible',
+    'Pants on Fire!': 'not_credible',
+    'pants on fire': 'not_credible',
     # from golbeck_fakenews
-    'Fake': 'fake',
+    'Fake': 'not_credible',
     # from liar (politifact-dashed)
-    'false': 'fake',
-    'true': 'true',
-    'mostly-true': 'true',
-    'mostly-false': 'fake',
-    'barely-true': 'fake',
-    'pants-fire': 'fake',
-    'half-true': 'mixed',
+    'false': 'not_credible',
+    'true': 'credible',
+    'mostly-true': 'mostly_credible',
+    'mostly-false': 'not_credible',
+    'barely-true': 'uncertain',
+    'pants-fire': 'not_credible',
+    'half-true': 'uncertain',
     # from vlachos_factchecking
-    'TRUE': 'true',
-    'FALSE': 'fake',
-    'MOSTLY TRUE': 'true',
-    'MOSTLY FALSE': 'fake',
-    'HALF TRUE': 'mixed',
+    'TRUE': 'credible',
+    'FALSE': 'not_credible',
+    'MOSTLY TRUE': 'mostly_credible',
+    'MOSTLY FALSE': 'not_credible',
+    'HALF TRUE': 'uncertain',
     # others from ClaimReviews
-    'Accurate': 'true',
-    'Inaccurate': 'fake',
-    'Wrong': 'fake',
-    'Not accurate': 'fake',
-    'Lie of the Year': 'fake',
-    'Mostly false': 'fake',
+    'Accurate': 'credible',
+    'Inaccurate': 'not_credible',
+    'Wrong': 'not_credible',
+    'Not accurate': 'not_credible',
+    'Lie of the Year': 'not_credible',
+    'Mostly false': 'not_credible',
     # metafact.ai labels
-    'Affirmative': 'true',
-    'Negative': 'fake',
-    'Uncertain': 'mixed',
-    #'Not Enough Experts': ??
+    'Affirmative': 'credible',
+    'Negative': 'not_credible',
+    'Uncertain': 'uncertain',
+    'Not Enough Experts': 'not_verifiable',
     # tempo (indonesian)
-    'BENAR' : 'true',
-    'SEBAGIAN BENAR' : 'mixed',
-    'TIDAK TERBUKTI' : 'mixed', # unproven
-    'SESAT' : 'mixed', # facts are correct, but wrong conclusions (misleading)
-    'KELIRU' : 'fake',
-    'mixture': 'mixed',
-    'somewhat true': 'mixed',
-    'somewhat false': 'mixed',
-    'misleading': 'mixed',
-    'ambiguous': 'mixed',
+    'BENAR' : 'credible',
+    'SEBAGIAN BENAR' : 'uncertain',
+    'TIDAK TERBUKTI' : 'uncertain', # unproven
+    'SESAT' : 'uncertain', # facts are correct, but wrong conclusions (misleading)
+    'KELIRU' : 'not_credible',
+    'mixture': 'uncertain',
+    'somewhat true': 'mostly_credible',
+    'somewhat false': 'uncertain',
+    'misleading': 'not_credible',
+    'ambiguous': 'uncertain',
     # newtral.es
-    'falso': 'fake',
+    'falso': 'not_credible',
     # verificat
-    'fals': 'fake',
+    'fals': 'not_credible',
     # other things
-    ': false': 'fake',
-    ': true': 'true',
-    ': mixture': 'mixed',
-    'rating: false': 'fake',
-    'rating by fact crescendo: false': 'fake',
-    'verdadero': 'true',
-    'verdad a medias': 'mixed',
+    ': false': 'not_credible',
+    ': true': 'credible',
+    ': mixture': 'uncertain',
+    'rating: false': 'not_credible',
+    'rating by fact crescendo: false': 'not_credible',
+    'verdadero': 'credible',
+    'verdad a medias': 'uncertain',
     # factnameh
-    '\u0646\u0627\u062f\u0631\u0633\u062a': 'fake', # false
-    '\u0646\u06cc\u0645\u0647 \u062f\u0631\u0633\u062a': 'mixed', # half true
-    '\u06af\u0645\u0631\u0627\u0647\u200c\u06a9\u0646\u0646\u062f\u0647': 'mixed', # misleading
+    '\u0646\u0627\u062f\u0631\u0633\u062a': 'not_credible', # false
+    '\u0646\u06cc\u0645\u0647 \u062f\u0631\u0633\u062a': 'uncertain', # half true
+    '\u06af\u0645\u0631\u0627\u0647\u200c\u06a9\u0646\u0646\u062f\u0647': 'not_credible', # misleading
 
-    # fullfact
-    'correct': 'true',
-    'that\u2019s correct': 'true',
-    'incorrect' : 'fake',
-    'this is false': 'fake',
-    'roughly correct': 'mixed',
-    'broadly correct': 'mixed',
-    'this isn\'t correct': 'fake',
-    'this is correct': 'true',
-    'not far off': 'mixed',
-    'that\u2019s wrong': 'mixed',
-    'it\u2019s correct': 'true',
-    'this is true': 'true',
-    'this is wrong': 'fake',
-    'that\'s correct': 'true',
-    'that is correct': 'true',
-    'these aren\u2019t all correct': 'mixed',
+    # fullfact (this is the beginning of the label, they have very long labels)
+    'correct': 'credible',
+    'that\u2019s correct': 'credible',
+    'incorrect' : 'not_credible',
+    'this is false': 'not_credible',
+    'roughly correct': 'uncertain',
+    'broadly correct': 'uncertain',
+    'this isn\'t correct': 'not_credible',
+    'this is correct': 'credible',
+    'not far off': 'mostly_credible',
+    'that\u2019s wrong': 'not_credible',
+    'it\u2019s correct': 'credible',
+    'this is true': 'credible',
+    'this is wrong': 'not_credible',
+    'that\'s correct': 'credible',
+    'that is correct': 'credible',
+    'these aren\u2019t all correct': 'uncertain',
 
     # teyit.org
-    'yanliş': 'fake',
-    'doğru': 'true',
-    'karma': 'mixed',
-    'belirsiz': None, #'uncertain'
+    'yanliş': 'not_credible',
+    'doğru': 'credible',
+    'karma': 'uncertain',
+    'belirsiz': 'not_verifiable', #'uncertain'
 
     # lemonde
-    'faux': 'fake',
+    'faux': 'not_credible',
 
     # istinomer
-    'neistina': 'fake',
-    'skoro neistina': None, # almost untrue
+    'neistina': 'not_credible',
+    'skoro neistina': 'uncertain', # almost untrue
 
     # https://evrimagaci.org ???
-    'sahte': 'fake',
+    'sahte': 'not_credible',
 
     # https://verafiles.org
-    'mali': 'fake',
+    'mali': 'not_credible',
 
     # poligrafo
-    'verdadeiro': 'true',
-    'engañoso': 'fake', # misleading
-    'contraditorio': None, # contradictory
+    'verdadeiro': 'credible',
+    'engañoso': 'not_credible', # misleading
+    'contraditorio': 'uncertain', # contradictory
 
     # pagella politica
-    'vero': 'true',
-    'c’eri quasi': 'mixed', # almost true
-    'pinocchio andante': 'fake',
-    'panzana pazzesca': 'fake',
+    'vero': 'credible',
+    'c’eri quasi': 'mostly_credible', # almost true
+    'c\'eri quasi': 'mostly_credible', # almost true
+    'pinocchio andante': 'not_credible',
+    'panzana pazzesca': 'not_credible',
+    'nì': 'uncertain',
 
     # euvsdisinfo
-    'disinfo': 'fake',
+    'disinfo': 'not_credible',
 
 
+    # from twitter subset
+    'Фейк': 'not_credible',
+    # 'usatoday.com'
+    'partly false': 'uncertain',
+    # factcheck.org
+    'baseless claim': 'not_verifiable',
+    'mixed.': 'uncertain',
+    'experts disagree': 'not_credible',
+    'one pinocchio': 'mostly_credible',
+    'two pinocchios': 'uncertain',
+    'three pinocchios': 'not_credible',
+    'four pinocchios': 'not_credible',
+    'the statement is false': 'not_credible',
+    'erroné': 'not_credible',
+    'c\'est faux': 'not_credible',
+    'not correct': 'not_credible',
+    'not true': 'not_credible',
+    'largely accurate': 'mostly_credible',
+    'mixed': 'uncertain',
+    'partially true': 'uncertain',
+    'partly right': 'uncertain',
 
-    # random stuff (just set to fake to debug and go on)
-    # 'ce sondage n\'existe pas.': 'fake',
-    # "New England MP and former Deputy Prime Minister Barnaby Joyce": 'fake',
-    # '6': 'fake',
-    # 'mh.10.sangli': 'fake',
-    # "Le B\u00e9nin est bien class\u00e9 6e pays le plus heureux de l\u2019Afrique subsaharienne selon le \"World Happiness Report\" qui, cependant, n'\u00e9mane pas des Nations Unies.": 'fake',
-    # "Bitcoin n\u00e3o \u00e9 uma pir\u00e2mide financeira ou esquema ponzi, o Bitcoin tem um embasamento completamente oposto ao que s\u00e3o esquemas fradulentos. Bitcoin \u00e9 a primeira criptomoeda lan\u00e7ada, as primeiras pessoas que adotaram o bitcoin foram os entusiastas de criptografia, o bitcoin foi anunciado em um grupo cypherpunk em 2008, ou seja, pessoas com um conhecimento avan\u00e7ado em tecnologia e matem\u00e1tica acreditaram no pot\u00eancial da tecnologia.": 'fake',
-    # 'no disponible': 'fake',
-    # 'at the time indian-pakistan war rajiv gandhi was in india.': 'fake',
-    # 'while data on sex workers in ireland is extremely lacking, the figures that are available and most commonly employed by experts do not support this claim. there is no official data documenting the movement of sex workers south across the border, but whatever the scale, an 80% impact in ireland is unlikely.': 'fake',
+
 }
 
+### MAPPING FUNCTIONS
+
+def claimreview_get_coinform_label(cr):
+    """takes a ClaimReviews and outputs a CoInform score"""
+    # unify to the score (easier to work with numbers)
+    score = claimreview_get_rating(cr)
+    # and then map the score to the labels
+    mapped_label = get_coinform_label_from_score(score)
+    return mapped_label
+
 def simplify_label(label):
+    """maps from the fact-checker label to the coinform label"""
+    # normalise string to lowercase and strip spaces around
     label = label.strip().lower()
     label = label.replace('fact crescendo rating: ', '')
     label = label.replace('fact crescendo rating - ', '')
     label = label.replace('fact crescendo rating ', '')
+    # first look for the full label
     result = label_maps.get(label, None)
+    # then if the label begins with something known
     if not result:
         for k,v in label_maps.items():
             if label.startswith(k.lower()):
                 result = v
                 break
     if not result:
-        print('unmappable alternateName', label)
+        # return None which will get mapped
+        pass
     return result
 
-def claimreview_get_rating(claimreview):
-    # what to do with these labels? for now returns None so the claims are discarded
-    # {'Known since 2008', 'Lacks context', 'Unproven claim', 'Tactics look typical', 'Cannot Be Verified', 'Shift from past position', 'Easily beats the market', 'Includes Hispanic Other Black', 'More words than action', 'By Some Counts Yes', 'Roe grants federal right', 'Not a Muslim migrant', 'Polls depend on wording', 'Had seat at table', "Record doesn't say that", 'Coverage has limits', 'Wrong', 'Not accurate', 'Photo is real', 'Misleads', 'Met half of them', 'Mostly entered before Obama', 'No evidence', 'Wrong use of word', 'Mis- leading', 'Lie of the Year', 'Other spending nears $200M', 'Too soon to say', 'Possible but risky', 'White House not studio', 'Obama Called in 2012', 'Trump ordered new probe', 'Disputed Claim', 'Clinton role still unclear', 'Flip- flop', 'False', 'They are not eligible', 'No such plan', 'Not what GM says', 'In dispute', 'Trump deserves some credit', 'Can still be deported', 'Spinning the facts', 'Revised after backlash', 'Personal tweet taken down', "It's Calif. law", "Japan's leader acted first", 'Mostly false', 'Study in Dispute', 'Salary not only factor', 'No contact', 'Needs Context', 'Old stat', "He's very close", 'Flip- Flop', 'Rates are even higher', 'Staff error', 'In effect since 1965', 'Far from clear', 'Number not that high', 'Claim omits key facts', "Didn't use that word", 'Ignores US GDP size', 'Needs context', 'U.S. has trade surplus', 'Depends on the metric', 'Not the Whole Story', 'Way early to say', 'Numbers are close', 'Trump role emerged later', 'Depends on source', 'No way to verify', 'Effect not clear', 'No way to know', 'Result of Trump policy', 'Twitter fixed a glitch', 'Ignores all tax hikes', 'Vetted by State Dept.', 'His numbers are outdated', 'Fuzzy math', 'Latino numbers much higher', 'Not the same thing', 'Not what Pelosi said', 'Not the whole story', 'Experts question wall impact', 'Flynn talked Russia sanction', 'Lacks Context', 'Under Dispute', 'Supports border tech security', 'Unlikely but possible', 'Could be much worse', 'Lacks Evidence', 'No MS-13 removal data', 'Legal rules unclear', 'She told law schools', 'Not Missouri students', "Don't count your chickens", 'Depends on intent', 'Not that clear cut', 'History poses big hurdle', 'But little impact yet'}
+def get_coinform_label_from_score(score):
+    """The inverse function of `simplified_labels_scores`"""
+    if score is None:
+        return 'not_verifiable'
+    if score > 0.8:
+        return 'credible'
+    if score > 0.6:
+        return 'mostly_credible'
+    if score > 0.4:
+        return 'uncertain'
+    return 'not_credible'
 
+def claimreview_get_rating(claimreview):
+    """takes a claimReviews and outputs a score of truthfulness between [0;1] or None if not verifiable"""
+    # take the reviewRating
     reviewRating = claimreview.get('reviewRating', None)
     if not reviewRating:
+        # sometimes reviewRating is inside "properties"
         reviewRating = claimreview.get('properties', {}).get('reviewRating', None)
     if not reviewRating:
+        # nothing to say
         return None
+    
+
+    if 'properties' in reviewRating:
+        reviewRating = reviewRating['properties']
+
+    score = None
+
+    # first take the textual label
     try:
-        if 'properties' in reviewRating:
-            reviewRating = reviewRating['properties']
-        best = int(reviewRating['bestRating'])
-        worst = int(reviewRating['worstRating'])
-        value = int(reviewRating['ratingValue'])
-        if best == -1 and worst == -1:
-            score = None
-        else:
-            score = (value - worst) / (best - worst)
-            # correct errors like: 'bestRating': '10', 'ratingValue': '0', 'worstRating': '1'
-            score = min(score, 1.0)
-            score = max(score, 0.0)
+        scoreTxt = reviewRating.get('alternateName', '') or reviewRating.get('properties', {}).get('alternateName', '')
+        if isinstance(scoreTxt, dict):
+            scoreTxt = scoreTxt['@value']
     except Exception as e:
-        score = None
-        print('rating numbers not found', reviewRating)
+        print(reviewRating)
+        raise e
+    try:
+        # map it to the coinform labels
+        simplified_label = simplify_label(scoreTxt)
+    except Exception as e:
+        print(claimreview['url'])
+        print(reviewRating)
+        raise e
+    if simplified_label:
+        # get the numerical score
+        score = simplified_labels_scores[simplified_label]
+
+    # second strategy: if the textual label is unknown, take the rating value
     if score == None:
         try:
-            scoreTxt = reviewRating.get('alternateName', '') or reviewRating.get('properties', {}).get('alternateName', '')
-            if isinstance(scoreTxt, dict):
-                scoreTxt = scoreTxt['@value']
+            best = int(reviewRating['bestRating'])
+            worst = int(reviewRating['worstRating'])
+            value = int(reviewRating['ratingValue'])
+            if best == -1 and worst == -1:
+                score = None
+            else:
+                score = (value - worst) / (best - worst)
+                # correct errors like: 'bestRating': '10', 'ratingValue': '0', 'worstRating': '1'
+                score = min(score, 1.0)
+                score = max(score, 0.0)
         except Exception as e:
-            print(reviewRating)
-            raise e
-        try:
-            simplified_label = simplify_label(scoreTxt)
-            #print(simplified_label)
-        except Exception as e:
-            print(claimreview['url'])
-            print(reviewRating)
-            print(score)
-            raise e
-        if simplified_label:
-            score = simplified_labels_scores[simplified_label]
+            # in the case the numbers are not found, there is not any information that can be used to map the rating
+            score = None
+
     return score
+
 
 def claimreview_interpret_rating(claimreview):
     rating = claimreview_get_rating(claimreview)
