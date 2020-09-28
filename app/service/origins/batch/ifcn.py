@@ -157,7 +157,7 @@ def _get_credibility_measures(ifcn_assessment):
     confidence = 1.0
     if ifcn_assessment['expired']:
         # if IFCN assessment is expired, lower the confidence
-        confidence = 0.5
+        confidence = 0.8 # due to COVID, process is slower (see disclaimer https://ifcncodeofprinciples.poynter.org/signatories)
     for skill in ifcn_assessment['skills']:
         for value in skill['values']:
             if value == 'partially_compliant':
