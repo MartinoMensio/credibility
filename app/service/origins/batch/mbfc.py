@@ -65,6 +65,7 @@ _save_me_dict = {
     'herb': 'https://herb.co/',
     'shafaq-news': 'https://www.shafaaq.com/',
     'kcra-3': 'https://www.kcra.com/',
+    'the-political-tribune': 'https://www.thepoliticaltribune.com/',
 }
 
 def _retrieve_assessments(origin_id, homepage):
@@ -132,12 +133,15 @@ def _get_categories(homepage):
 
     soup = BeautifulSoup(response.text, features='lxml')
     biases = soup.select('ul#mega-menu-info_nav a.mega-menu-link')
-    return [{
+    categories = [{
         'url': b['href'],
         'name': b.text,
         'path': _get_path_from_full_url(b['href'], homepage),
         'label': _get_path_from_full_url(b['href'], homepage).replace('/', '')
     } for b in biases]
+    # this page is a dictionary of terms
+    categories = [el for el in categories if el['path'] != '/pseudoscience-dictionary/']
+    return categories
 
 def _get_path_from_full_url(full_url, homepage):
     return full_url.replace(homepage, '/').replace('http://mediabiasfactcheck.com/', '/')
