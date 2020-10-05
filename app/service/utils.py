@@ -300,6 +300,7 @@ def aggregate_by(doc_level, origin_name, key):
         # something like {'snopes.com' : {'factcheck_positive_cnt': 3, ...}}}
         cnts_by_factchecker = defaultdict(lambda: defaultdict(list))
         counts = defaultdict(list)
+        # TODO convert this to a list of detailed reports (label, which URL was checked, ...)
 
         assessment_urls = set()
         for el in v:

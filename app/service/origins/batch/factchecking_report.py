@@ -43,6 +43,48 @@ class Origin(OriginBatch):
         }
         return counts
 
+    # TODO double check this gets called also by multiple check
+    def get_url_credibility(self, url):
+        domain = utils.get_url_domain(url)
+        if domain == 'twitter.com':
+            match = re.search(r'https://twitter\.com/[A-Za-z0-9_]+/status/(?P<tweet_id>[0-9]+).*', url)
+            if not match:
+                # cannot do this twitter thing, go back to the other condition
+                result = persistence.get_url_assessment(self.id, url)
+            else:
+                tweet_id = match.group('tweet_id')
+                # also match with URLs that have more content
+                results = persistence.get_tweet_assessments(self.id, tweet_id)
+                results = list(results)
+                if len(results):
+                    # this is merging multiple results
+                    original = defaultdict(lambda: defaultdict(set))
+                    # TODO this needs to be changed, in aggregation function (utils.py). Allow to see the single labels from fact-checkers
+                    for el in results:
+                        for k1, v1 in el['original'].items():
+                            for k2, v2 in v1.items():
+                                original[k1][k2].update(v2)
+                    # set to list, without duplicates
+                    original = {k1: {k2: list(v2) for k2, v2 in v1.items()} for k1, v1 in original.items()}
+                    result = {
+                        'url': 'http://todo.todo',
+                        'credibility': { # TODO proper average accounting for confidence???
+                            'value': sum(el['credibility']['value'] for el in results) / len(results),
+                            'confidence': sum(el['credibility']['confidence'] for el in results) / len(results),
+                        },
+                        'itemReviewed': tweet_id,
+                        'original': original,
+                        'origin_id': 'factchecking_report',
+                        'granularity': 'itemReviewed'
+                    }
+                else:
+                    result = None
+        else:
+            result = persistence.get_url_assessment(self.id, url)
+        return result
+        # use regex search 
+        # db.getCollection('factchecking_report').find({'itemReviewed': { $regex : /^https:\/\/twitter\.com\/wvdemocrats\/status\/1016745675642556417/ }})
+
 ID = 'factchecking_report'
 
 def get_factcheckers():
@@ -438,11 +480,11 @@ def clean_claim_url(url):
 
 # the values of truthiness for the simplified labels in [0;1] range with None for 'not_verifiable'
 simplified_labels_scores = {
-    'credible': 1.0,
-    'mostly_credible': 0.8,
-    'uncertain': 0.5,
-    'not_credible': 0.0,
-    'not_verifiable': None,
+    'credible': 1.0, # becomes 1 credibility
+    'mostly_credible': 0.75, # becomes 0.5 credibility
+    'uncertain': 0.5, # becomes 0 credibility
+    'not_credible': 0.0, # becomes -1 credibility
+    'not_verifiable': None, # becomes 0 confidence
     # legacy labels
     'true': 1.0,
     'mixed': 0.5,

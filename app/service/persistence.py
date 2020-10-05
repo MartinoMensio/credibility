@@ -81,15 +81,23 @@ def get_domain_assessment(origin_name: str, domain: str):
 def get_source_assessment(origin_name: str, source: str):
     """Returns the domain assessment from the specified origin about the source"""
     collection = db_credibility[origin_name]
-    # TODO deal with multiple matches
+    # TODO deal with multiple matches (they should have been merged before!!!)
     match = collection.find_one({'source': source, 'granularity': 'source'})
     return match
 
 def get_url_assessment(origin_name: str, url: str):
     """Returns the domain assessment from the specified origin about the source"""
     collection = db_credibility[origin_name]
-    # TODO deal with multiple matches
+    # TODO deal with multiple matches (they should have been merged before!!!)
     match = collection.find_one({'itemReviewed': url, 'granularity': 'itemReviewed'})
+    return match
+
+
+def get_tweet_assessments(origin_name: str, tweet_id: str):
+    """Returns the domain assessments from the specified origin about the source"""
+    collection = db_credibility[origin_name]
+    # TODO deal with multiple matches (they should have been merged before!!!)
+    match = collection.find({'itemReviewed': {'$regex': f'^https://twitter\.com/[A-Za-z0-9_]+/status/{tweet_id}'}, 'granularity': 'itemReviewed'})
     return match
 
 def get_domain_assessment_multiple(origin_name: str, domains: List[str]):
