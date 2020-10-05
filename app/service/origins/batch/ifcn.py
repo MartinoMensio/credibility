@@ -161,9 +161,9 @@ def _get_credibility_measures(ifcn_assessment):
     for skill in ifcn_assessment['skills']:
         for value in skill['values']:
             if value == 'partially_compliant':
-                credibility -= 0.05
+                credibility -= 0.025
             elif value == 'none_compliant':
-                credibility -= 0.1
+                credibility -= 0.05
     # credibility is still positive / neutral, not negative
     credibility = max(credibility, 0.0)
     result = {
