@@ -20,7 +20,12 @@ class Origin(OriginRealtime):
         return _retrieve_assessment(domain, self.api_endpoint, self.id)
 
     def retrieve_source_credibility(self, source):
-        return _retrieve_assessment(source, self.api_endpoint, self.id)
+        result = _retrieve_assessment(source, self.api_endpoint, self.id)
+        # TODO the following does not work because the db _id is on the domain, so only domain-level or source-level can be stored
+        # if result:
+        #     results_domain = utils.aggregate_domain([result], self.id)
+        #     persistence.save_assessments(self.id, results_domain)
+        return result
 
 def _retrieve_assessment(source, api_endpoint, origin_id):
     original_assessment = _query_assessment(source, api_endpoint)
