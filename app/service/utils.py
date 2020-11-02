@@ -318,6 +318,10 @@ def aggregate_by(doc_level, origin_name, key):
                     'origin': el['origin']
                 })
 
+                # TODO limit the size somehow
+                # pymongo.errors.OperationFailure: BSONObj size: 22840637 (0x15C853D) is invalid. Size must be between 0 and 16793600(16MB)
+                reports = reports[:500]
+
             if 'coinform_label' in el:
                 label_to_use = 'coinform_label'
             # the mapping for other data, non fact-checks
