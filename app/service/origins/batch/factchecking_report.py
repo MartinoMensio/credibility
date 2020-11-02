@@ -58,14 +58,25 @@ class Origin(OriginBatch):
                 results = list(results)
                 if len(results):
                     # this is merging multiple results
-                    original = defaultdict(lambda: defaultdict(set))
+                    # original = defaultdict(lambda: defaultdict(set))
+                    reports = defaultdict(list)
                     # TODO this needs to be changed, in aggregation function (utils.py). Allow to see the single labels from fact-checkers
                     for el in results:
-                        for k1, v1 in el['original'].items():
-                            for k2, v2 in v1.items():
-                                original[k1][k2].update(v2)
+                        for report in el['reports']:
+                            reports[report['report_url']].append(report)
+                        # for k1, v1 in el['original'].items():
+                        #     for k2, v2 in v1.items():
+                        #         original[k1][k2].update(v2)
                     # set to list, without duplicates
-                    original = {k1: {k2: list(v2) for k2, v2 in v1.items()} for k1, v1 in original.items()}
+                    # original = {k1: {k2: list(v2) for k2, v2 in v1.items()} for k1, v1 in original.items()}
+                    # again to list without duplicates
+                    reports_cleaned = []
+                    for k, l in reports.items():
+                        labels = set(el['coinform_label'] for el in l)
+                        if len(labels) > 1:
+                            raise ValueError('Reports not agreeing!!!!')
+                        # just append one for each claimreview URL (no duplicates)
+                        reports_cleaned.append(l[0])
                     result = {
                         'url': 'http://todo.todo',
                         'credibility': { # TODO proper average accounting for confidence???
@@ -73,7 +84,7 @@ class Origin(OriginBatch):
                             'confidence': sum(el['credibility']['confidence'] for el in results) / len(results),
                         },
                         'itemReviewed': tweet_id,
-                        'original': original,
+                        'reports': reports_cleaned,
                         'origin_id': 'factchecking_report',
                         'granularity': 'itemReviewed'
                     }
@@ -104,10 +115,12 @@ def get_factcheckers():
     for sa in signatories_assessments:
         homepage = sa['original']['website']
         id = sa['original']['id']
+        assessment_url = sa['url']
+        name = sa['original']['name']
         domain = utils.get_url_domain(homepage)
         # TODO this is kinda of the formula for propagation (warning negative weights? mapping function?)
         weight = sa['credibility']['value'] * sa['credibility']['confidence'] * ifcn.Origin().default_weight
-        fact_checker = FactChecker(homepage, id, weight)
+        fact_checker = FactChecker(homepage, id, weight, assessment_url, name)
         print(fact_checker.id, fact_checker.WEIGHT)
         result[domain] = fact_checker
 
@@ -120,10 +133,21 @@ class FactChecker(object):
     id: str
     origin_type: str
 
-    def __init__(self, homepage, id, weight):
+    def __init__(self, homepage, id, weight, assessment_url, name):
         self.HOMEPAGE = homepage
         self.WEIGHT = weight
         self.id = id#utils.get_url_domain(homepage)
+        self.assessment_url = assessment_url
+        self.name = name
+
+    def serialise(self):
+        return {
+            'id': self.id,
+            'homepage': self.HOMEPAGE,
+            'assessment_url': self.assessment_url,
+            'weight': self.WEIGHT,
+            'name': self.name
+        }
 
     # def get_source_credibility(self, source):
     #     return get_source_credibility_from(source, self.id)
@@ -171,6 +195,7 @@ def _retrieve_assessments():
     # - itemReviewed: the appearance URL
     # - review_url: the URL of the assessment
     # - origin_domain: the domain of the review_url
+    # - coinform_label: the original label given by the fact-checker
     url_assessments = []
     for cr in all_claimreviews:
         #serialisation issues with mongo objectid
@@ -184,6 +209,7 @@ def _retrieve_assessments():
             print('no url for', cr)
             continue
         origin_domain = utils.get_url_domain(review_url)
+        coinform_label = claimreview_get_coinform_label(cr)
 
         for appearance in claimreview_get_claim_appearances(cr):
             # TODO unshorten appearance
@@ -197,7 +223,8 @@ def _retrieve_assessments():
                 'origin_domain': origin_domain,
                 'domain': domain,
                 'source': source,
-                'original': cr
+                'original': cr,
+                'coinform_label': coinform_label
             })
     print(len(url_assessments), 'URL assessments')
     # persistence.save_url_assessments(ID, url_assessments)
@@ -219,15 +246,18 @@ def _retrieve_assessments():
             # TODO maybe also other factcheckers can be trusted!
             origin_weight = 0
             origin_id = origin_domain.replace('.', '_')
+            origin_serialisable = None
         else:
             origin_weight = origin.WEIGHT
             origin_id = origin.id
+            origin_serialisable = origin.serialise()
 
         credibility_value = ass['credibility']['value']
         credibility_confidence = ass['credibility']['confidence']
 
         # TODO redefine the weight maximum value, for now it's 10
         confidence_rescored = credibility_confidence * (float(origin_weight) / 10)
+
 
         url_assessments_propagated.append({
             'original': ass['original'],
@@ -241,7 +271,9 @@ def _retrieve_assessments():
                 'confidence': confidence_rescored
             },
             'origin_id': origin_id,
-            'origin_weight': origin_weight
+            'origin': origin_serialisable,
+            'origin_weight': origin_weight,
+            'coinform_label': ass['coinform_label']
         })
     print('propagation done')
 

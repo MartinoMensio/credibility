@@ -43,7 +43,7 @@ class Assessment(BaseModel):
     # the URL to the item reviewed, the more punctual as possible
     itemReviewed: str
     # the original assessment
-    original: Any
+    reports: List[Any] = []
     # the domain of the itemReviewed
     domain: Optional[str]
     # the source of the itemReviewed

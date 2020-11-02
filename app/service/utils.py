@@ -286,14 +286,14 @@ def aggregate_domain(doc_level, origin_name):
     return aggregate_by(doc_level, origin_name, 'domain')
 
 def aggregate_by(doc_level, origin_name, key):
-    by_source = defaultdict(list)
+    by_group = defaultdict(list)
 
     for ass in doc_level:
-        by_source[ass[key]].append(ass)
+        by_group[ass[key]].append(ass)
 
     results = {}
 
-    for k,v in by_source.items():
+    for k,v in by_group.items():
         credibility_sum = 0.
         confidence_sum = 0.
 
@@ -301,6 +301,7 @@ def aggregate_by(doc_level, origin_name, key):
         cnts_by_factchecker = defaultdict(lambda: defaultdict(list))
         counts = defaultdict(list)
         # TODO convert this to a list of detailed reports (label, which URL was checked, ...)
+        reports = []
 
         assessment_urls = set()
         for el in v:
@@ -309,7 +310,17 @@ def aggregate_by(doc_level, origin_name, key):
             assessment_urls.add(el['url'])
             credibility_sum += credibility_value * credibility_confidence
             confidence_sum += credibility_confidence
-            # TODO collect counts of positive, negative, neutral assessments
+            if origin_name == 'factchecking_report':
+                # collect counts of positive, negative, neutral assessments
+                reports.append({
+                    'report_url': el['url'],
+                    'coinform_label': el['coinform_label'],
+                    'origin': el['origin']
+                })
+
+            if 'coinform_label' in el:
+                label_to_use = 'coinform_label'
+            # the mapping for other data, non fact-checks
             label_to_use = 'unknown' if credibility_confidence < 0.4 \
                 else 'positive' if credibility_value > 0 \
                     else 'negative' if credibility_value < 0 else 'neutral'
@@ -339,6 +350,8 @@ def aggregate_by(doc_level, origin_name, key):
         else:
             assessment_url = 'http://todo.todo'
 
+        # TODO assign final coinform label from credibility?
+
         all_counts = cnts_by_factchecker
         cnts_by_factchecker['overall'] = counts
 
@@ -349,7 +362,8 @@ def aggregate_by(doc_level, origin_name, key):
                 'confidence': confidence_sum / len(v)
             },
             'itemReviewed': k,
-            'original': cnts_by_factchecker,
+            'counts': cnts_by_factchecker, # --> RINOMINA campo a "counts" e poi usa reviews/details per metterci roba
+            'reports': reports,
             'origin_id': origin_name,
             key: k,
             'granularity': key
