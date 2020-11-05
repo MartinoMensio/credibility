@@ -52,7 +52,7 @@ def _download_assessments():
     
 
 def _download_csv(url):
-    res = requests.get(url)
+    res = requests.get(url, verify=False)
     res.raise_for_status()
     text = res.text
     reader = csv.DictReader(text.splitlines())
