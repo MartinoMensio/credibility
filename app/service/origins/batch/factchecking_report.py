@@ -210,6 +210,7 @@ def _retrieve_assessments():
             continue
         origin_domain = utils.get_url_domain(review_url)
         coinform_label = claimreview_get_coinform_label(cr)
+        original_label = cr.get('reviewRating', {}).get('alternateName', None)
 
         for appearance in claimreview_get_claim_appearances(cr):
             # TODO unshorten appearance
@@ -224,7 +225,8 @@ def _retrieve_assessments():
                 'domain': domain,
                 'source': source,
                 'original': cr,
-                'coinform_label': coinform_label
+                'coinform_label': coinform_label,
+                'original_label': original_label
             })
     print(len(url_assessments), 'URL assessments')
     # persistence.save_url_assessments(ID, url_assessments)
@@ -273,7 +275,8 @@ def _retrieve_assessments():
             'origin_id': origin_id,
             'origin': origin_serialisable,
             'origin_weight': origin_weight,
-            'coinform_label': ass['coinform_label']
+            'coinform_label': ass['coinform_label'],
+            'original_label': ass['original_label']
         })
     print('propagation done')
 

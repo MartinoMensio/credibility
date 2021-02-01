@@ -315,6 +315,7 @@ def aggregate_by(doc_level, origin_name, key):
                 reports.append({
                     'report_url': el['url'],
                     'coinform_label': el['coinform_label'],
+                    'original_label': el['original_label'],
                     'origin': el['origin']
                 })
 
