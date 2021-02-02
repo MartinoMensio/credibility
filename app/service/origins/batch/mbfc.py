@@ -66,6 +66,10 @@ _save_me_dict = {
     'shafaq-news': 'https://www.shafaaq.com/',
     'kcra-3': 'https://www.kcra.com/',
     'the-political-tribune': 'https://www.thepoliticaltribune.com/',
+    'cbs-los-angeles-kcbs': 'https://losangeles.cbslocal.com/',
+    'wamu-fm': 'https://wamu.org/',
+    'real-raw-news': 'https://realrawnewstoday.com/',
+    'rumble': 'https://rumble.com/',
 }
 
 def _retrieve_assessments(origin_id, homepage):
@@ -79,6 +83,7 @@ def _scrape(homepage):
     categories = _get_categories(homepage)
     assessments = {}
     for c in categories:
+        print(c)
         if c['label'] == 're-evaluated-sources':
             # these sources are already in other lists
             continue
@@ -132,7 +137,7 @@ def _get_categories(homepage):
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, features='lxml')
-    biases = soup.select('ul#mega-menu-info_nav a.mega-menu-link')
+    biases = soup.select('ul#mega-menu-main_nav .mega-menu-link')
     categories = [{
         'url': b['href'],
         'name': b.text,
@@ -151,8 +156,11 @@ def get_assessments_urls(category):
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, features='lxml')
-    name =  soup.select_one('.page > h1.page-title').text
-    description = ''.join([el.text.strip() for el in soup.select('div.entry p')[:2]])
+    name =  soup.select_one('h1.entry-title.page-title')
+    if not name:
+        return []
+    name = name.text
+    description = ''.join([el.text.strip() for el in soup.select('div.entry-content p')[:2]])
     description = re.sub('see also:', '', description, flags=re.IGNORECASE).strip()
     #print(description)
     # they are in a table-container (not anymore in a list)
@@ -188,7 +196,7 @@ def scrape_assessment(assessment, mbfc_homepage):
     id = article_element['id'].replace('page-', '')
 
     #print(assessment['url'], assessment['bias'])
-    name = soup.select_one('article.page > h1.page-title').text
+    name = soup.select_one('article.page h1.page-title').text
 
     # searching the homepage
     paragraphs = soup.select('p')
@@ -236,12 +244,14 @@ def scrape_assessment(assessment, mbfc_homepage):
         # TODO find a way to signal this without interrupting everything
         raise ValueError(assessment['url'])
     factual = None
-    for m in paragraphs:
-        if m.text.startswith('Factual Reporting:'):
-            factual = m.text.replace('Factual Reporting:', '')
-            factual = factual.split('\n')[0]
-            factual = factual.strip()
-            break
+    img = soup.select('article img')
+    if len(img) >= 2:
+        img = img[1]
+        img_alt = img['alt']
+        factual = img_alt.replace('Factual Reporting:', '')
+        factual = factual.split('\n')[0]
+        factual = factual.strip()
+        factual = factual.upper()
     if not factual:
         print('no factuality rating in', assessment['url'])
         # TODO look at the image on the top (factual, high, mostly, mixed, ...)
