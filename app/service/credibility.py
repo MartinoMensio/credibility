@@ -70,10 +70,12 @@ def get_weighted_credibility(item, get_fn_to_call, granularity='source'):
         # TODO source evaluation, now is a fixed value
         origin_weight = origin.default_weight
         # special weights for URLs
-        if granularity == 'url' and origin.id == 'factchecking_report':
-            if assessment['credibility']['confidence'] > 0.01:
+        if granularity == 'url' and assessment['credibility']['confidence'] > 0.01:
+            if origin.id == 'factchecking_report':
                 # if the URL says something, this counts more
                 origin_weight *= 10
+            else:
+                origin_weight /= 10
         credibility_value = assessment['credibility']['value']
         credibility_confidence = assessment['credibility']['confidence']
 
