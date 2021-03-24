@@ -49,9 +49,9 @@ def get_source_credibility(source):
 
 def get_url_credibility(url):
     get_fn_to_call = lambda el: el.get_url_credibility
-    return get_weighted_credibility(url, get_fn_to_call)
+    return get_weighted_credibility(url, get_fn_to_call, granularity='url')
 
-def get_weighted_credibility(item, get_fn_to_call):
+def get_weighted_credibility(item, get_fn_to_call, granularity='source'):
     """retrieve the credibility score for the source, by using the origins available"""
     # TODO be sure to be at the source level, e.g. use utils.get_domain but be careful to facebook/twitter/... platforms
     #source = utils.get_url_domain(source)
@@ -69,6 +69,11 @@ def get_weighted_credibility(item, get_fn_to_call):
             continue
         # TODO source evaluation, now is a fixed value
         origin_weight = origin.default_weight
+        # special weights for URLs
+        if granularity == 'url' and origin.id == 'factchecking_report':
+            if assessment['credibility']['confidence'] > 0.01:
+                # if the URL says something, this counts more
+                origin_weight *= 10
         credibility_value = assessment['credibility']['value']
         credibility_confidence = assessment['credibility']['confidence']
 
@@ -185,7 +190,7 @@ def get_url_credibility_parallel(urls):
 
 
     for url in urls:
-        results[url] = get_weighted_credibility(url, performance_trick_query_already_done)
+        results[url] = get_weighted_credibility(url, performance_trick_query_already_done, granularity='url')
     return results
 
 def update_batch_origin(origin_id):
