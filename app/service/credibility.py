@@ -33,7 +33,7 @@ batch_origins = {
 #     o.get_source_credibility = 'TODO'
 
 realtime_origins = {
-    'newsguard': newsguard.Origin(),
+    # 'newsguard': newsguard.Origin(),
     'mywot': mywot.Origin(),
 }
 
