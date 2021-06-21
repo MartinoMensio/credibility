@@ -37,7 +37,10 @@ def _get_fake_news_websites(self_id):
     for headers, table in headers_and_tables:
         for row in tqdm.tqdm(table, desc='Fake websites'):
             # print(row.keys())
-            name = row['Name'].text.strip()
+            name = row['Name']
+            for el in name.select('style'):
+                el.decompose()
+            name = name.text.strip()
             name = re.sub(r'\s*\([^)]*\)', '', name)
             name = re.sub(r'\s*\[[^)]*\]', '', name)
             notes = row['Notes'].text.strip()

@@ -252,6 +252,13 @@ name_domain_map = {
     'Fair Observer': 'https://www.fairobserver.com/',
     'ΚΒΟΙ2.com': 'http://ΚΒΟΙ2.com/',
     'Battery University': 'https://batteryuniversity.com/',
+    'Global Times': 'https://www.globaltimes.cn/',
+    'Zero Hedge': 'https://www.zerohedge.com/',
+    'The California Globe': 'https://californiaglobe.com/',
+    'Metal-experience.com': 'https://metal-experience.com/',
+    'Our Campaigns': 'https://www.ourcampaigns.com/',
+    'Religion News Service': 'https://religionnews.com/',
+    'Weather2Travel.com': 'https://www.weather2travel.com/',
 }
 
 # this regex works for facebook and twitter and extracts the source as account name
