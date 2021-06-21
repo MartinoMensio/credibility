@@ -16,7 +16,7 @@ class Origin(OriginBatch):
             id = 'mbfc',
             name = 'Media Bias/Fact Check',
             description = 'We are the most comprehensive media bias resource on the internet. There are currently 2800+ media sources listed in our database and growing every day. Don’t be fooled by Fake News sources.',
-            homepage = 'https://mediabiasfactcheck.com/',
+            homepage = 'https://mediabiasfactcheck.com',
             logo = 'https://i1.wp.com/mediabiasfactcheck.com/wp-content/uploads/2019/09/70594586_2445557865563713_6069591037599285248_n.png?resize=300%2C300&ssl=1',
             default_weight = 7
         )
@@ -70,6 +70,15 @@ _save_me_dict = {
     'wamu-fm': 'https://wamu.org/',
     'real-raw-news': 'https://realrawnewstoday.com/',
     'rumble': 'https://rumble.com/',
+    'alt-right-tv': 'https://altrighttv.com/',
+    'sc-connecticut-news': 'https://scconnnews.com/',
+    'we-love-trump': 'https://welovetrump.com/',
+    'anewspost-com': 'https://anewspost.com/',
+    'online-updates': 'https://online-updates.net/',
+    'the-vaccine-reaction': 'https://thevaccinereaction.org/',
+    'american-conservative-movement-acm': 'https://americanconservativemovement.com/',
+    'christians-for-truth': 'https://christiansfortruth.com/',
+    'dan-bongino-bias-rating': 'https://bongino.com/',
 }
 
 def _retrieve_assessments(origin_id, homepage):
@@ -87,7 +96,7 @@ def _scrape(homepage):
         if c['label'] == 're-evaluated-sources':
             # these sources are already in other lists
             continue
-        assessments_urls = get_assessments_urls(c)
+        assessments_urls = get_assessments_urls(c, homepage)
         print(c['url'], len(assessments_urls))
         for ass_url in assessments_urls:#[:3]:
             assessment = {
@@ -98,7 +107,13 @@ def _scrape(homepage):
             assessments[ass_url] = assessment
     assessments = assessments.values()
 
-    scrape_assessment_wrapper = lambda ass: scrape_assessment(ass, homepage)
+    def scrape_assessment_wrapper(ass):
+        try:
+            return scrape_assessment(ass, homepage)
+        except Exception as e:
+            print('EXPLODING EXCEPTION: ', e)
+            # debug which assessment is causing problems
+            raise ValueError(ass['url'])
 
     assessments_scraped = []
     with ThreadPool(_POOL_SIZE) as pool:
@@ -138,12 +153,16 @@ def _get_categories(homepage):
 
     soup = BeautifulSoup(response.text, features='lxml')
     biases = soup.select('ul#mega-menu-main_nav .mega-menu-link')
-    categories = [{
-        'url': b['href'],
-        'name': b.text,
-        'path': _get_path_from_full_url(b['href'], homepage),
-        'label': _get_path_from_full_url(b['href'], homepage).replace('/', '')
-    } for b in biases]
+    categories = []
+    for b in biases:
+        url = b['href'] if b['href'].startswith('https') else f"{homepage}{b['href']}"
+        path = url.replace(homepage, '')
+        categories.append({
+            'url': url,
+            'name': b.text,
+            'path': path,
+            'label': path.replace('/', '')
+        })
     # this page is a dictionary of terms
     categories = [el for el in categories if el['path'] != '/pseudoscience-dictionary/']
     return categories
@@ -151,15 +170,17 @@ def _get_categories(homepage):
 def _get_path_from_full_url(full_url, homepage):
     return full_url.replace(homepage, '/').replace('http://mediabiasfactcheck.com/', '/')
 
-def get_assessments_urls(category):
+def get_assessments_urls(category, homepage):
     response = requests.get(category['url'])
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, features='lxml')
     name =  soup.select_one('h1.entry-title.page-title')
     if not name:
+        print('no name')
         return []
-    name = name.text
+    name = name.text.strip()
+    # TODO description is in a span, not p
     description = ''.join([el.text.strip() for el in soup.select('div.entry-content p')[:2]])
     description = re.sub('see also:', '', description, flags=re.IGNORECASE).strip()
     #print(description)
@@ -173,12 +194,13 @@ def get_assessments_urls(category):
     source_urls =  source_urls_tables # + source_urls_list
     source_urls = [el['href'] for el in source_urls]
     # there are some spurious elements, e.g. https://www.hermancain.com/
-    source_urls = [el for el in source_urls if 'mediabiasfactcheck.com' in el]
+    source_urls = [el for el in source_urls if el.startswith('/') or homepage in el]
+    source_urls = [f'{homepage}{el}' if el.startswith('/') else el for el in source_urls]
 
     return source_urls
 
 def scrape_assessment(assessment, mbfc_homepage):
-    response = requests.get(assessment['url'])
+    response = requests.get(assessment['url'], verify=False) # lots of verification issues when scraping
     if response.status_code != 200:
         # These 6 pages return HTTP 404
         # https://mediabiasfactcheck.com/euromaiden-press/
@@ -197,6 +219,11 @@ def scrape_assessment(assessment, mbfc_homepage):
 
     #print(assessment['url'], assessment['bias'])
     name = soup.select_one('article.page h1.page-title').text
+
+    # some pages require a paid account: https://mediabiasfactcheck.com/jim-acosta-bias-rating/ https://mediabiasfactcheck.com/erin-burnett-bias-rating/ ...
+    pro = soup.select('div.pmpro_content_message')
+    if pro:
+        return None
 
     # searching the homepage
     paragraphs = soup.select('p')
@@ -236,6 +263,13 @@ def scrape_assessment(assessment, mbfc_homepage):
                     source_homepage = source_homepage['href']
                     break
     if not source_homepage:
+        # some new sources have a table with all the details (e.g. https://mediabiasfactcheck.com/roanoke-times/)
+        table = soup.select_one('article table')
+        if table:
+            for row in table.select('tr'):
+                if row.select_one('td span').text == 'Source URL:':
+                    source_homepage = row.select_one('td a')['href']
+    if not source_homepage:
         # last hope when the assessment does not have the homepage linked
         path = _get_path_from_full_url(assessment['url'], mbfc_homepage).replace('/', '')
         # use an handcrafted mapping
@@ -243,24 +277,32 @@ def scrape_assessment(assessment, mbfc_homepage):
     if not source_homepage:
         # TODO find a way to signal this without interrupting everything
         raise ValueError(assessment['url'])
+    factual_desc = None
     factual = None
-    img = soup.select('article img')
-    if len(img) >= 2:
-        img = img[1]
-        img_alt = img['alt']
-        factual = img_alt.replace('Factual Reporting:', '')
-        factual = factual.split('\n')[0]
-        factual = factual.strip()
-        factual = factual.upper()
-    if not factual:
-        print('no factuality rating in', assessment['url'])
-        # TODO look at the image on the top (factual, high, mostly, mixed, ...)
+    leaning = None
+    leaning_desc = None
+    imgs = soup.select('article img')
+    for img in imgs:
+        img_title = img.get('data-image-title', None)
+        if not img_title or len(img_title) > 50:
+            continue
+        img_alt = img['alt'].strip()
+        desc = img_alt.split('\n')[0]
+        desc = desc.strip()
+        if 'Factual Reporting' in img_alt:
+            # this is the factual label
+            factual = img_title
+            factual_desc = img_alt
+        else:
+            leaning = img_title
+            leaning_desc = img_alt
+    
 
     # the ones in questionable (fake-news) have an attribute called "reasoning"
     reasoning = None
     for m in paragraphs:
-        if m.text.startswith('Reasoning:'):
-            reasoning = m.text.replace('Reasoning:', '')
+        if m.text.startswith('Reasoning:') or m.text.startswith('Questionable Reasoning:'):
+            reasoning = m.text
             reasoning = reasoning.split('\n')[0]
             reasoning = reasoning.strip()
             break
@@ -271,11 +313,12 @@ def scrape_assessment(assessment, mbfc_homepage):
         'id': id,
         'name': name,
         'homepage': source_homepage,
-        'factual': factual
+        'factual': factual,
+        'factual_desc': factual_desc,
+        'leaning': leaning,
+        'leaning_desc': leaning_desc,
+        'reasoning': reasoning
     }
-
-    if reasoning:
-        result['reasoning'] = reasoning
 
     return result
 
