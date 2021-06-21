@@ -443,7 +443,7 @@ def claimreview_get_claim_appearances(claimreview):
             if appearances:
                 # new field appearance in https://pending.schema.org/Claim
                 #print(appearances)
-                result = [el['url'] for el in appearances if el]
+                result = [el['url'] for el in appearances if el and 'url' in el]
             else:
                 # sometimes instead the appearances are listed in itemReviewed
                 sameAs = itemReviewed.get('sameAs', None)
@@ -471,9 +471,19 @@ def claimreview_get_claim_appearances(claimreview):
 
         # split appearances that are a single field with comma or ` and `
         cleaned_result = []
+        # unlist
+        result_unlisted = []
         for el in result:
-            if not isinstance(el, str):
-                cleaned_result.extend(el)
+            if isinstance(el, list):
+                for el2 in el:
+                    if isinstance(el2, list):
+                        result_unlisted.extend(el2)
+                    else:
+                        result_unlisted.append(el2)
+            else:
+                result_unlisted.append(el)
+        # and fragment
+        for el in result_unlisted:
             if ',' in el:
                 els = el.split(',')
                 cleaned_result.extend(els)
@@ -485,6 +495,7 @@ def claimreview_get_claim_appearances(claimreview):
                 cleaned_result.extend(els)
             else:
                 cleaned_result.append(el)
+        # print(result, result_unlisted, cleaned_result)
         # remove spaces around
         cleaned_result = [el.strip() for el in cleaned_result if el]
         # just keep http(s) links
