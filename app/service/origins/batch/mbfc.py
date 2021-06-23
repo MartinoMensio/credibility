@@ -79,6 +79,7 @@ _save_me_dict = {
     'american-conservative-movement-acm': 'https://americanconservativemovement.com/',
     'christians-for-truth': 'https://christiansfortruth.com/',
     'dan-bongino-bias-rating': 'https://bongino.com/',
+    'the-intergovernmental-panel-on-climate-change-ipcc': 'https://www.ipcc.ch/',
 }
 
 def _retrieve_assessments(origin_id, homepage):
