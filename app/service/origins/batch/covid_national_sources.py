@@ -36,16 +36,17 @@ def _download_assessments(homepage):
     # remove namespace that 
     # xmlstring = re.sub(r'\sxmlns="[^"]+"', '', xmlstring, count=1)
     soup = BeautifulSoup(xmlstring, 'lxml')
-    # print(soup)
-    table_element = soup.find('table')
-    table_headers = [el.text.strip()
-                     for el in table_element.select('thead tr th')]
     results = []
-    for tr in table_element.select('tbody tr'):
-        fields = [el for el in tr.select('th') + tr.select('td')]
-        row_parsed = {header: value for header,
-                      value in zip(table_headers, fields)}
-        results.append(row_parsed)
+    for row in soup.select('article.node'):
+        website = row.select_one('a')['href']
+        name = row.select_one('h3').text.strip()
+        description = row.select_one('p').text.strip()
+        # too difficult to get country
+        results.append({
+            'website': website,
+            'name': name,
+            'description': description
+        })
     print(len(results))
     return results
 
@@ -58,22 +59,19 @@ def _interpret_items(original_items, origin_id, homepage):
         'confidence': 1.
     }
     for el in original_items:
-        print(el)
-        websites = el['Website'].select('a')
-        for website in websites:
-            reviewed_url = website['href']
-            source = utils.get_url_source(reviewed_url)
-            source_domain = utils.get_url_domain(source)
-            result = {
-                'url': assessment_url,
-                'credibility': credibility,
-                'itemReviewed': reviewed_url,
-                'original': {k: v.text.strip() for k,v in el.items()},
-                'origin_id': origin_id,
-                'domain': source_domain,
-                'source': source,
-                'granularity': 'source'
-            }
-            results.append(result)
+        reviewed_url = el['website']
+        source = utils.get_url_source(reviewed_url)
+        source_domain = utils.get_url_domain(source)
+        result = {
+            'url': assessment_url,
+            'credibility': credibility,
+            'itemReviewed': reviewed_url,
+            'original': el,
+            'origin_id': origin_id,
+            'domain': source_domain,
+            'source': source,
+            'granularity': 'source'
+        }
+        results.append(result)
 
     return results
