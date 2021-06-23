@@ -276,7 +276,8 @@ def _retrieve_assessments():
             'origin': origin_serialisable,
             'origin_weight': origin_weight,
             'coinform_label': ass['coinform_label'],
-            'original_label': ass['original_label']
+            'original_label': ass['original_label'],
+            'itemReviewed': ass['itemReviewed']
         })
     print('propagation done')
 

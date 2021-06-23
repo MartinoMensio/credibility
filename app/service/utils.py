@@ -259,6 +259,7 @@ name_domain_map = {
     'Our Campaigns': 'https://www.ourcampaigns.com/',
     'Religion News Service': 'https://religionnews.com/',
     'Weather2Travel.com': 'https://www.weather2travel.com/',
+    'The College Fix': 'https://www.thecollegefix.com/',
 }
 
 # this regex works for facebook and twitter and extracts the source as account name
@@ -326,6 +327,7 @@ def aggregate_by(doc_level, origin_name, key):
                     'report_url': el['url'],
                     'coinform_label': el['coinform_label'],
                     'original_label': el['original_label'],
+                    'itemReviewed': el['itemReviewed'],
                     'origin': el['origin']
                 })
 
@@ -384,3 +386,8 @@ def aggregate_by(doc_level, origin_name, key):
             'granularity': key
         }
     return results.values()
+
+def batch(iterable, n=100):
+    l = len(iterable)
+    for ndx in range(0, l, n):
+        yield iterable[ndx:min(ndx + n, l)]
