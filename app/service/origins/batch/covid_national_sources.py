@@ -68,6 +68,7 @@ def _interpret_items(original_items, origin_id, homepage):
             'itemReviewed': reviewed_url,
             'original': el,
             'origin_id': origin_id,
+            'original_label': 'National authority or public health agency',
             'domain': source_domain,
             'source': source,
             'granularity': 'source'

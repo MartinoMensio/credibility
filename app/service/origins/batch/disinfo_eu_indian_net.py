@@ -14,7 +14,7 @@ class Origin(OriginBatch):
             id = 'disinfo_eu_indian_net',
             name = 'Disinfo.eu fake media',
             description = 'Coordinated fake local media outlets serving Indian interests',
-            homepage = 'https://www.disinfo.eu/2019/11/13/uncovered:-265-coordinated-fake-local-media-outlets-serving-indian-interests/',
+            homepage = 'https://www.disinfo.eu/publications/uncovered-265-coordinated-fake-local-media-outlets-serving-indian-interests/',
             logo = 'https://www.disinfo.eu/wp-content/uploads/2019/01/Disinfo-Logo-on-white-rgb-400.jpg',
             default_weight = 1
         )
@@ -70,6 +70,13 @@ def _interpret_items(original_items, origin_id):
             account = account.replace('http://', '')
             # add the review of the twitter account too
             itemReviewed.append(account)
+        if el['original_outlet'] == 'Zombie':
+            label = 'Zombie: named after an extinct local newspaper'
+        elif el['original_outlet'] == 'New':
+            label = 'New: media outlets that never existed'
+        else:
+            # Misleading
+            label = 'Misleading: media outlets name close to actual running media outlets'
         for source in itemReviewed:
             source_domain = utils.get_url_domain(source)
             result = {
@@ -78,6 +85,7 @@ def _interpret_items(original_items, origin_id):
                 'itemReviewed': source,
                 'original': el,
                 'origin_id': origin_id,
+                'original_label': label,
                 'domain': source_domain,
                 'source': source,
                 'granularity': 'source'

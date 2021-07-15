@@ -54,6 +54,7 @@ def _interpret_table(table, origin_id, homepage):
             'itemReviewed': itemReviewed,
             'original': properties,
             'origin_id': origin_id,
+            'original_label': 'Fact-checker',
             'domain': domain,
             'source': source,
             'granularity': 'source'

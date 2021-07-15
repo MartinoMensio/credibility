@@ -139,12 +139,15 @@ def _interpret_assessments(assessments, origin_id):
         fact_checker_domain = utils.get_url_domain(fact_checker_url)
         fact_checker_source = utils.get_url_source(fact_checker_url)
 
+        label = ('Valid' if not ass['expired'] else 'Expired') + ' IFCN signatory'
+
         result = {
             'url': assessment_url,
             'credibility': credibility,
             'itemReviewed': fact_checker_source,
             'original': ass,
             'origin_id': origin_id,
+            'original_label': label,
             'domain': fact_checker_domain,
             'source': fact_checker_source,
             'granularity': 'source'

@@ -34,6 +34,7 @@ def _interpret_table(table, origin_id):
         source = utils.get_url_source(itemReviewed)
 
         credibility = get_credibility_measures(row)
+        original_label = ', '.join(set(row['category_list']))
 
         interpreted = {
             'url': row['details_url'],
@@ -41,6 +42,7 @@ def _interpret_table(table, origin_id):
             'itemReviewed': itemReviewed,
             'original': row,
             'origin_id': origin_id,
+            'original_label': original_label,
             'domain': domain,
             'source': source,
             'granularity': 'source'

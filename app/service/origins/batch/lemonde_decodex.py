@@ -72,6 +72,7 @@ def _interpret_assessments(assessments, origin_id):
         source_domain = utils.get_url_domain(source_raw)
         source = utils.get_url_source(source_raw)
         class_info = _classes[class_id]
+        original_label = class_info['name']
         credibility = _get_credibility_measures(class_info)
         assessment_url = f'https://www.lemonde.fr/verification/source/{path_id}/'
         ass = {
@@ -89,6 +90,7 @@ def _interpret_assessments(assessments, origin_id):
             'itemReviewed': source_raw,
             'original': ass,
             'origin_id': origin_id,
+            'original_label': original_label,
             'domain': source_domain,
             'source': source,
             'granularity': 'source'

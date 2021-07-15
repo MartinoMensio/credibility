@@ -121,11 +121,14 @@ def _scrape_source_assessment(url):
     row = {'Reliability': reliability, 'Bias': bias, 'url': url, 'source_name': source_name}
     credibility = _get_credibility_measures(row)
 
+    score = row['Reliability']
+
     return {
         'url': url,
         'credibility': credibility,
-        'itemReviewed': url,
+        'itemReviewed': source,
         'original': row,
+        'original_label': f'Reliability: {score} out of 64',
         'origin_id': origin_id,
         'domain': domain,
         'source': source,
@@ -176,12 +179,15 @@ def _interpret_assessments(table, origin_id, homepage):
         source = utils.get_url_source(url)
         credibility = _get_credibility_measures(ass)
 
+        score = ass.get('quality', None)
+
         result = {
             'url': homepage,
             'credibility': credibility,
             'itemReviewed': url,
             'original': ass,
             'origin_id': origin_id,
+            'original_label': f'Quality: {score} out of 64',
             'domain': domain,
             'source': source,
             'granularity': 'url'

@@ -45,6 +45,12 @@ def _interpret_table(table, origin_id, homepage):
         source = utils.get_url_source(source_raw)
 
         credibility = _get_credibility_measures(row_parsed)
+        
+        # explanation
+        full_compliant_cnt = sum([1 for el in row_parsed.values() if el == 'Full'])
+        partial_compliant_cnt = sum([1 for el in row_parsed.values() if el == 'Partial'])
+        none_compliant_cnt = sum([1 for el in row_parsed.values() if el == 'None'])
+        original_label = f'Compliant to {full_compliant_cnt + partial_compliant_cnt} indicators out of {full_compliant_cnt + partial_compliant_cnt + none_compliant_cnt} ({partial_compliant_cnt} partial)'
 
         interpreted = {
             'url': homepage,
@@ -52,6 +58,7 @@ def _interpret_table(table, origin_id, homepage):
             'itemReviewed': source,
             'original': row_parsed,
             'origin_id': origin_id,
+            'original_label': original_label,
             'domain': domain,
             'source': source,
             'granularity': 'source'

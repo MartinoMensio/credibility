@@ -63,6 +63,7 @@ def _pack_response(response, origin_id):
     credibility = _get_credibility_measures(response)
     if not credibility:
         return None
+    original_label = response.get('safety', {}).get('status', None)
     result = {
         'url': review_url,
         'credibility': credibility,
@@ -71,6 +72,7 @@ def _pack_response(response, origin_id):
         'source': utils.get_url_source(target),
         'original': response,
         'origin_id': origin_id,
+        'original_label': original_label,
         'granularity': 'source'
     }
     return result

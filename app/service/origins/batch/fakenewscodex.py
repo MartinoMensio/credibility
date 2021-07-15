@@ -34,12 +34,15 @@ def _interpret_table(table, origin_id):
 
         credibility = _get_credibility_measures(row)
 
+        label = row['badge'].replace('badge--', '').capitalize()
+
         interpreted = {
             'url': row['details_url'],
             'credibility': credibility,
             'itemReviewed': itemReviewed,
             'original': row,
             'origin_id': origin_id,
+            'original_label': label,
             'domain': domain,
             'source': source,
             'granularity': 'source'

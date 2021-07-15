@@ -22,7 +22,122 @@ class Origin(OriginBatch):
         )
 
     def retreive_source_assessments(self):
-        return _retrieve_assessments(self.id, self.homepage)
+        # return _retrieve_assessments(self.id, self.homepage)
+        return _retrieve_assessments_2(self.id, self.homepage)
+
+
+def _retrieve_assessments_2(self_id, homepage):
+    # based on github.com/drmikecrowe/mbfcext
+    url = 'https://raw.githubusercontent.com/drmikecrowe/mbfcext/master/docs/v3/combined.json'
+    res = requests.get(url)
+    res.raise_for_status()
+    data = res.json()
+    # to rebuild/interpret assessments
+    key_shortener = lambda name: ''.join([el[0].upper() for el in name.replace(' ', '-').split('-')]) if name != 'conspiracy' else 'CP'
+    biases_dict = {key_shortener(key): value for key, value in data['biases'].items()}
+    reporting_dict = {key_shortener(key): value for key, value in data['reporting'].items()}
+    credibility_dict = data['credibility']
+    results = []
+    for source, ass in data['sources'].items():
+        bias = ass.get('b', None)
+        if not bias:
+            if source == 'freepress.org':
+                bias = 'L'
+            elif source in ['rightwingnews.com', 'redrocktribune.com']:
+                bias = 'FN'
+            else:
+                raise ValueError(source)
+        bias = biases_dict[bias]
+        domain = ass.get('d', None)
+        if not domain:
+            if source == 'conservativepoliticstoday':
+                domain = 'https://www.facebook.com/conservativepoliticstoday/'
+            elif source == 'womensrightsnews':
+                domain = 'https://www.facebook.com/WOMENSRIGHTSNEWS/'
+            else:
+                raise ValueError(source)
+        name = ass['n']
+        reporting = ass.get('r', None)
+        if reporting:
+            reporting = reporting_dict[reporting]
+        url = ass['u']
+        if 'http' not in url:
+            url = f'{homepage}/{url}'
+        credibility = ass['c']
+        credibility = credibility_dict[credibility]
+        original = {
+            'bias': bias,
+            'domain': domain,
+            'name': name,
+            'reporting': reporting,
+            'url': url,
+            'credibility': credibility,
+        }
+        if reporting:
+            reporting_name = reporting['pretty']
+            mapped_credibility = credibility_mapping(reporting_name)
+            original_label = reporting_name + ' factual reporting'
+        elif credibility:
+            credibility_name = credibility
+            if credibility_name == 'N/A':
+                bias_name = bias['name']
+                mapped_credibility = credibility_mapping(bias_name)
+                original_label = bias_name + ' bias'
+            else:
+                mapped_credibility = credibility_mapping(credibility_name)
+                original_label = credibility_name + ' credibility'
+        else:
+            bias_name = bias['name']
+            mapped_credibility = credibility_mapping(bias_name)
+            original_label = bias_name + ' bias'
+        source_homepage = original['domain']
+        source = utils.get_url_source(source_homepage)
+        domain = utils.get_url_domain(source_homepage)
+        result = {
+            'url': original['url'],
+            'credibility': mapped_credibility,
+            'itemReviewed': source_homepage,
+            'original': original,
+            'origin_id': self_id,
+            'original_label': original_label,
+            'domain': domain,
+            'source': source,
+            'granularity': 'source'
+        }
+        results.append(result)
+    return results
+
+def credibility_mapping(label):
+    confidence = 1.0
+    label = label.replace('-', ' ').upper().replace('CREDIBILITY', '').strip()
+    # from the values reported here https://mediabiasfactcheck.com/methodology/
+    # using value = (10 - mean(score) - 5)/5
+    # that corresponds to flipping [0;10] and linearly transposing to [-1;1]
+    # where mean(score) is the mean value
+    # e.g. HIGH --> score in 1-3 --> mean(score) = 2 --> value = 0.6
+    if label == 'VERY HIGH':
+        credibility = 1.0
+    elif label == 'HIGH':
+        credibility = 0.6
+    elif label == 'MOSTLY FACTUAL':
+        credibility = 0.3
+    elif label in ['MIXED', 'MEDIUM']:
+        credibility = 0.0
+    elif label in ['LOW', 'CONSPIRACY PSEUDOSCIENCE', 'QUESTIONABLE SOURCES']:
+        credibility = -0.6
+    elif label == 'VERY LOW':
+        credibility = -1.0
+    else:
+        #print(mbfc_assessment)
+        # the scraper didn't manage to find it, so we don't know
+        credibility = 0.0
+        confidence = 0.0
+    result = {
+        'value': credibility,
+        'confidence': confidence
+    }
+    return result
+
 
 _POOL_SIZE = 30
 
@@ -327,6 +442,7 @@ def scrape_assessment(assessment, mbfc_homepage):
 def _get_credibility_measures(mbfc_assessment):
     confidence = 1.0
     factual_level = mbfc_assessment.get('factual', None)
+    factual_level = factual_level.replace('MBFC', '').upper()
     # from the values reported here https://mediabiasfactcheck.com/methodology/
     # using value = (10 - mean(score) - 5)/5
     # that corresponds to flipping [0;10] and linearly transposing to [-1;1]

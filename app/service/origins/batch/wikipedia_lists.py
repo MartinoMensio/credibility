@@ -62,6 +62,7 @@ def _get_fake_news_websites(self_id):
                 'itemReviewed': url,
                 'original': original,
                 'origin_id': self_id,
+                'original_label': 'Fake news website',
                 'domain': domain,
                 'source': source,
                 'granularity': 'source'
@@ -119,6 +120,7 @@ def _get_satire_news_websites(self_id):
                 'itemReviewed': url,
                 'original': original,
                 'origin_id': self_id,
+                'original_label': 'Satire website',
                 'domain': domain,
                 'source': source,
                 'granularity': 'source'
@@ -220,6 +222,8 @@ def _get_perennial_sources(self_id):
                 'value': 0.0,
                 'confidence': 0.0
             })
+
+            original_label = ', '.join(original['labels'])
             
             ass = {
                 'url': url_list,
@@ -227,6 +231,7 @@ def _get_perennial_sources(self_id):
                 'itemReviewed': url,
                 'original': original,
                 'origin_id': self_id,
+                'original_label': original_label,
                 'domain': domain,
                 'source': source,
                 'granularity': 'source'

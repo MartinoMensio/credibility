@@ -69,12 +69,14 @@ def _interpret_assessments(assessments, homepage, origin_id):
         source_domain = utils.get_url_domain(source_raw)
         source = utils.get_url_source(source_raw)
         credibility = _get_credibility_measures(ass)
+        original_label = ', '.join(el for el in set([ass['type'], ass['2nd type'], ass['3rd type']]) if el)
         result = {
             'url': homepage,
             'credibility': credibility,
             'itemReviewed': source_raw,
             'original': ass,
             'origin_id': origin_id,
+            'original_label': original_label,
             'domain': source_domain,
             'source': source,
             'granularity': 'source'

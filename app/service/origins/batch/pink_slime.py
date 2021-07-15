@@ -72,6 +72,7 @@ def _interpret_table(table, origin_id, homepage):
             'itemReviewed': domain,
             'original': row,
             'origin_id': origin_id,
+            'original_label': 'Pink slime',
             'domain': domain,
             'source': source,
             'granularity': 'source'

@@ -35,6 +35,8 @@ class Assessment(BaseModel):
     origin_id: str
     # details about the origin
     origin: Origin
+    # the original label
+    original_label: Optional[str]
     # the URL where the assessment is published
     # TODO rename it to assessment_url
     url: Optional[UrlStr]
