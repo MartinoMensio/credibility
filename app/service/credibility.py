@@ -208,8 +208,13 @@ def update_batch_origin(origin_id):
 def update_batch_origins():
     counts = {}
     for origin_id, origin in batch_origins.items():
-        counts[origin_id] = update_batch_origin(origin_id)
+        # deprecated/non-working and last factchecking_report
+        if origin_id not in ['junknews_aggregator', 'factchecking_report']:
+            counts[origin_id] = update_batch_origin(origin_id)
 
+    # now run this as the last
+    origin_id = 'factchecking_report'
+    counts[origin_id] = update_batch_origin(origin_id)
     return counts
 
 def get_origin(origin_id):
@@ -237,4 +242,40 @@ def get_origins():
     # sort by weight descending
     result = sorted(result, key=lambda el: el['weight'], reverse=True)
 
+    return result
+
+def get_all_sources_evaluations():
+    all_sources = set()
+    for origin_id in batch_origins.keys():
+        from_o = persistence.get_source_assessments_all(origin_id)
+        print(from_o[0])
+        all_sources.update(el['source'] for el in from_o)
+    all_sources = list(all_sources)
+    result = []
+    for source_batch in tqdm.tqdm(utils.batch(all_sources, n=100), total=len(all_sources)/100, desc="batch outer loop"):
+        d_c = get_source_credibility_multiple(source_batch)
+        # values = []
+        # for el in d_c.values():
+        #     del el['_id']
+        #     # del el['original']
+        #     values.append(el)
+        result.extend(d_c.values())
+    return result
+
+def get_all_domains_evaluations():
+    all_domains = set()
+    for origin_id in batch_origins.keys():
+        from_o = persistence.get_domain_assessments_all(origin_id)
+        print(from_o[0])
+        all_domains.update(el['domain'] for el in from_o)
+    all_domains = list(all_domains)
+    result = []
+    for domain_batch in tqdm.tqdm(utils.batch(all_domains, n=100), total=len(all_domains)/100, desc="batch outer loop"):
+        d_c = get_domain_credibility_multiple(domain_batch)
+        # values = []
+        # for el in d_c.values():
+        #     del el['_id']
+        #     # del el['original']
+        #     values.append(el)
+        result.extend(d_c.values())
     return result

@@ -117,6 +117,11 @@ def get_source_assessments_all(origin_name: str):
     matches = collection.find({'granularity': 'source'})
     return matches
 
+def get_domain_assessments_all(origin_name: str):
+    collection = db_credibility[origin_name]
+    matches = collection.find({'granularity': 'domain'})
+    return matches
+
 def get_url_assessment_multiple(origin_name: str, urls: List[str]):
     """Find multiple"""
     print(origin_name)
