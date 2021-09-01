@@ -262,6 +262,15 @@ name_domain_map = {
     'The College Fix': 'https://www.thecollegefix.com/',
     'CFO': 'https://www.cfo.com/',
     'Financial Buzz': 'https://www.financialbuzz.com/',
+    'Cuomo Prime Time': 'https://edition.cnn.com/shows/cuomo-prime-time',
+    'Hannity': 'https://www.foxnews.com/shows/hannity',
+    'The Daily': 'https://www.nytimes.com/column/the-daily',
+    'The Lead with Jake Tapper': 'https://edition.cnn.com/shows/the-lead',
+    'The Rachel Maddow Show': 'https://www.msnbc.com/rachel-maddow-show',
+    'This American Life': 'https://www.thisamericanlife.org/',
+    'Timesnewroman.ro': 'https://www.timesnewroman.ro/',
+    'Centre for Research on Globalisation': 'https://www.globalresearch.ca/',
+    'MEAWW': 'https://meaww.com/',
 }
 
 # this regex works for facebook and twitter and extracts the source as account name
@@ -317,12 +326,15 @@ def aggregate_by(doc_level, origin_name, key):
         reports = []
 
         assessment_urls = set()
+        original_labels = set()
         for el in v:
             credibility_value = el['credibility']['value']
             credibility_confidence = el['credibility']['confidence']
             assessment_urls.add(el['url'])
             credibility_sum += credibility_value * credibility_confidence
             confidence_sum += credibility_confidence
+            if el['original_label']:
+                original_labels.add(el['original_label'])
             if origin_name == 'factchecking_report':
                 # collect counts of positive, negative, neutral assessments
                 reports.append({
@@ -338,11 +350,12 @@ def aggregate_by(doc_level, origin_name, key):
                 reports = reports[:500]
 
             if 'coinform_label' in el:
-                label_to_use = 'coinform_label'
-            # the mapping for other data, non fact-checks
-            label_to_use = 'unknown' if credibility_confidence < 0.4 \
-                else 'positive' if credibility_value > 0 \
-                    else 'negative' if credibility_value < 0 else 'neutral'
+                label_to_use = el['coinform_label']
+            else:
+                # the mapping for other data, non fact-checks
+                label_to_use = 'not_verifiable' if credibility_confidence < 0.4 \
+                    else 'credible' if credibility_value > 0 \
+                        else 'not_credible' if credibility_value < 0 else 'uncertain'
             # TODO just collect counts? nested resource or separate?
             counts[label_to_use].append(el['url'])
             origin_id = el['origin_id']
@@ -382,6 +395,7 @@ def aggregate_by(doc_level, origin_name, key):
             },
             'itemReviewed': k,
             'counts': cnts_by_factchecker, # --> RINOMINA campo a "counts" e poi usa reviews/details per metterci roba
+            'original_label': ', '.join(original_labels),
             'reports': reports,
             'origin_id': origin_name,
             key: k,

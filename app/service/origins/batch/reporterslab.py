@@ -26,9 +26,10 @@ def _retrieve_assessments(origin_id, homepage):
     return result_source_level
 
 def _download_from_source():
-    source_url = 'https://spreadsheets.google.com/feeds/list/10nFzJbHbPho7_kMFCRoX7VsQLSNIB3EaUh4ITDlsV0M/1/public/values?alt=json'
+    source_url = 'https://sheets.googleapis.com/v4/spreadsheets/10nFzJbHbPho7_kMFCRoX7VsQLSNIB3EaUh4ITDlsV0M/values/Fact-checking%20sites?alt=json&key=AIzaSyBgCpWxIarQJSW5AuMxjIRIgLSHeDCcC-U'
 
     response = requests.get(source_url)
+    print(response.text)
     response.raise_for_status()
     
     data = response.json()
@@ -37,10 +38,12 @@ def _download_from_source():
 def _interpret_table(table, origin_id, homepage):
     results = []
 
-    for row in table['feed']['entry']:
+    headers = table['values'][0]
 
-        properties = {k[4:].replace('.', '_'): v['$t'].strip() for k, v in row.items() if k.startswith('gsx$')}
-        itemReviewed = properties['url']
+    for row in table['values'][1:]:
+
+        properties = {key.replace('.', '_'): v.strip() for key, v in zip(headers, row)}
+        itemReviewed = properties['URL']
         if itemReviewed == 'no website':
             continue
         domain = utils.get_url_domain(itemReviewed)

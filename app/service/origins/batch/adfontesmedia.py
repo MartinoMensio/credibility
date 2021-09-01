@@ -46,7 +46,7 @@ def _retrieve_source_assessments(origin_id, homepage):
 
 def _get_credibility_measures(row):
     # vertical rank is quality
-    quality = row.get('quality', None)
+    quality = row.get('Quality', None)
     if quality:
         quality = float(quality)
         # maximum value is 64 https://www.adfontesmedia.com/white-paper-multi-analyst-ratings-project-august-2019/
@@ -101,10 +101,17 @@ def _scrape_source_assessment(url):
         source = utils.get_url_source(first_url)
         domain = utils.get_url_source(first_url)
     else:
-        # no table, search with the mappings
-        source_url = utils.name_domain_map[source_name]
-        source = utils.get_url_source(source_url)
-        domain = utils.get_url_source(source_url)
+        # no table, search in the description
+        homepage = soup.select_one('.post-content a')
+        if homepage:
+            homepage_url = homepage['href']
+            source = utils.get_url_source(homepage_url)
+            domain = utils.get_url_source(homepage_url)
+        else:
+            # search with the mappings
+            source_url = utils.name_domain_map[source_name]
+            source = utils.get_url_source(source_url)
+            domain = utils.get_url_source(source_url)
 
     ps = soup.select('div.post-content p')
     reliability = None
@@ -139,16 +146,18 @@ def _scrape_source_assessment(url):
 def _get_table(homepage):
     # deprecated: the csv is here https://www.adfontesmedia.com/
     # https://docs.google.com/spreadsheets/d/1nmUD5CglEuHq6airlHWI8AWtsQ5XjIdKRxUHF4IVUDM/edit#gid=24078135
-    source_url = 'https://spreadsheets.google.com/feeds/list/1nmUD5CglEuHq6airlHWI8AWtsQ5XjIdKRxUHF4IVUDM/1/public/values?alt=json'
+    source_url = 'https://sheets.googleapis.com/v4/spreadsheets/1nmUD5CglEuHq6airlHWI8AWtsQ5XjIdKRxUHF4IVUDM/values/Articles?alt=json&key=AIzaSyBgCpWxIarQJSW5AuMxjIRIgLSHeDCcC-U'
 
     response = requests.get(source_url)
     response.raise_for_status()
     
     table = response.json()
 
+    headers = table['values'][0]
+
     cleaned_table = []
-    for row in table['feed']['entry']:
-        properties = {k[4:].replace('.', '_'): v['$t'].strip() for k, v in row.items() if k.startswith('gsx$')}
+    for row in table['values'][1:]:
+        properties = {key.replace('.', '_'): v.strip() for key, v in zip(headers, row)}
         cleaned_table.append(properties)
     return cleaned_table
 
@@ -173,13 +182,13 @@ def _interpret_assessments(table, origin_id, homepage):
     results = {}
 
     for ass in table:
-        source_name = ass['source']
-        url = ass['url']
+        source_name = ass['Source']
+        url = ass['Url']
         domain = utils.get_url_domain(url)
         source = utils.get_url_source(url)
         credibility = _get_credibility_measures(ass)
 
-        score = ass.get('quality', None)
+        score = ass.get('Quality', None)
 
         result = {
             'url': homepage,
