@@ -1,6 +1,9 @@
+import os
 import tldextract
 import re
 from collections import defaultdict
+
+from . import unshortener
 
 # some mapping between news outlet name and homepage,
 # this is useful for some origins that reference outlets by name
@@ -277,6 +280,13 @@ name_domain_map = {
 # TODO for youtube extract the channel name as in the second answer here https://stackoverflow.com/questions/17806944/how-to-get-youtube-channel-name
 social_regex = r'^(https?:\/\/)?([a-z-]+\.)*(?P<res>(facebook\.com|facebook\.com\/pages|twitter\.com|youtube\.com)\/([A-Za-z0-9_.]*))(\/.*)?'
 
+def add_protocol(url):
+    """when the URL does not have http://"""
+    if not re.match(r'[a-z]+://.*', url):
+        # default protocol
+        url = 'https://' + url
+    return url
+
 def get_url_domain(url, only_tld=True):
     """Returns the domain of the URL"""
     if not url:
@@ -407,3 +417,7 @@ def batch(iterable, n=100):
     l = len(iterable)
     for ndx in range(0, l, n):
         yield iterable[ndx:min(ndx + n, l)]
+
+def unshorten(url):
+    response = unshortener.unshorten(url)
+    return response#['url_full']

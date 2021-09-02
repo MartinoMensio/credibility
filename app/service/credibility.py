@@ -48,6 +48,8 @@ def get_source_credibility(source):
     return get_weighted_credibility(source, get_fn_to_call)
 
 def get_url_credibility(url):
+    url = utils.unshorten(url)
+    print('url for credibility', url)
     get_fn_to_call = lambda el: el.get_url_credibility
     return get_weighted_credibility(url, get_fn_to_call, granularity='url')
 
@@ -192,7 +194,8 @@ def get_url_credibility_parallel(urls):
 
 
     for url in urls:
-        results[url] = get_weighted_credibility(url, performance_trick_query_already_done, granularity='url')
+        url_unshortened = utils.unshorten(url)
+        results[url] = get_weighted_credibility(url_unshortened, performance_trick_query_already_done, granularity='url')
     return results
 
 def update_batch_origin(origin_id):

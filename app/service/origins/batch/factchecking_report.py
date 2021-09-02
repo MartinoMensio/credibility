@@ -1,6 +1,7 @@
 from collections import defaultdict
 import re
 import json
+import tqdm
 
 from ... import utils, persistence
 from . import ifcn
@@ -197,7 +198,7 @@ def _retrieve_assessments():
     # - origin_domain: the domain of the review_url
     # - coinform_label: the original label given by the fact-checker
     url_assessments = []
-    for cr in all_claimreviews:
+    for cr in tqdm.tqdm(all_claimreviews):
         #serialisation issues with mongo objectid
         del cr['_id']
         credibility = claimreview_interpret_rating(cr)
@@ -213,11 +214,11 @@ def _retrieve_assessments():
         original_label = cr.get('reviewRating', {}).get('alternateName', None)
 
         for appearance in claimreview_get_claim_appearances(cr):
-            # TODO unshorten appearance
             domain = utils.get_url_domain(appearance)
             source = utils.get_url_source(appearance)
+            url_normalised = utils.unshorten(appearance)
             url_assessments.append({
-                'itemReviewed': appearance,
+                'itemReviewed': url_normalised,
                 'granularity': 'url',
                 'review_url': review_url,
                 'credibility': credibility,

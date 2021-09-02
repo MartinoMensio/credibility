@@ -1,5 +1,6 @@
 import os
 import pymongo
+import datetime
 from typing import List
 
 MONGO_HOST = os.environ.get('MONGO_HOST', 'localhost:27017')
@@ -136,3 +137,30 @@ def get_claimreviews():
 
 def ping_db():
     return db_credibility.command('ping')
+
+
+# from MisinfoMe backend
+db_redirects = client['utilities']
+url_redirects_collection = db_redirects['url_redirects']
+
+def replace_safe(collection, document, key_property='_id'):
+    document['updated'] = datetime.datetime.now()
+    # the upsert sometimes fails, mongo does not perform it atomically
+    # https://jira.mongodb.org/browse/SERVER-14322
+    # https://stackoverflow.com/questions/29305405/mongodb-impossible-e11000-duplicate-key-error-dup-key-when-upserting
+    try:
+        collection.replace_one({'_id': document[key_property]}, document, upsert=True)
+    except os.error.DuplicateKeyError:
+        collection.replace_one({'_id': document[key_property]}, document, upsert=True)
+    document['updated'] = document['updated'].isoformat()
+
+def get_url_redirect(url):
+    return url_redirects_collection.find_one({'_id': url})
+
+def save_url_redirect(from_url, to_url):
+    # just be sure not to go beyond the MongoDB limit of 1024
+    url_mapping = {'_id': from_url[:1000], 'to': to_url}
+    return replace_safe(url_redirects_collection, url_mapping)
+
+def get_url_redirects_in(url_list):
+    return url_redirects_collection.find({'_id': {'$in': url_list}})
