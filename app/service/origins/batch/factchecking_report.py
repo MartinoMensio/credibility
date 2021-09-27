@@ -75,9 +75,12 @@ class Origin(OriginBatch):
                     for k, l in reports.items():
                         labels = set(el['coinform_label'] for el in l)
                         if len(labels) > 1:
-                            raise ValueError('Reports not agreeing!!!!')
-                        # just append one for each claimreview URL (no duplicates)
-                        reports_cleaned.append(l[0])
+                            l_by_labels = {el['coinform_label']: el for el in l}
+                            reports_cleaned.extend(l_by_labels.values())
+                            # raise ValueError('Reports not agreeing!!!!')
+                        else:
+                            # just append one for each claimreview URL (no duplicates)
+                            reports_cleaned.append(l[0])
                     result = {
                         'url': 'http://todo.todo',
                         'credibility': { # TODO proper average accounting for confidence???

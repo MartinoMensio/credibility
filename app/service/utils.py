@@ -337,6 +337,7 @@ def aggregate_by(doc_level, origin_name, key):
 
         assessment_urls = set()
         original_labels = set()
+        coinform_labels = defaultdict(int)
         for el in v:
             credibility_value = el['credibility']['value']
             credibility_confidence = el['credibility']['confidence']
@@ -346,6 +347,8 @@ def aggregate_by(doc_level, origin_name, key):
             if el['original_label']:
                 original_labels.add(el['original_label'])
             if origin_name == 'factchecking_report':
+                if el.get('coinform_label', None):
+                    coinform_labels[el['coinform_label']] += 1
                 # collect counts of positive, negative, neutral assessments
                 reports.append({
                     'report_url': el['url'],
@@ -389,8 +392,21 @@ def aggregate_by(doc_level, origin_name, key):
             assessment_url = assessment_urls.pop()
             # TODO should do the same when aggregating on source, keeping the domain
             # TODO: we need to propagate the review URLs and itemReviewed to allow transparency
+        if origin_name == 'factchecking_report':
+            if key in ['source', 'domain']:
+                source_path_safe = k.replace('/', '%2F')
+                assessment_url = f'https://misinfo.me/misinfo/credibility/sources/{source_path_safe}'
+            # elif key == 'itemReviewed':
+            #     assessment_url = 'http://todo.todo'
+                # assessment_url = f'https://misinfo.me/misinfo/credibility/?/{k}'
+
+        if origin_name == 'factchecking_report':
+            n_factchecks = sum(coinform_labels.values())
+            original_label = f'Fact-checked {n_factchecks} time{"s" if n_factchecks > 1 else ""}: ' + \
+                ', '.join(f'{coinform_labels[label]} as {label.replace("_", " ")}' for label in coinform_labels) + '.'
         else:
-            assessment_url = 'http://todo.todo'
+            original_label = ', '.join(original_labels)
+
 
         # TODO assign final coinform label from credibility?
 
@@ -405,7 +421,7 @@ def aggregate_by(doc_level, origin_name, key):
             },
             'itemReviewed': k,
             'counts': cnts_by_factchecker, # --> RINOMINA campo a "counts" e poi usa reviews/details per metterci roba
-            'original_label': ', '.join(original_labels),
+            'original_label': original_label,
             'reports': reports,
             'origin_id': origin_name,
             key: k,
