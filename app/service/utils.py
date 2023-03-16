@@ -274,6 +274,8 @@ name_domain_map = {
     'Timesnewroman.ro': 'https://www.timesnewroman.ro/',
     'Centre for Research on Globalisation': 'https://www.globalresearch.ca/',
     'MEAWW': 'https://meaww.com/',
+    'bestgore.com': 'https://bestgore.com/',
+    'NewsBlaze': 'https://newsblaze.com/',
 }
 
 # this regex works for facebook and twitter and extracts the source as account name
@@ -344,7 +346,7 @@ def aggregate_by(doc_level, origin_name, key):
             assessment_urls.add(el['url'])
             credibility_sum += credibility_value * credibility_confidence
             confidence_sum += credibility_confidence
-            if el['original_label']:
+            if el.get('original_label', None):
                 original_labels.add(el['original_label'])
             if origin_name == 'factchecking_report':
                 if el.get('coinform_label', None):
@@ -388,17 +390,23 @@ def aggregate_by(doc_level, origin_name, key):
         #print(k, len(v), credibility_sum, confidence_sum)
 
         # see whether there is just one assessment url
+        if not len(assessment_urls):
+            continue
         if len(assessment_urls) == 1:
             assessment_url = assessment_urls.pop()
             # TODO should do the same when aggregating on source, keeping the domain
             # TODO: we need to propagate the review URLs and itemReviewed to allow transparency
-        if origin_name == 'factchecking_report':
+        elif origin_name == 'factchecking_report':
             if key in ['source', 'domain']:
                 source_path_safe = k.replace('/', '%2F')
                 assessment_url = f'https://misinfo.me/misinfo/credibility/sources/{source_path_safe}'
             # elif key == 'itemReviewed':
             #     assessment_url = 'http://todo.todo'
                 # assessment_url = f'https://misinfo.me/misinfo/credibility/?/{k}'
+        else:
+            # happens with wikipedia_lists? Not really
+            print('HOHOHO', assessment_url)
+            assessment_url = assessment_urls.pop()
 
         if origin_name == 'factchecking_report':
             n_factchecks = sum(coinform_labels.values())

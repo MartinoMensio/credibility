@@ -2,6 +2,7 @@ import requests
 import json
 import re
 import tqdm
+import unicodedata
 import multiprocessing
 from multiprocessing.pool import ThreadPool
 from bs4 import BeautifulSoup
@@ -22,8 +23,8 @@ class Origin(OriginBatch):
         )
 
     def retreive_source_assessments(self):
-        # return _retrieve_assessments(self.id, self.homepage)
-        return _retrieve_assessments_2(self.id, self.homepage)
+        return _retrieve_assessments(self.id, self.homepage)
+        # return _retrieve_assessments_2(self.id, self.homepage) # 4479
 
 
 def _retrieve_assessments_2(self_id, homepage):
@@ -54,6 +55,16 @@ def _retrieve_assessments_2(self_id, homepage):
                 domain = 'https://www.facebook.com/conservativepoliticstoday/'
             elif source == 'womensrightsnews':
                 domain = 'https://www.facebook.com/WOMENSRIGHTSNEWS/'
+            elif source == 'borowitz-report':
+                domain = 'https://www.newyorker.com/humor/borowitz-report'
+            elif source == 'bemidji pioneer':
+                domain = 'https://www.bemidjipioneer.com/'
+            elif source == 'elizabethtown new-enterprise':
+                domain = 'https://www.thenewsenterprise.com/'
+            elif source == 'thedenverchannel':
+                domain = 'https://www.thedenverchannel.com/'
+            elif source == 'wc minnesota news':
+                domain = 'https://wcminnesotanews.com/'
             else:
                 raise ValueError(source)
         name = ass['n']
@@ -195,6 +206,16 @@ _save_me_dict = {
     'christians-for-truth': 'https://christiansfortruth.com/',
     'dan-bongino-bias-rating': 'https://bongino.com/',
     'the-intergovernmental-panel-on-climate-change-ipcc': 'https://www.ipcc.ch/',
+    'borowitz-report': 'https://www.newyorker.com/humor/borowitz-report',
+    'der-standard-bias': 'https://www.derstandard.at/',
+    '4chan-bias': 'https://www.4chan.org/',
+    'covidanalysis-network-c19early-com-bias': 'https://c19early.com/',
+    'national-alliance': 'https://natall.com/',
+    'riposte-laique-bias': 'https://ripostelaique.com/',
+    'the-grayzone': 'https://thegrayzone.com/',
+    'rachel-maddow-bias-rating-2': 'https://www.msnbc.com/rachel-maddow-show',
+    'giffords-law-center-to-prevent-gun-violence-bias': 'https://giffords.org/',
+    'education-week-bias': 'https://www.edweek.org/',
 }
 
 def _retrieve_assessments(origin_id, homepage):
@@ -228,6 +249,7 @@ def _scrape(homepage):
             return scrape_assessment(ass, homepage)
         except Exception as e:
             print('EXPLODING EXCEPTION: ', e)
+            print(ass)
             # debug which assessment is causing problems
             raise ValueError(ass['url'])
 
@@ -291,7 +313,7 @@ def get_assessments_urls(category, homepage):
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, features='lxml')
-    name =  soup.select_one('h1.entry-title.page-title')
+    name = soup.select_one('h1.entry-title.page-title')
     if not name:
         print('no name')
         return []
@@ -308,12 +330,25 @@ def get_assessments_urls(category, homepage):
     category['description'] = description
 
     source_urls =  source_urls_tables # + source_urls_list
+    sources_names = [el.getText() for el in source_urls_tables]
     source_urls = [el['href'] for el in source_urls]
     # there are some spurious elements, e.g. https://www.hermancain.com/
-    source_urls = [el for el in source_urls if el.startswith('/') or homepage in el]
+    source_urls_valid_indices = [True if el.startswith('/') or homepage in el else False for el in source_urls]
+    # source_urls = [el for el in source_urls if el.startswith('/') or homepage in el]
     source_urls = [f'{homepage}{el}' if el.startswith('/') else el for el in source_urls]
 
-    return source_urls
+    # fix some entries that have errors
+    sources_fixes = {
+        'Freedom Outpost (freedomoutpost.com)': 'https://mediabiasfactcheck.com/freedom-outpost/',
+    }
+    for k, v in sources_fixes.items():
+        if k in sources_names:
+            print('fixed', k)
+            source_urls[sources_names.index(k)] = v
+
+    vald_source_urls = [el for i, el in enumerate(source_urls) if source_urls_valid_indices[i]]
+
+    return vald_source_urls
 
 def scrape_assessment(assessment, mbfc_homepage):
     response = requests.get(assessment['url'], verify=False) # lots of verification issues when scraping
@@ -419,9 +454,48 @@ def scrape_assessment(assessment, mbfc_homepage):
     for m in paragraphs:
         if m.text.startswith('Reasoning:') or m.text.startswith('Questionable Reasoning:'):
             reasoning = m.text
+            reasoning = unicodedata.normalize("NFKD", reasoning)
             reasoning = reasoning.split('\n')[0]
             reasoning = reasoning.strip()
             break
+    detailed_report_fields = [{
+        'name': 'reasoning',
+        'prefixes': ['Reasoning:', 'Questionable Reasoning:'],
+    }, {
+        'name': 'bias_rating',
+        'prefixes': ['Bias Rating:'],
+    }, {
+        'name': 'factual_reporting',
+        'prefixes': ['Factual Reporting:'],
+    }, {
+        'name': 'country',
+        'prefixes': ['Country:'],
+    }, {
+        'name': 'press_freedom_rating',
+        'prefixes': ['Press Freedom Rating:'],
+    }, {
+        'name': 'media_type',
+        'prefixes': ['Media Type:'],
+    }, {
+        'name': 'traffic_popularity',
+        'prefixes': ['Traffic/Popularity:'],
+    }, {
+        'name': 'mbfc_credibility_rating',
+        'prefixes': ['MBFC Credibility Rating:'],
+    }]
+    detailed_report = {}
+    for m in paragraphs:
+        for field in detailed_report_fields:
+            for prefix in field['prefixes']:
+                if m.text.lower().startswith(prefix.lower()):
+                    value = m.text
+                    value = value.split('\n')[0]
+                    value = ':'.join(value.split(':')[1:])
+                    value = value.strip()
+                    # split by comma
+                    # value = value.split(', ')
+                    detailed_report[field['name']] = value
+                    break
 
     result = {
         'url': assessment['url'],
@@ -433,7 +507,8 @@ def scrape_assessment(assessment, mbfc_homepage):
         'factual_desc': factual_desc,
         'leaning': leaning,
         'leaning_desc': leaning_desc,
-        'reasoning': reasoning
+        'reasoning': reasoning,
+        'detailed_report': detailed_report
     }
 
     return result
@@ -442,7 +517,8 @@ def scrape_assessment(assessment, mbfc_homepage):
 def _get_credibility_measures(mbfc_assessment):
     confidence = 1.0
     factual_level = mbfc_assessment.get('factual', None)
-    factual_level = factual_level.replace('MBFC', '').upper()
+    if factual_level:
+        factual_level = factual_level.replace('MBFC', '').upper()
     # from the values reported here https://mediabiasfactcheck.com/methodology/
     # using value = (10 - mean(score) - 5)/5
     # that corresponds to flipping [0;10] and linearly transposing to [-1;1]
