@@ -66,7 +66,7 @@ def get_origin_assessments_count(origin_name):
     """Returns how many assessments are stored from the specified origin"""
     collection = db_credibility[origin_name]
     return {
-        'total': collection.count(),
+        'total': collection.count_documents({}),
         'sources': len(collection.distinct('source', {'granularity': 'source'})),
         'domains': len(collection.distinct('domain', {'granularity': 'domain'})),
         'urls': len(collection.distinct('itemReviewed', {'granularity': 'itemReviewed'}))
