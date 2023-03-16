@@ -61,16 +61,25 @@ def _get_credibility_measures(row):
     }
 
 def _get_sources_scores(homepage):
-    response = requests.get(f'{homepage}rankings-by-individual-news-source/')
-    response.raise_for_status()
-
-    soup = BeautifulSoup(response.text, 'lxml')
-    eval_urls = [el['href'] for el in soup.select('article h2 a')]
+    page = 1 # TODO check domains from page 4 
+    all_urls = []
+    while True:
+        response = requests.get(f'{homepage}rankings-by-individual-news-source/{page}')
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'lxml')
+        eval_urls = [el['href'] for el in soup.select('article h3 a')]
+        print(f'adfontesmedia: page {page} {len(eval_urls)} eval_urls')
+        if not eval_urls:
+            break
+        all_urls.extend(eval_urls)
     results = []
+    needing_attention = []
     with ThreadPool(5) as pool:
-        for assessment_scraped in tqdm.tqdm(pool.imap_unordered(_scrape_source_assessment, eval_urls), total=len(eval_urls)):
+        for assessment_scraped, url in tqdm.tqdm(pool.imap_unordered(_scrape_source_assessment, all_urls), total=len(all_urls)):
             if assessment_scraped:
                 results.append(assessment_scraped)
+            else:
+                needing_attention.append(url)
     return results
 
 def _scrape_source_assessment(url):
@@ -80,7 +89,7 @@ def _scrape_source_assessment(url):
         response = requests.get(url)
     except TooManyRedirects:
         print('Too many redirects for', url)
-        return None
+        return None, url
     except Exception as e:
         print(e)
         print(url)
@@ -88,7 +97,7 @@ def _scrape_source_assessment(url):
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, 'lxml')
-    title = soup.select_one('h1.entry-title')
+    title = soup.select_one('h2.elementor-heading-title')
     # print(title)
     if not title:
         raise ValueError(url)
@@ -97,7 +106,7 @@ def _scrape_source_assessment(url):
     source_name = source_name.strip()
     first_url = soup.select_one('table td a')
     if first_url:
-        first_url = first_url['href']
+        first_url = first_url['onclick'].split("'")[1]
         source = utils.get_url_source(first_url)
         domain = utils.get_url_source(first_url)
     else:
@@ -109,11 +118,14 @@ def _scrape_source_assessment(url):
             domain = utils.get_url_source(homepage_url)
         else:
             # search with the mappings
-            source_url = utils.name_domain_map[source_name]
+            source_url = utils.name_domain_map.get(source_name)
+            if source_url == None:
+                print('adfontesmedia: no source_url for', source_name, 'skipping')
+                return None, url
             source = utils.get_url_source(source_url)
             domain = utils.get_url_source(source_url)
 
-    ps = soup.select('div.post-content p')
+    ps = soup.select('div p strong')
     reliability = None
     bias = None
     for p in ps:
@@ -124,6 +136,7 @@ def _scrape_source_assessment(url):
             bias = float(text.replace('Bias: ', ''))
     if reliability == None:
         # some don't have a score yet (https://www.adfontesmedia.com/nbc-bias-and-reliability/)
+        print('adfontesmedia: no score for', url, source_name, source, domain, 'skipping')
         return None
     row = {'Reliability': reliability, 'Bias': bias, 'url': url, 'source_name': source_name}
     credibility = _get_credibility_measures(row)
@@ -140,7 +153,7 @@ def _scrape_source_assessment(url):
         'domain': domain,
         'source': source,
         'granularity': 'source'
-    }
+    }, url
 
 
 def _get_table(homepage):
