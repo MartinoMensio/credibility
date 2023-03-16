@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, UrlStr
+from pydantic import BaseModel, AnyUrl
 from typing import Dict, List, Any, Optional
 
 class TypeEnum(str, Enum):
@@ -10,7 +10,7 @@ class Origin(BaseModel):
     id: str
     origin_type: TypeEnum
     weight: float
-    homepage: UrlStr
+    homepage: AnyUrl
     assessments_count: Dict[str, int]
     name: str
     description: str
@@ -39,7 +39,7 @@ class Assessment(BaseModel):
     original_label: Optional[str]
     # the URL where the assessment is published
     # TODO rename it to assessment_url
-    url: Optional[UrlStr]
+    url: Optional[AnyUrl]
     # our conversion
     credibility: Credibility
     # the URL to the item reviewed, the more punctual as possible

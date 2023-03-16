@@ -114,6 +114,12 @@ You need a [MyWOT key](https://www.mywot.com/api). Once you have it, pass it as 
 MYWOT_KEY=PASTE_HERE_YOUR_KEY
 ```
 
+## Run
+
+```bash
+python -m uvicorn app.main:app --host 0.0.0.0 --port 20300
+```
+
 ## Docker
 
 build the container: `docker build -t mm35626/credibility .`
