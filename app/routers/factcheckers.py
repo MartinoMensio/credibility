@@ -8,10 +8,10 @@ from ..service.origins.batch import ifcn
 router = APIRouter()
 
 
-@router.get('/')
+@router.get("/")
 def get_origins():
     """Returns all the factcheckers"""
     result = list(ifcn.get_all_sources_credibility())
     for r in result:
-        del r['_id']
+        del r["_id"]
     return result

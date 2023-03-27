@@ -2,9 +2,11 @@ from enum import Enum
 from pydantic import BaseModel, AnyUrl
 from typing import Dict, List, Any, Optional
 
+
 class TypeEnum(str, Enum):
-    batch = 'batch'
-    realtime = 'realtime'
+    batch = "batch"
+    realtime = "realtime"
+
 
 class Origin(BaseModel):
     id: str
@@ -16,19 +18,22 @@ class Origin(BaseModel):
     description: str
     logo: str
 
+
 class Credibility(BaseModel):
     value: float
     confidence: float
 
+
 class GranularityEnum(str, Enum):
     # a domain can have multiple sources in it
-    domain = 'domain'
+    domain = "domain"
     # a source can be twitter.com/realDonaldTrump
-    source = 'source'
+    source = "source"
     # a document / url is identified by the full URL
-    url = 'url'
+    url = "url"
     # a claim is identified by the sentence itslef (TODO this is not implemented, and what about the context?)
-    claim = 'claim'
+    claim = "claim"
+
 
 class Assessment(BaseModel):
     # who assessed it
@@ -51,9 +56,10 @@ class Assessment(BaseModel):
     # the source of the itemReviewed
     source: Optional[str]
     # granularity
-    granularity: Any # TODO use again GranularityEnum, as soon as url becomes review_url
+    granularity: Any  # TODO use again GranularityEnum, as soon as url becomes review_url
     # the weights used
     weights: Any
+
 
 class AggregatedAssessment(BaseModel):
     # the aggregated credibility

@@ -4,28 +4,43 @@ from collections import defaultdict
 
 from .origins.batch import factchecking_report
 from .origins.realtime import mywot
-from .origins.batch import adfontesmedia, fakenewscodex, ifcn, lemonde_decodex, mbfc, ntt, opensources, realorsatire, reporterslab, disinfo_eu_indian_net, wikipedia_lists, covid_national_sources, junknews_aggregator, pink_slime
+from .origins.batch import (
+    adfontesmedia,
+    fakenewscodex,
+    ifcn,
+    lemonde_decodex,
+    mbfc,
+    ntt,
+    opensources,
+    realorsatire,
+    reporterslab,
+    disinfo_eu_indian_net,
+    wikipedia_lists,
+    covid_national_sources,
+    junknews_aggregator,
+    pink_slime,
+)
 
 from . import utils, persistence
 
 POOL_SIZE = 30
 
 batch_origins = {
-    'ntt': ntt.Origin(),
-    'ifcn': ifcn.Origin(),
-    'opensources': opensources.Origin(),
-    'adfontesmedia': adfontesmedia.Origin(),
-    'mbfc': mbfc.Origin(),
-    'factchecking_report': factchecking_report.Origin(),
-    'lemonde_decodex': lemonde_decodex.Origin(),
-    'fakenewscodex': fakenewscodex.Origin(),
-    'realorsatire': realorsatire.Origin(),
-    'reporterslab': reporterslab.Origin(),
-    'disinfo_eu_indian_net': disinfo_eu_indian_net.Origin(),
-    'wikipedia_lists': wikipedia_lists.Origin(),
-    'covid_national_sources': covid_national_sources.Origin(),
-    'junknews_aggregator': junknews_aggregator.Origin(),
-    'pink_slime': pink_slime.Origin(),
+    "ntt": ntt.Origin(),
+    "ifcn": ifcn.Origin(),
+    "opensources": opensources.Origin(),
+    "adfontesmedia": adfontesmedia.Origin(),
+    "mbfc": mbfc.Origin(),
+    "factchecking_report": factchecking_report.Origin(),
+    "lemonde_decodex": lemonde_decodex.Origin(),
+    "fakenewscodex": fakenewscodex.Origin(),
+    "realorsatire": realorsatire.Origin(),
+    "reporterslab": reporterslab.Origin(),
+    "disinfo_eu_indian_net": disinfo_eu_indian_net.Origin(),
+    "wikipedia_lists": wikipedia_lists.Origin(),
+    "covid_national_sources": covid_national_sources.Origin(),
+    "junknews_aggregator": junknews_aggregator.Origin(),
+    "pink_slime": pink_slime.Origin(),
 }
 # # TODO define this as a class
 # for o in batch_origins.values():
@@ -33,29 +48,33 @@ batch_origins = {
 #     o.get_source_credibility = 'TODO'
 
 realtime_origins = {
-    'mywot': mywot.Origin(),
+    "mywot": mywot.Origin(),
 }
 
 origins = {**batch_origins, **realtime_origins}
+
 
 def get_domain_credibility(domain):
     get_fn_to_call = lambda el: el.get_domain_credibility
     return get_weighted_credibility(domain, get_fn_to_call)
 
+
 def get_source_credibility(source):
     get_fn_to_call = lambda el: el.get_source_credibility
     return get_weighted_credibility(source, get_fn_to_call)
 
+
 def get_url_credibility(url):
     url = utils.unshorten(url)
-    print('url for credibility', url)
+    print("url for credibility", url)
     get_fn_to_call = lambda el: el.get_url_credibility
-    return get_weighted_credibility(url, get_fn_to_call, granularity='url')
+    return get_weighted_credibility(url, get_fn_to_call, granularity="url")
 
-def get_weighted_credibility(item, get_fn_to_call, granularity='source'):
+
+def get_weighted_credibility(item, get_fn_to_call, granularity="source"):
     """retrieve the credibility score for the source, by using the origins available"""
     # TODO be sure to be at the source level, e.g. use utils.get_domain but be careful to facebook/twitter/... platforms
-    #source = utils.get_url_domain(source)
+    # source = utils.get_url_domain(source)
     assessments = {}
     # TODO make it an array, sort by final weight
     credibility_sum = 0
@@ -71,26 +90,26 @@ def get_weighted_credibility(item, get_fn_to_call, granularity='source'):
         # TODO source evaluation, now is a fixed value
         origin_weight = origin.default_weight
         # special weights for URLs
-        if granularity == 'url' and assessment['credibility']['confidence'] > 0.01:
-            if origin.id == 'factchecking_report':
+        if granularity == "url" and assessment["credibility"]["confidence"] > 0.01:
+            if origin.id == "factchecking_report":
                 # if the URL says something, this counts more
                 origin_weight *= 10
             else:
                 origin_weight /= 10
-        credibility_value = assessment['credibility']['value']
-        credibility_confidence = assessment['credibility']['confidence']
+        credibility_value = assessment["credibility"]["value"]
+        credibility_confidence = assessment["credibility"]["confidence"]
 
         final_weight = credibility_confidence * origin_weight
         confidence_and_weights_sum += final_weight
-        #confidence_sum +=
+        # confidence_sum +=
         credibility_sum += credibility_value * origin_weight * credibility_confidence
         weights_sum += origin_weight
 
-        assessment['origin_id'] = origin_id
-        assessment['origin'] = get_origin(origin_id)
-        assessment['weights'] = {
-            'origin_weight': origin_weight,
-            'final_weight': final_weight
+        assessment["origin_id"] = origin_id
+        assessment["origin"] = get_origin(origin_id)
+        assessment["weights"] = {
+            "origin_weight": origin_weight,
+            "final_weight": final_weight,
         }
 
         assessments[origin_id] = assessment
@@ -101,17 +120,18 @@ def get_weighted_credibility(item, get_fn_to_call, granularity='source'):
         confidence_weighted = confidence_and_weights_sum / weights_sum
     else:
         # TODO maybe return a 404? For now we assume the client will look at the confidence
-        credibility_weighted = 0.
-        confidence_weighted = 0.
+        credibility_weighted = 0.0
+        confidence_weighted = 0.0
 
     return {
-        'credibility': {
-            'value': credibility_weighted,
-            'confidence': confidence_weighted
+        "credibility": {
+            "value": credibility_weighted,
+            "confidence": confidence_weighted,
         },
-        'assessments': list(assessments.values()),
-        'itemReviewed': item
+        "assessments": list(assessments.values()),
+        "itemReviewed": item,
     }
+
 
 def get_source_credibility_tuple_wrap(argument):
     """This method wraps another method giving back a tuple of (argument, result)"""
@@ -119,10 +139,12 @@ def get_source_credibility_tuple_wrap(argument):
     result = get_source_credibility(argument)
     return (argument, result)
 
+
 def get_urls_credibility_tuple_wrap(argument):
     """This method wraps another method giving back a tuple of (argument, result)"""
     result = get_url_credibility(argument)
     return (argument, result)
+
 
 def get_domain_credibility_multiple(domains):
     domains = list(set(domains))
@@ -132,10 +154,11 @@ def get_domain_credibility_multiple(domains):
     for origin_id, origin in origins.items():
         res_origin = persistence.get_domain_assessment_multiple(origin_id, domains)
         for r in res_origin:
-            db_results_by_origin_id[origin_id][r['itemReviewed']] = r
+            db_results_by_origin_id[origin_id][r["itemReviewed"]] = r
 
     def performance_trick_query_already_done(origin):
         origin_id = origin.id
+
         def get_assessment(domain):
             result = db_results_by_origin_id[origin_id].get(domain, None)
             # TODO ask with a parameter whether to retrieve new evaluation or not if missing
@@ -143,11 +166,15 @@ def get_domain_credibility_multiple(domains):
             #     if origin.origin_type == 'realtime':
             #         result = origin.retrieve_source_credibility(source)
             return result
+
         return get_assessment
 
     for domain in tqdm.tqdm(domains):
-        results[domain] = get_weighted_credibility(domain, performance_trick_query_already_done)
+        results[domain] = get_weighted_credibility(
+            domain, performance_trick_query_already_done
+        )
     return results
+
 
 def get_source_credibility_multiple(sources):
     sources = list(set(sources))
@@ -157,10 +184,11 @@ def get_source_credibility_multiple(sources):
     for origin_id, origin in origins.items():
         res_origin = persistence.get_source_assessment_multiple(origin_id, sources)
         for r in res_origin:
-            db_results_by_origin_id[origin_id][r['itemReviewed']] = r
+            db_results_by_origin_id[origin_id][r["itemReviewed"]] = r
 
     def performance_trick_query_already_done(origin):
         origin_id = origin.id
+
         def get_assessment(source):
             result = db_results_by_origin_id[origin_id].get(source, None)
             # TODO ask with a parameter whether to retrieve new evaluation or not if missing
@@ -168,11 +196,15 @@ def get_source_credibility_multiple(sources):
             #     if origin.origin_type == 'realtime':
             #         result = origin.retrieve_source_credibility(source)
             return result
+
         return get_assessment
 
     for source in tqdm.tqdm(sources):
-        results[source] = get_weighted_credibility(source, performance_trick_query_already_done)
+        results[source] = get_weighted_credibility(
+            source, performance_trick_query_already_done
+        )
     return results
+
 
 def get_url_credibility_parallel(urls):
     # TODO this seriously needs to query mongo more efficiently (no realtime checking, just batch. Need to refactor a bit!)
@@ -183,27 +215,31 @@ def get_url_credibility_parallel(urls):
     for origin_id, origin in origins.items():
         res_origin = persistence.get_url_assessment_multiple(origin_id, urls)
         for r in res_origin:
-            db_results_by_origin_id[origin_id][r['itemReviewed']] = r
+            db_results_by_origin_id[origin_id][r["itemReviewed"]] = r
 
     def performance_trick_query_already_done(origin):
         origin_id = origin.id
+
         def get_assessment(url):
             return db_results_by_origin_id[origin_id].get(url, None)
-        return get_assessment
 
+        return get_assessment
 
     for url in urls:
         url_unshortened = utils.unshorten(url)
-        results[url] = get_weighted_credibility(url_unshortened, performance_trick_query_already_done, granularity='url')
+        results[url] = get_weighted_credibility(
+            url_unshortened, performance_trick_query_already_done, granularity="url"
+        )
     return results
+
 
 def update_batch_origin(origin_id):
     if origin_id not in batch_origins:
         return None
     origin = batch_origins[origin_id]
-    print('updating', origin_id, '...')
+    print("updating", origin_id, "...")
     result = origin.update()
-    print('updated', origin_id)
+    print("updated", origin_id)
     return result
 
 
@@ -211,29 +247,31 @@ def update_batch_origins():
     counts = {}
     for origin_id, origin in batch_origins.items():
         # deprecated/non-working and last factchecking_report
-        if origin_id not in ['junknews_aggregator', 'factchecking_report']:
+        if origin_id not in ["junknews_aggregator", "factchecking_report"]:
             counts[origin_id] = update_batch_origin(origin_id)
 
     # now run this as the last
-    origin_id = 'factchecking_report'
+    origin_id = "factchecking_report"
     counts[origin_id] = update_batch_origin(origin_id)
     return counts
 
+
 def get_origin(origin_id):
     if origin_id not in origins:
-        print(f'origin {origin_id} not found')
+        print(f"origin {origin_id} not found")
         return None
     origin = origins[origin_id]
     return {
-        'id': origin_id,
-        'weight': origin.default_weight,
-        'homepage': origin.homepage,
-        'name': origin.name,
-        'description': origin.description,
-        'origin_type': origin.origin_type,
-        'logo': origin.logo,
-        'assessments_count': persistence.get_origin_assessments_count(origin_id)
+        "id": origin_id,
+        "weight": origin.default_weight,
+        "homepage": origin.homepage,
+        "name": origin.name,
+        "description": origin.description,
+        "origin_type": origin.origin_type,
+        "logo": origin.logo,
+        "assessments_count": persistence.get_origin_assessments_count(origin_id),
     }
+
 
 def get_origins():
     result = []
@@ -242,19 +280,24 @@ def get_origins():
         result.append(get_origin(origin_id))
 
     # sort by weight descending
-    result = sorted(result, key=lambda el: el['weight'], reverse=True)
+    result = sorted(result, key=lambda el: el["weight"], reverse=True)
 
     return result
+
 
 def get_all_sources_evaluations():
     all_sources = set()
     for origin_id in batch_origins.keys():
         from_o = persistence.get_source_assessments_all(origin_id)
         print(from_o[0])
-        all_sources.update(el['source'] for el in from_o)
+        all_sources.update(el["source"] for el in from_o)
     all_sources = list(all_sources)
     result = []
-    for source_batch in tqdm.tqdm(utils.batch(all_sources, n=100), total=len(all_sources)/100, desc="batch outer loop"):
+    for source_batch in tqdm.tqdm(
+        utils.batch(all_sources, n=100),
+        total=len(all_sources) / 100,
+        desc="batch outer loop",
+    ):
         d_c = get_source_credibility_multiple(source_batch)
         # values = []
         # for el in d_c.values():
@@ -264,15 +307,20 @@ def get_all_sources_evaluations():
         result.extend(d_c.values())
     return result
 
+
 def get_all_domains_evaluations():
     all_domains = set()
     for origin_id in batch_origins.keys():
         from_o = persistence.get_domain_assessments_all(origin_id)
         print(from_o[0])
-        all_domains.update(el['domain'] for el in from_o)
+        all_domains.update(el["domain"] for el in from_o)
     all_domains = list(all_domains)
     result = []
-    for domain_batch in tqdm.tqdm(utils.batch(all_domains, n=100), total=len(all_domains)/100, desc="batch outer loop"):
+    for domain_batch in tqdm.tqdm(
+        utils.batch(all_domains, n=100),
+        total=len(all_domains) / 100,
+        desc="batch outer loop",
+    ):
         d_c = get_domain_credibility_multiple(domain_batch)
         # values = []
         # for el in d_c.values():

@@ -6,28 +6,34 @@ from ... import persistence
 # - populate the cache
 # - if confidence == 0, return domain assessment (does it make sense?)
 
+
 def _cache_wrap_one(func):
     """This decorator takes care of the cache, and is used when there is only one assessment to retrieve"""
+
     def wrapped(self, *args, **kwargs):
         # TODO check cache if cache allowed
         result = func(self, *args, **kwargs)
         if result:
             persistence.save_assessments(self.id, [result])
         return result
+
     return wrapped
+
 
 def _cache_wrap_multiple(func):
     """This decorator takes care of the cache, and is used when there are multiple assessments to retrieve"""
+
     def wrapped(self, *args, **kwargs):
         # TODO check cache if cache allowed
         results = func(*args, **kwargs)
         if results:
             persistence.save_assessments(self.id, results)
         return results
+
     return wrapped
 
-class OriginRealtime(OriginBase):
 
+class OriginRealtime(OriginBase):
     def __init__(self, id, name, description, homepage, logo, default_weight):
         OriginBase.__init__(
             self,
@@ -36,8 +42,8 @@ class OriginRealtime(OriginBase):
             description=description,
             homepage=homepage,
             logo=logo,
-            origin_type='realtime',
-            default_weight=default_weight
+            origin_type="realtime",
+            default_weight=default_weight,
         )
 
     # override this method with proper function to retrieve a domain assessment and interpret it

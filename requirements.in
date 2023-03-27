@@ -10,3 +10,6 @@ tldextract
 beautifulsoup4
 lxml
 python-dotenv
+# dev requirements
+black
+pytest

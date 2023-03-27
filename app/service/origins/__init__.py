@@ -11,7 +11,16 @@ class OriginBase(object):
     origin_type: str  # batch or realtime
     default_weight: float
 
-    def __init__(self, id: str, name: str, description: str, homepage: str, logo: str, origin_type: str, default_weight: float):
+    def __init__(
+        self,
+        id: str,
+        name: str,
+        description: str,
+        homepage: str,
+        logo: str,
+        origin_type: str,
+        default_weight: float,
+    ):
         self.id = id
         self.name = name
         self.description = description
