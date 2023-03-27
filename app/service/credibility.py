@@ -3,7 +3,7 @@ import tqdm
 from collections import defaultdict
 
 from .origins.batch import factchecking_report
-from .origins.realtime import mywot, newsguard
+from .origins.realtime import mywot
 from .origins.batch import adfontesmedia, fakenewscodex, ifcn, lemonde_decodex, mbfc, ntt, opensources, realorsatire, reporterslab, disinfo_eu_indian_net, wikipedia_lists, covid_national_sources, junknews_aggregator, pink_slime
 
 from . import utils, persistence
@@ -33,7 +33,6 @@ batch_origins = {
 #     o.get_source_credibility = 'TODO'
 
 realtime_origins = {
-    # 'newsguard': newsguard.Origin(),
     'mywot': mywot.Origin(),
 }
 

@@ -17,11 +17,6 @@ There are two kinds of sources: online and offline. The online ones can be queri
 
 ### Online query
 
-#### NewsGuard
-
-description: https://www.newsguardtech.com/ratings/rating-process-criteria/
-endpoint: https://api.newsguardtech.com/check?url={URL_HERE}
-granularity: domain-level
 
 ### MyWOT
 
