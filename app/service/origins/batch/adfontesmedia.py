@@ -72,6 +72,7 @@ def _get_sources_scores(homepage):
         if not eval_urls:
             break
         all_urls.extend(eval_urls)
+        page += 1
     results = []
     needing_attention = []
     with ThreadPool(5) as pool:
