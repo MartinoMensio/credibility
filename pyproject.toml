@@ -1,0 +1,31 @@
+[tool.pdm]
+
+[project]
+name = "credibility"
+version = "0.1.0"
+description = "Credibility computation for MisinfoMe"
+authors = [
+    {name = "Martino Mensio", email = "martino.mensio@open.ac.uk"},
+]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "requests",
+    "tqdm",
+    "pymongo",
+    "tldextract",
+    "beautifulsoup4",
+    "lxml",
+    "python-dotenv"
+]
+requires-python = ">=3.11"
+license = {text = "MIT"}
+
+[tool.pdm.dev-dependencies]  # This is dev dependencies
+dev1 = [
+    "black", "pytest"
+]
+
+[build-system]
+requires = ["pdm-pep517>=1.0.0"]
+build-backend = "pdm.pep517.api"
