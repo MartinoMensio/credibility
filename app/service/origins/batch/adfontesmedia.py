@@ -59,7 +59,7 @@ def _get_credibility_measures(row):
 
 
 def _get_sources_scores(homepage):
-    page = 1  # TODO check domains from page 4
+    page = 1
     all_urls = []
     while True:
         response = requests.get(f"{homepage}rankings-by-individual-news-source/{page}")
@@ -109,7 +109,9 @@ def _scrape_source_assessment(url):
     source_name = source_name.strip()
     first_url = soup.select_one("table td a")
     if first_url:
-        first_url = first_url["onclick"].split("'")[1]
+        first_url = first_url.get("onclick", None)
+    if first_url:
+        first_url = first_url.split("'")[1]
         source = utils.get_url_source(first_url)
         domain = utils.get_url_source(first_url)
     else:
@@ -142,7 +144,7 @@ def _scrape_source_assessment(url):
         print(
             "adfontesmedia: no score for", url, source_name, source, domain, "skipping"
         )
-        return None
+        return None, url
     row = {
         "Reliability": reliability,
         "Bias": bias,
