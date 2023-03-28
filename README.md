@@ -117,18 +117,18 @@ python -m uvicorn app.main:app --host 0.0.0.0 --port 20300
 
 ## Docker
 
-build the container: `docker build -t mm35626/credibility .`
+build the container: `docker build -t martinomensio/credibility .`
 
 Run the container:
 
 locally:
 ```
-docker run -dit --restart always --name mm35626_credibility -p 20300:8000 -e MONGO_HOST=mongo:27017 -v `pwd`:/app --link=mm35626_mongo:mongo mm35626/credibility
+docker run -it --restart always --name mm35626_credibility -p 20300:8000 -e MONGO_HOST=mongo:27017 -v `pwd`/.env:/app/.env -v `pwd`/app:/app/app --link=mm35626_mongo:mongo martinomensio/credibility
 ```
 
 server
 ```
-docker run -dit --restart always --name mm35626_credibility -p 127.0.0.1:20300:8000 -e MONGO_HOST=mongo:27017 -v `pwd`:/app --link=mm35626_mongo:mongo mm35626/credibility
+docker run -dit --restart always --name mm35626_credibility -p 127.0.0.1:20300:8000 -e MONGO_HOST=mongo:27017 -v `pwd`/.env:/app/.env --link=mm35626_mongo:mongo martinomensio/credibility
 ```
 
 Trigger the update of the origins:
