@@ -128,7 +128,7 @@ docker run -it --restart always --name mm35626_credibility -p 20300:8000 -e MONG
 
 server
 ```
-docker run -dit --restart always --name mm35626_credibility -p 127.0.0.1:20300:8000 -e MONGO_HOST=mongo:27017 -v `pwd`/.env:/app/.env --link=mm35626_mongo:mongo martinomensio/credibility
+docker run -it --restart always --name mm35626_credibility -p 127.0.0.1:20300:8000 -e MONGO_HOST=mongo:27017 -v `pwd`/.env:/app/.env --link=mm35626_mongo:mongo martinomensio/credibility
 ```
 
 Trigger the update of the origins:
