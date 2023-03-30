@@ -3,11 +3,11 @@ FROM python:3.11-alpine as base
 RUN sed -i -e 's/v[^/]*/edge/g' /etc/apk/repositories && \
     apk update && \
     apk upgrade
+WORKDIR /app
 
 # builder stage
 FROM base as builder
 
-WORKDIR /app
 # install dependencies
 RUN pip install pdm
 # gcc may be needed for some dependencies
@@ -25,7 +25,6 @@ RUN pdm install --prod --no-lock --no-editable
 FROM base as production
 # pip and setuptools have open vulnerabilities
 RUN pip uninstall setuptools pip -y
-WORKDIR /app
 COPY --from=builder /app /app
 COPY app /app/app
 # set environment as part of CMD because pdm installs there
