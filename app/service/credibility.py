@@ -208,7 +208,7 @@ def get_source_credibility_multiple(sources):
 
 def get_url_credibility_parallel(urls):
     # TODO this seriously needs to query mongo more efficiently (no realtime checking, just batch. Need to refactor a bit!)
-    urls = list(set(urls))
+    urls = [utils.unshorten(url) for url in set(urls)]
     results = {}
 
     db_results_by_origin_id = defaultdict(dict)
@@ -226,9 +226,8 @@ def get_url_credibility_parallel(urls):
         return get_assessment
 
     for url in urls:
-        url_unshortened = utils.unshorten(url)
         results[url] = get_weighted_credibility(
-            url_unshortened, performance_trick_query_already_done, granularity="url"
+            url, performance_trick_query_already_done, granularity="url"
         )
     return results
 
