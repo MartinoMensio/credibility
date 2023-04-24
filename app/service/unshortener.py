@@ -759,8 +759,18 @@ shortening_domains.extend(more_shortening_domains)
 
 def unshorten(url, use_cache=True):
     """If use_cache is False, does not use the cache"""
+    url_normalised = utils.add_protocol(url)
+    url_normalised = url_normalize(url_normalised)
+    result = url_normalised
+    print("url_normalised", url_normalised)
+
+    # to be tested
+    # result = urlexpander.expand(result)
+    # return result
+
+    domain = utils.get_url_domain(url_normalised)
     if use_cache:
-        cached = persistence.get_url_redirect(url)
+        cached = persistence.get_url_redirect(url_normalised)
     else:
         cached = False
     if cached:
@@ -768,13 +778,14 @@ def unshorten(url, use_cache=True):
         result = cached["to"]
     else:
         # not found
-        domain = utils.get_url_domain(url)
-        result = utils.add_protocol(url)
-        result = url_normalize(result)
-        # print('url_normalize result', result)
+        # first of all, check if it is a webarchive url
+        # if domain in webarchives.domains:
+        #     result = webarchives.resolve_url(url_normalised)
+        #     if use_cache:
+        #         persistence.save_url_redirect(url_normalised, result)
         if domain in shortening_domains:
             try:
-                res = requests.head(result, allow_redirects=True, timeout=2)
+                res = requests.head(url_normalised, allow_redirects=True, timeout=2)
                 result = res.url
             except requests.exceptions.Timeout as e:
                 # website dead, return the last one
@@ -796,11 +807,10 @@ def unshorten(url, use_cache=True):
             except Exception as e:
                 # something like http://ow.ly/yuFE8 that points to .
                 print("error for", url)
-            # re-normalise
-            result = url_normalize(result)
             if use_cache:
                 # save in the cache for next calls
-                persistence.save_url_redirect(url, result)
+                persistence.save_url_redirect(url_normalised, result)
+    result = url_normalize(result)
     return result
 
 
@@ -903,6 +913,8 @@ def escape(unescaped_str):
 
 
 def url_normalize(url):
+    if not url:
+        return None
     # print('url normalize called', url)
     url = url.replace("\t", "").replace("\r", "").replace("\n", "")
     url = url.strip()
@@ -982,6 +994,7 @@ def url_normalize(url):
             "utm_campaign",
             "utm_content",
             "utm_term",
+            "igshid",
         ]
     }
     query = sorted(query.items())
