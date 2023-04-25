@@ -20,7 +20,7 @@ class Origin(OriginBatch):
         )
         # 'https://docs.google.com/spreadsheets/d/1C6k2j1KVDvHU24SykB2VnEorVgLD6p18Hi1Yz7Wzdz8/edit'
         self.spreadsheet_id = "1C6k2j1KVDvHU24SykB2VnEorVgLD6p18Hi1Yz7Wzdz8"
-        self.api_key = os.environ["GOOGLE_SPREADSHEET_KEY"]
+        self.api_key = os.environ["PINKSLIME_SPREADSHEET_KEY"]
 
     def retreive_source_assessments(self):
         return _retrieve_assessments(
