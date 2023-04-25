@@ -14,8 +14,8 @@ print("MONGO_URI", MONGO_URI)
 client = pymongo.MongoClient(MONGO_URI)
 
 db_credibility = client["credibility"]
-# TODO use db claimreview_scraper instead of datasets_resources
-claimreviews_collection = client["claimreview_scraper"]["claim_reviews"]
+# TODO use db claimreview_collector instead of datasets_resources
+claimreviews_collection = client["claimreview_collector"]["claim_reviews"]
 
 
 def save_assessments(

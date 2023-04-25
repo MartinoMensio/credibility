@@ -8,7 +8,7 @@ If you have access to ClaimReview scraper repository, do
 
 ```
 pip install git+https://github.com/MartinoMensio/MisinfoMe_datasets
-pip install -e ../../claimreview-scraper
+pip install -e ../../claimreview-collector
 ```
 
 ## Sources
@@ -58,9 +58,9 @@ The factuality report is possible thanks to a process that:
 1. retrieves a lot of ClaimReview
 2. processes them looking at the appearances of the claims and propagating the fact-checker label on the websites (source / domain)
 
-The retrieval of the ClaimReview items is done by using `claimreview_scraper`.
+The retrieval of the ClaimReview items is done by using `claimreview_collector`.
 
-The `claimreview_scraper` library retrieves fact-checks using:
+The `claimreview_collector` library retrieves fact-checks using:
 - datacommons (research and feed)
 - google fact-checking tools
 - direct retrieval from fact-checking websites
