@@ -222,7 +222,6 @@ _save_me_dict = {
     "the-grayzone": "https://thegrayzone.com/",
     "rachel-maddow-bias-rating-2": "https://www.msnbc.com/rachel-maddow-show",
     "giffords-law-center-to-prevent-gun-violence-bias": "https://giffords.org/",
-    "education-week-bias": "https://www.edweek.org/",
 }
 
 
@@ -371,8 +370,14 @@ def get_assessments_urls(category, homepage):
 
 
 def scrape_assessment(assessment, mbfc_homepage):
+    # ignore these
+    if assessment["url"] in [
+        "https://mediabiasfactcheck.com/fake-news/",
+        "https://mediabiasfactcheck.com/worldpolitics-news/",
+    ]:
+        return None
     response = requests.get(
-        assessment["url"], verify=False
+        assessment["url"], verify=True
     )  # lots of verification issues when scraping
     if response.status_code != 200:
         # These 6 pages return HTTP 404
@@ -406,9 +411,10 @@ def scrape_assessment(assessment, mbfc_homepage):
         par_text = m.text.replace('"', "")
         # that starts with a specific string
         if (
-            par_text.startswith("Source:")
-            or par_text.startswith(".Source:")
-            or par_text.startswith("Sources:")
+            par_text.strip().startswith("Source:")
+            or par_text.strip().startswith(".Source:")
+            or par_text.strip().startswith("Sources:")
+            or par_text.strip().startswith("Source ")
         ):
             source_homepage = m.select_one("a")
             if source_homepage:
@@ -444,7 +450,7 @@ def scrape_assessment(assessment, mbfc_homepage):
         table = soup.select_one("article table")
         if table:
             for row in table.select("tr"):
-                if row.select_one("td span").text == "Source URL:":
+                if span := row.select_one("td span") and span.text == "Source URL:":
                     source_homepage = row.select_one("td a")["href"]
     if not source_homepage:
         # last hope when the assessment does not have the homepage linked
