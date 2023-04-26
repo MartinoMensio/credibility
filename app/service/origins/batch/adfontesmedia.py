@@ -17,7 +17,7 @@ class Origin(OriginBatch):
             name="Ad Fontes Media",
             description="Navigate the News Landscape and Contribute to a Healthy Democracy.",
             homepage="https://www.adfontesmedia.com/",
-            logo="https://www.adfontesmedia.com/wp-content/uploads/2018/08/ad-fonts-media-favicon-66x66.png",
+            logo="https://adfontesmedia.com/wp-content/uploads/2018/08/Ad-Fontes-Media.png",
             default_weight=1,
         )
 
