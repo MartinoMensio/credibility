@@ -265,6 +265,7 @@ dependencies = [
 
 [metadata]
 lock_version = "4.2"
+cross_platform = true
 groups = ["default", "dev1"]
 content_hash = "sha256:8089d182a9f9bed1eb157b38d8db0281e0e7c580698ef1f65c70c3e075c3231e"
 
