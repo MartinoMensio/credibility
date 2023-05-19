@@ -128,7 +128,13 @@ def _get_signatories_info(homepage):
         detail_url = signatory_el.select("div.media-body div div div a")[0]["href"]
         media_logo = signatory_el.select_one("img.signatory-avatar")["src"]
         # here get the details
-        result.append(_extract_signatory_info(detail_url, media_logo))
+        try:
+            signatory = _extract_signatory_info(detail_url, media_logo)
+            result.append(signatory)
+        except Exception as e:
+            print(f"error retrieving {detail_url}")
+            print(e)
+            continue
 
     return result
 
