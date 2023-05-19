@@ -450,8 +450,9 @@ def scrape_assessment(assessment, mbfc_homepage):
         table = soup.select_one("article table")
         if table:
             for row in table.select("tr"):
-                if span := row.select_one("td span") and span.text == "Source URL:":
-                    source_homepage = row.select_one("td a")["href"]
+                if span := row.select_one("td span"):
+                    if span.text == "Source URL:":
+                        source_homepage = row.select_one("td a")["href"]
     if not source_homepage:
         # last hope when the assessment does not have the homepage linked
         path = _get_path_from_full_url(assessment["url"], mbfc_homepage).replace(
