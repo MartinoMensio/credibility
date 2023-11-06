@@ -629,14 +629,18 @@ def get_url_domain(url, only_tld=True):
     """Returns the domain of the URL"""
     if not url:
         return ""
-    ext = tldextract.extract(url)
-    if not only_tld:
-        result = ".".join(part for part in ext if part)
-    else:
-        result = ".".join([ext.domain, ext.suffix])
-    if result.startswith("www."):
-        # sometimes the www is there, sometimes not
-        result = result[4:]
+    try:
+        ext = tldextract.extract(url)
+        if not only_tld:
+            result = ".".join(part for part in ext if part)
+        else:
+            result = ".".join([ext.domain, ext.suffix])
+        if result.startswith("www."):
+            # sometimes the www is there, sometimes not
+            result = result[4:]
+    except Exception as e:
+        print('get_url_domain', url, e)
+        raise ValueError(url)
     return result.lower()
 
 
