@@ -632,7 +632,7 @@ def get_url_domain(url, only_tld=True):
     try:
         ext = tldextract.extract(url)
         if not only_tld:
-            result = ".".join(part for part in ext if part)
+            result = ".".join(part for part in [ext.subdomain, ext.domain, ext.suffix] if part)
         else:
             result = ".".join([ext.domain, ext.suffix])
         if result.startswith("www."):
