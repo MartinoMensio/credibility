@@ -1,6 +1,8 @@
 import requests
 import tqdm
 from bs4 import BeautifulSoup
+import re
+import json
 
 from ... import utils, persistence
 from . import OriginBatch
@@ -51,6 +53,27 @@ def _colors_to_value(style_str):
     raise ValueError(style_str)
 
 
+def get_metadata():
+    url = 'https://ifcncodeofprinciples.poynter.org/_next/static/chunks/4638-c29b00f6e6267f71.js'
+    response = requests.get(url)
+    response.raise_for_status()
+    js = response.text
+    # find lines with json objects
+    regex = r"JSON\.parse\('(.*?)'\)"
+    matches = re.finditer(regex, js, re.MULTILINE)
+    result = {}
+    for match in matches:
+        json_str = match.group(1)
+        json_str = json_str.replace('\\', '')
+        print(json_str)
+        metadata = json.loads(json_str)
+        for element in metadata:
+            name = element["name"]
+            data = {int(el["id"]): el["name"] for el in element["data"]}
+            result[name] = data
+    return result
+
+
 def _get_signatories_info():
     url = "https://ifcn-cop-prod-server-8q9x7.ondigitalocean.app/api/organization/signatories"
     response = requests.get(url)
@@ -58,6 +81,8 @@ def _get_signatories_info():
         print("error retrieving list")
         raise ValueError(response.status_code)
     data = response.json()
+
+    metadata = get_metadata()
 
     # card_body_containers = soup.select('.card div.card-body')
     # verified_signatories = card_body_containers[0]
@@ -70,6 +95,10 @@ def _get_signatories_info():
         badge_hash = el["badge_hash"]
         signatory_status = el["signatory_status"]
         expired = signatory_status == "Expired Signatory"
+        country_id = el["organization_owner"]["countries"][0]
+        country = metadata["countries"][country_id]
+        language_id = el["organization_owner"]["languages"][0]
+        language = metadata["languages"][language_id]
         signatory = {
             "assessment_url": f"https://ifcncodeofprinciples.poynter.org/profile/{slug}",
             "id": slug,
@@ -78,8 +107,8 @@ def _get_signatories_info():
             "issued_on": el["signatory_status_approval_date"],
             # "expires_on": expires_on,
             "expired": expired,
-            # "country": country,
-            # "language": language,
+            "country": country,
+            "language": language,
             "website": el["organization_owner"]["website"],
             "skills": [],
         }
