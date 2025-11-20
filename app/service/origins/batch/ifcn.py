@@ -54,7 +54,7 @@ def _colors_to_value(style_str):
 
 
 def get_metadata():
-    url = 'https://ifcncodeofprinciples.poynter.org/_next/static/chunks/4638-c29b00f6e6267f71.js'
+    url = 'https://ifcncodeofprinciples.poynter.org/_next/static/chunks/4638-cf731971011fa3f7.js' # Older version: 'https://ifcncodeofprinciples.poynter.org/_next/static/chunks/4638-c29b00f6e6267f71.js'
     response = requests.get(url)
     response.raise_for_status()
     js = response.text

@@ -136,7 +136,11 @@ def _scrape_source_assessment(url):
     for p in ps:
         text = p.text.strip()
         if text.startswith("Reliability: "):
-            reliability = float(text.replace("Reliability: ", ""))
+            try:
+                reliability = float(text.replace("Reliability: ", ""))
+            except ValueError:
+                print("adfontesmedia: cannot parse reliability for: ", url)
+                reliability = None
         elif text.startswith("Bias: "):
             bias = float(text.replace("Bias: ", ""))
     if reliability == None:

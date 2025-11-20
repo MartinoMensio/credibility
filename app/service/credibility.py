@@ -26,21 +26,21 @@ from . import utils, persistence
 POOL_SIZE = 30
 
 batch_origins = {
-    "ntt": ntt.Origin(),
+    #"ntt": ntt.Origin(), # deprecated: the website is no longer available
     "ifcn": ifcn.Origin(),
     "opensources": opensources.Origin(),
     "adfontesmedia": adfontesmedia.Origin(),
-    "mbfc": mbfc.Origin(),
+    #"mbfc": mbfc.Origin(), # too many requests issues sometimes
     "factchecking_report": factchecking_report.Origin(),
     "lemonde_decodex": lemonde_decodex.Origin(),
-    "fakenewscodex": fakenewscodex.Origin(),
+    # "fakenewscodex": fakenewscodex.Origin(), # deprecated: the website is unresponsive.
     "realorsatire": realorsatire.Origin(),
     "reporterslab": reporterslab.Origin(),
     "disinfo_eu_indian_net": disinfo_eu_indian_net.Origin(),
     "wikipedia_lists": wikipedia_lists.Origin(),
     "covid_national_sources": covid_national_sources.Origin(),
     "junknews_aggregator": junknews_aggregator.Origin(),
-    "pink_slime": pink_slime.Origin(),
+    #"pink_slime": pink_slime.Origin(), # disabled due to issues with the spreadsheet access
 }
 # # TODO define this as a class
 # for o in batch_origins.values():

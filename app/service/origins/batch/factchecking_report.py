@@ -44,7 +44,11 @@ class Origin(OriginBatch):
             + list(result_source_level)
             + list(result_domain_level)
         )
-        persistence.save_assessments(self.id, all_assessments, drop=True)
+        
+        if not all_assessments:
+            print("No assessments to save for", self.id)
+        else:
+            persistence.save_assessments(self.id, all_assessments, drop=True)
         counts = {
             "native_urls": len(url_assessments_propagated),
             "native_source": 0,

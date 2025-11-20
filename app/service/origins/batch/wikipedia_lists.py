@@ -25,11 +25,11 @@ class Origin(OriginBatch):
 
 def _retrieve_assessments(self_id, homepage):
     assessments_1 = _get_fake_news_websites(self_id)
-    assessments_2 = _get_satire_news_websites(self_id)
-    assessments_3 = _get_perennial_sources(self_id)
+    #assessments_2 = _get_satire_news_websites(self_id) # temporarily disabled due to bugs
+    #assessments_3 = _get_perennial_sources(self_id) # temporarily disabled due to bugs
 
     # TODO duplicates?
-    return assessments_1 + assessments_2 + assessments_3
+    return assessments_1 #+ assessments_2 + assessments_3
 
 
 def _get_fake_news_websites(self_id):
@@ -46,31 +46,36 @@ def _get_fake_news_websites(self_id):
             name = name.text.strip()
             name = re.sub(r"\s*\([^)]*\)", "", name)
             name = re.sub(r"\s*\[[^)]*\]", "", name)
-            notes = row["Notes"].text.strip()
+            #notes = row["Notes"].text.strip()
             if "URL" in headers:
                 # the second table also has URLs
                 url = f"http://{row['URL'].text.strip()}/"
             else:
-                url = utils.name_domain_map[name]
+                if name in utils.name_domain_map:
+                    url = utils.name_domain_map[name]
+                else:
+                    print("wikipedia_lists: no URL found for fake news website:", name)
+                    url = None
 
-            domain = utils.get_url_domain(url)
-            source = utils.get_url_source(url)
+            if url:
+                domain = utils.get_url_domain(url)
+                source = utils.get_url_source(url)
 
-            original = {k: v.text.strip() for k, v in row.items()}
+                original = {k: v.text.strip() for k, v in row.items()}
 
-            # print(name, notes, url)
-            ass = {
-                "url": url_list,
-                "credibility": _default_credibility("fake"),
-                "itemReviewed": url,
-                "original": original,
-                "origin_id": self_id,
-                "original_label": "Fake news website",
-                "domain": domain,
-                "source": source,
-                "granularity": "source",
-            }
-            results.append(ass)
+                # print(name, notes, url)
+                ass = {
+                    "url": url_list,
+                    "credibility": _default_credibility("fake"),
+                    "itemReviewed": url,
+                    "original": original,
+                    "origin_id": self_id,
+                    "original_label": "Fake news website",
+                    "domain": domain,
+                    "source": source,
+                    "granularity": "source",
+                }
+                results.append(ass)
     return results
 
 
@@ -95,42 +100,56 @@ def _get_satire_news_websites(self_id):
             else:
                 # relative URL
                 details_url = f"https://en.wikipedia.org{href}"
-            details = requests.get(
-                details_url,
-                headers={
-                    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
-                },
-            )
-            details.raise_for_status()
-            soup = BeautifulSoup(details.text, "lxml")
-            official_website = soup.select_one("span.official-website a")
-            if official_website:
-                url = official_website["href"]
-            else:
-                official_website = soup.select_one("table.infobox a.external")
+                
+            print(f"--{details_url}--")
+            if str(details_url) not in ["https://en.wikipedia.org/wiki/Bopress", "https://en.wikipedia.org/w/index.php?title=Bopress&action=edit&redlink=1"]:
+                details = requests.get(
+                    details_url,
+                    headers={
+                        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+                    },
+                )
+                details.raise_for_status()
+                soup = BeautifulSoup(details.text, "lxml")
+                official_website = soup.select_one("span.official-website a")
                 if official_website:
                     url = official_website["href"]
                 else:
+                    official_website = soup.select_one("table.infobox a.external")
+                    if official_website:
+                        url = official_website["href"]
+                    else:
+                        if name in utils.name_domain_map:
+                            url = utils.name_domain_map[name]
+                        else:
+                            print("wikipedia_lists: no URL found for satire website:", name)
+                            url = None
+            else:
+                if name in utils.name_domain_map:
                     url = utils.name_domain_map[name]
+                else:
+                    print("wikipedia_lists: no URL found for satire website:", name)
+                    url = None
 
-            domain = utils.get_url_domain(url)
-            source = utils.get_url_source(url)
+            if url:
+                domain = utils.get_url_domain(url)
+                source = utils.get_url_source(url)
 
-            original = {k: v.text.strip() for k, v in row.items()}
+                original = {k: v.text.strip() for k, v in row.items()}
 
-            # print(name, notes, url)
-            ass = {
-                "url": url_list,
-                "credibility": _default_credibility("satire"),
-                "itemReviewed": url,
-                "original": original,
-                "origin_id": self_id,
-                "original_label": "Satire website",
-                "domain": domain,
-                "source": source,
-                "granularity": "source",
-            }
-            results.append(ass)
+                # print(name, notes, url)
+                ass = {
+                    "url": url_list,
+                    "credibility": _default_credibility("satire"),
+                    "itemReviewed": url,
+                    "original": original,
+                    "origin_id": self_id,
+                    "original_label": "Satire website",
+                    "domain": domain,
+                    "source": source,
+                    "granularity": "source",
+                }
+                results.append(ass)
     return results
 
 
@@ -260,7 +279,9 @@ def _default_credibility(label):
 
 def _get_wikipedia_tables_with_headers(url, exclude=[]):
     # retrieves the wikipedia tables at `url`
-    response = requests.get(url)
+    response = requests.get(url, headers={
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+    })
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "lxml")

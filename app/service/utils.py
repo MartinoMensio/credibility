@@ -610,6 +610,15 @@ name_domain_map = {
     "MEAWW": "https://meaww.com/",
     "bestgore.com": "https://bestgore.com/",
     "NewsBlaze": "https://newsblaze.com/",
+    "Democratic Review": "https://democraticreview.com/",
+    "Conservative Beaver": "https://conservativebeaver.com/",
+    "The Red Panther": "https://theredpanther.com/",
+    "Toronto99.com": "https://toronto99.com/",
+    "Toronto Today": "https://torontotoday.net/",
+    "Vancouver Times": "https://vancouvertimes.org/",
+    "christianfreedommovement.com": "https://christianfreedommovement.com/",
+    "cnn.com.de": "https://cnn.com.de/",
+    "donaldjtrump.com.co": "https://donaldjtrump.com.co/",
 }
 
 # this regex works for facebook and twitter and extracts the source as account name

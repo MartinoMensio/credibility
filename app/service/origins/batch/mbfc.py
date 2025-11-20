@@ -1,3 +1,4 @@
+from wsgiref import headers
 import requests
 import json
 import re
@@ -319,7 +320,7 @@ def _get_path_from_full_url(full_url, homepage):
 
 
 def get_assessments_urls(category, homepage):
-    response = requests.get(category["url"])
+    response = requests.get(category["url"], headers={"user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"},)
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, features="lxml")
@@ -374,6 +375,7 @@ def scrape_assessment(assessment, mbfc_homepage):
     if assessment["url"] in [
         "https://mediabiasfactcheck.com/fake-news/",
         "https://mediabiasfactcheck.com/worldpolitics-news/",
+        "https://mediabiasfactcheck.com/zeteo-bias-and-credibility/",
     ]:
         return None
     response = requests.get(
