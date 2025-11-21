@@ -56,7 +56,10 @@ def save_assessments(
         for ass in assessments:
             add_origin_assessment(origin_name, ass)
     else:
-        return collection.insert_many(assessments)
+        batch_size = 1000
+        for i in range(0, len(assessments), batch_size):
+            batch = assessments[i:i + batch_size]
+            collection.insert_many(batch)
 
 
 def add_origin_assessment(origin_name, ass):
