@@ -56,10 +56,16 @@ def save_assessments(
         for ass in assessments:
             add_origin_assessment(origin_name, ass)
     else:
-        batch_size = 500
-        for i in range(0, len(assessments), batch_size):
-            batch = assessments[i:i + batch_size]
-            collection.insert_many(batch)
+        # batch_size = 1000
+        # for i in range(0, len(assessments), batch_size):
+        #     batch = assessments[i:i + batch_size]
+        #     collection.insert_many(batch)
+        for ass in assessments:
+            try:
+                collection.insert_one(ass)
+            except Exception as e:
+                print(f"Error inserting assessment: {e}")
+                print(ass)
 
 
 def add_origin_assessment(origin_name, ass):
