@@ -16,7 +16,7 @@ filelock==3.20.0
 h11==0.16.0
 idna==3.11
 iniconfig==2.3.0
-lxml==6.0.2
+lxml==6.0.4
 mypy-extensions==1.1.0
 packaging==25.0
 pathspec==1.0.3
@@ -26,7 +26,7 @@ pydantic==2.12.4
 pydantic-core==2.41.5
 pygments==2.19.2
 pymongo==4.16.0
-pytest==9.0.2
+pytest==9.0.3
 python-dotenv==1.2.2
 pytokens==0.4.1
 requests==2.33.1
@@ -39,4 +39,4 @@ tqdm==4.67.3
 typing-extensions==4.15.0
 typing-inspection==0.4.2
 urllib3==2.6.3
-uvicorn==0.43.0
+uvicorn==0.44.0
