@@ -16,7 +16,7 @@ filelock==3.20.0
 h11==0.16.0
 idna==3.11
 iniconfig==2.3.0
-lxml==6.1.1
+lxml==6.1.2
 mypy-extensions==1.1.0
 packaging==25.0
 pathspec==1.0.3
@@ -39,4 +39,4 @@ tqdm==4.70.0
 typing-extensions==4.15.0
 typing-inspection==0.4.2
 urllib3==2.7.0
-uvicorn==0.52.3
+uvicorn==0.52.4
