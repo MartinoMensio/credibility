@@ -27,7 +27,7 @@ pydantic==2.12.4
 pydantic-core==2.41.5
 pygments==2.19.2
 pymongo==4.19.0
-pytest==9.1.1
+pytest==9.2.0
 python-dotenv==1.2.4
 pytokens==0.4.1
 requests==2.34.2
